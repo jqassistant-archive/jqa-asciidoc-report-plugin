@@ -1,0 +1,7 @@
+<jqa-plugin:jqassistant-plugin xmlns:jqa-plugin="http://www.buschmais.com/jqassistant/core/plugin/schema/v1.1"
+                               name="Asciidoc Report">
+    <description>Asciidoc Report</description>
+    <report>
+        <class id="asciidoc">org.jqassistant.contrib.plugin.asciidocreport.AsciidocReportPlugin</class>
+    </report>
+</jqa-plugin:jqassistant-plugin>
