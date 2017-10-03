@@ -7,6 +7,7 @@ import java.io.FilenameFilter;
 import java.util.*;
 
 import org.asciidoctor.Asciidoctor;
+import org.asciidoctor.AttributesBuilder;
 import org.asciidoctor.OptionsBuilder;
 import org.asciidoctor.SafeMode;
 import org.asciidoctor.extension.JavaExtensionRegistry;
@@ -32,6 +33,8 @@ public class AsciidocReportPlugin implements ReportPlugin {
     private static final String DEFAULT_DIRECTORY = "jqassistant/report/asciidoc";
     private static final String DEFAULT_RULE_DIRECTORY = "jqassistant/report/asciidoc";
     public static final String BACKEND_HTML5 = "html5";
+    public static final String CODERAY = "coderay";
+    public static final String ASCIIDOCTOR_DIAGRAM = "asciidoctor-diagram";
 
     private File reportDirectory;
 
@@ -73,23 +76,32 @@ public class AsciidocReportPlugin implements ReportPlugin {
     @Override
     public void end() throws ReportException {
         if (ruleDirectory.exists()) {
-            Asciidoctor asciidoctor = Asciidoctor.Factory.create();
-            JavaExtensionRegistry extensionRegistry = asciidoctor.javaExtensionRegistry();
-            OptionsBuilder optionsBuilder = OptionsBuilder.options().mkDirs(true).baseDir(ruleDirectory).toDir(reportDirectory).backend(BACKEND_HTML5)
-                    .safe(SafeMode.UNSAFE).option("source-highlighter", "coderay");
-            final FilePatternMatcher filePatternMatcher = FilePatternMatcher.Builder.newInstance().include(this.fileInclude).exclude(this.fileExclude).build();
-            File[] files = ruleDirectory.listFiles(new FilenameFilter() {
-                @Override
-                public boolean accept(File dir, String name) {
-                    return filePatternMatcher.accepts(name);
+            File[] files = getAsciidocFiles();
+            if (files.length > 0) {
+                LOGGER.info("Initializing Asciidoctor...");
+                Asciidoctor asciidoctor = Asciidoctor.Factory.create();
+                asciidoctor.requireLibrary(ASCIIDOCTOR_DIAGRAM);
+                JavaExtensionRegistry extensionRegistry = asciidoctor.javaExtensionRegistry();
+                OptionsBuilder optionsBuilder = OptionsBuilder.options().mkDirs(true).baseDir(ruleDirectory).toDir(reportDirectory).backend(BACKEND_HTML5)
+                        .safe(SafeMode.UNSAFE).attributes(AttributesBuilder.attributes().sourceHighlighter(CODERAY));
+                for (File file : files) {
+                    LOGGER.info("Rendering " + file.getPath());
+                    extensionRegistry.treeprocessor(new ResultTreePreprocessor(conceptResults, constraintResults));
+                    asciidoctor.convertFile(file, optionsBuilder);
                 }
-            });
-            for (File file : files) {
-                LOGGER.info("Rendering " + file.getPath());
-                extensionRegistry.treeprocessor(new ResultTreePreprocessor(conceptResults, constraintResults));
-                asciidoctor.convertFile(file, optionsBuilder);
+                LOGGER.info("Finished rendering.");
             }
         }
+    }
+
+    private File[] getAsciidocFiles() {
+        final FilePatternMatcher filePatternMatcher = FilePatternMatcher.Builder.newInstance().include(this.fileInclude).exclude(this.fileExclude).build();
+        return ruleDirectory.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return filePatternMatcher.accepts(name);
+            }
+        });
     }
 
     @Override
@@ -119,13 +131,10 @@ public class AsciidocReportPlugin implements ReportPlugin {
     @Override
     public void setResult(Result<? extends ExecutableRule> result) throws ReportException {
         ExecutableRule rule = result.getRule();
-        Report report = rule.getReport();
-        if (isAsciidocReport(report)) {
-            if (rule instanceof Concept) {
-                this.conceptResults.put(rule.getId(), getRuleResult(result));
-            } else if (rule instanceof Constraint) {
-                this.constraintResults.put(rule.getId(), getRuleResult(result));
-            }
+        if (rule instanceof Concept) {
+            this.conceptResults.put(rule.getId(), getRuleResult(result));
+        } else if (rule instanceof Constraint) {
+            this.constraintResults.put(rule.getId(), getRuleResult(result));
         }
     }
 
@@ -143,19 +152,4 @@ public class AsciidocReportPlugin implements ReportPlugin {
         }
         return ruleResultBuilder.build();
     }
-
-    /**
-     * Verify if this report shall be executed.
-     *
-     * FIXME This logic should be provided by the framework.
-     *
-     * @param report
-     *            The report configured for the executed rule.
-     * @return <code>true</code> if this report is selected.
-     */
-    private boolean isAsciidocReport(Report report) {
-        Set<String> selectedTypes = report.getSelectedTypes();
-        return selectedTypes == null || selectedTypes.isEmpty();
-    }
-
 }

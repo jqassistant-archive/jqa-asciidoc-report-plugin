@@ -35,6 +35,7 @@
         <com.buschmais.jqassistant.plugin.version>1.3</com.buschmais.jqassistant.plugin.version>
         <com.buschmais.xo.version>0.8.1</com.buschmais.xo.version>
         <org.asciidoctorj.version>1.5.6</org.asciidoctorj.version>
+        <org.asciidoctorj-diagram.version>1.5.4.1</org.asciidoctorj-diagram.version>
         <org.neo4j.version>3.1.3</org.neo4j.version>
         <org.slf4j.version>1.7.12</org.slf4j.version>
     </properties>
@@ -104,6 +105,17 @@
             <groupId>org.asciidoctor</groupId>
             <artifactId>asciidoctorj</artifactId>
             <version>${org.asciidoctorj.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.jruby</groupId>
+                    <artifactId>jruby-complete</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.asciidoctor</groupId>
+            <artifactId>asciidoctorj-diagram</artifactId>
+            <version>${org.asciidoctorj-diagram.version}</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>

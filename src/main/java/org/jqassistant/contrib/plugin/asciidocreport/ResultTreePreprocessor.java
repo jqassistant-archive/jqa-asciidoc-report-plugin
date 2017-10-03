@@ -4,10 +4,7 @@ import static com.buschmais.jqassistant.core.rule.impl.reader.AsciiDocRuleSetRea
 import static com.buschmais.jqassistant.core.rule.impl.reader.AsciiDocRuleSetReader.CONSTRAINT;
 import static java.util.Collections.singletonList;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.asciidoctor.ast.AbstractBlock;
@@ -16,6 +13,7 @@ import org.asciidoctor.ast.Document;
 import org.asciidoctor.extension.Treeprocessor;
 
 import com.buschmais.jqassistant.core.analysis.api.Result;
+import com.buschmais.jqassistant.core.analysis.api.rule.Report;
 
 public class ResultTreePreprocessor extends Treeprocessor {
 
@@ -35,17 +33,17 @@ public class ResultTreePreprocessor extends Treeprocessor {
     }
 
     public Document process(Document document) {
-        process(singletonList(document));
+        parse(singletonList(document));
         enrichResults(conceptBlocks);
         enrichResults(constraintBlocks);
         return document;
     }
 
-    private void process(Collection<?> blocks) {
+    private void parse(Collection<?> blocks) {
         for (Object element : blocks) {
             if (element instanceof AbstractBlock) {
                 AbstractBlock block = (AbstractBlock) element;
-                process(block.getBlocks());
+                parse(block.getBlocks());
                 String role = block.getRole();
                 if (role != null) {
                     String id = (String) block.getAttr(ID);
@@ -56,7 +54,7 @@ public class ResultTreePreprocessor extends Treeprocessor {
                     }
                 }
             } else if (element instanceof Collection<?>) {
-                process((Collection<?>) element);
+                parse((Collection<?>) element);
             }
         }
     }
@@ -68,17 +66,17 @@ public class ResultTreePreprocessor extends Treeprocessor {
             AbstractNode parent = block.getParent();
             List<AbstractBlock> siblings = ((AbstractBlock) parent).getBlocks();
             int i = siblings.indexOf(block);
+            List<String> content = new ArrayList<>();
             if (result != null) {
-                siblings.add(i + 1,
-                        createBlock((AbstractBlock) parent, "paragraph", "Severity: " + result.getSeverity(), new HashMap<String, Object>(), new HashMap<>()));
                 Result.Status status = result.getStatus();
-                siblings.add(i + 2, createBlock((AbstractBlock) parent, "paragraph", getStatusContent(status), new HashMap<String, Object>(), new HashMap<>()));
                 String tableContent = createResultTable(result);
-                siblings.add(i + 3, createBlock((AbstractBlock) parent, "paragraph", tableContent, new HashMap<String, Object>(), new HashMap<>()));
+                content.add(getStatusContent(status));
+                content.add("Severity: " + result.getSeverity());
+                content.add(tableContent);
             } else {
-                siblings.add(i + 1, createBlock((AbstractBlock) parent, "paragraph", getStatusContent(Result.Status.SKIPPED), new HashMap<String, Object>(),
-                        new HashMap<>()));
+                content.add("Status: Not Available");
             }
+            siblings.add(i + 1, createBlock((AbstractBlock) parent, "paragraph", content, new HashMap<String, Object>(), new HashMap<>()));
         }
     }
 
