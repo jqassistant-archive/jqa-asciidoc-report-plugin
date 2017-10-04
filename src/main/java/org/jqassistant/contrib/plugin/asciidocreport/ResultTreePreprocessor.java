@@ -13,7 +13,7 @@ import org.asciidoctor.ast.Document;
 import org.asciidoctor.extension.Treeprocessor;
 
 import com.buschmais.jqassistant.core.analysis.api.Result;
-import com.buschmais.jqassistant.core.analysis.api.rule.Report;
+import com.buschmais.jqassistant.core.analysis.api.rule.Severity;
 
 public class ResultTreePreprocessor extends Treeprocessor {
 
@@ -71,7 +71,8 @@ public class ResultTreePreprocessor extends Treeprocessor {
                 Result.Status status = result.getStatus();
                 String tableContent = createResultTable(result);
                 content.add(getStatusContent(status));
-                content.add("Severity: " + result.getSeverity());
+                Severity severity = result.getRule().getSeverity();
+                content.add("Severity: " + severity.getInfo(result.getEffectiveSeverity()));
                 content.add(tableContent);
             } else {
                 content.add("Status: Not Available");
@@ -81,22 +82,7 @@ public class ResultTreePreprocessor extends Treeprocessor {
     }
 
     private String getStatusContent(Result.Status status) {
-        String color;
-        switch (status) {
-        case SUCCESS:
-            color = "green";
-            break;
-        case FAILURE:
-            color = "red";
-            break;
-        case SKIPPED:
-            color = "yellow";
-            break;
-        default:
-            color = "black";
-            break;
-        }
-        return "Status: " + "<span class=\"" + color + "\">" + status.toString() + "</span>";
+        return "Status: " + "<span class=\"" + StatusHelper.getStatusColor(status) + "\">" + status.toString() + "</span>";
     }
 
     private String createResultTable(RuleResult result) {

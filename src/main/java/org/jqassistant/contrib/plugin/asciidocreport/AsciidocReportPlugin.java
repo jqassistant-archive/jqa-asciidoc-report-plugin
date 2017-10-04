@@ -4,7 +4,10 @@ import static java.util.Collections.singletonList;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.asciidoctor.Asciidoctor;
 import org.asciidoctor.AttributesBuilder;
@@ -15,7 +18,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.buschmais.jqassistant.core.analysis.api.Result;
-import com.buschmais.jqassistant.core.analysis.api.rule.*;
+import com.buschmais.jqassistant.core.analysis.api.rule.Concept;
+import com.buschmais.jqassistant.core.analysis.api.rule.Constraint;
+import com.buschmais.jqassistant.core.analysis.api.rule.ExecutableRule;
+import com.buschmais.jqassistant.core.analysis.api.rule.Group;
 import com.buschmais.jqassistant.core.report.api.ReportException;
 import com.buschmais.jqassistant.core.report.api.ReportHelper;
 import com.buschmais.jqassistant.core.report.api.ReportPlugin;
@@ -83,9 +89,11 @@ public class AsciidocReportPlugin implements ReportPlugin {
                 asciidoctor.requireLibrary(ASCIIDOCTOR_DIAGRAM);
                 JavaExtensionRegistry extensionRegistry = asciidoctor.javaExtensionRegistry();
                 OptionsBuilder optionsBuilder = OptionsBuilder.options().mkDirs(true).baseDir(ruleDirectory).toDir(reportDirectory).backend(BACKEND_HTML5)
-                        .safe(SafeMode.UNSAFE).attributes(AttributesBuilder.attributes().sourceHighlighter(CODERAY));
+                        .safe(SafeMode.UNSAFE).attributes(AttributesBuilder.attributes().experimental(true).sourceHighlighter(CODERAY));
+                LOGGER.info("Using report directory " + reportDirectory.getAbsolutePath());
                 for (File file : files) {
-                    LOGGER.info("Rendering " + file.getPath());
+                    LOGGER.info("  " + file.getPath());
+                    extensionRegistry.blockMacro(new MacroProcessor(conceptResults, constraintResults));
                     extensionRegistry.treeprocessor(new ResultTreePreprocessor(conceptResults, constraintResults));
                     asciidoctor.convertFile(file, optionsBuilder);
                 }
@@ -141,7 +149,7 @@ public class AsciidocReportPlugin implements ReportPlugin {
     private RuleResult getRuleResult(Result<? extends ExecutableRule> result) {
         RuleResult.RuleResultBuilder ruleResultBuilder = RuleResult.builder();
         List<String> columnNames = result.getColumnNames();
-        ruleResultBuilder.rule(result.getRule()).severity(result.getRule().getSeverity().getInfo(result.getSeverity())).status(result.getStatus())
+        ruleResultBuilder.rule(result.getRule()).effectiveSeverity(result.getSeverity()).status(result.getStatus())
                 .columnNames(columnNames != null ? columnNames : singletonList("No Result"));
         for (Map<String, Object> row : result.getRows()) {
             Map<String, String> resultRow = new LinkedHashMap<>();

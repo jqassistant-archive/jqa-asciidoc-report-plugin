@@ -9,19 +9,17 @@ import com.buschmais.jqassistant.core.analysis.api.Result;
 
 import com.buschmais.jqassistant.core.analysis.api.rule.ExecutableRule;
 import com.buschmais.jqassistant.core.analysis.api.rule.Severity;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Singular;
+import lombok.*;
 
 @Builder
 @Getter
 @AllArgsConstructor(access = PRIVATE)
+@ToString
 public class RuleResult {
 
     private ExecutableRule rule;
 
-    private String severity;
+    private Severity effectiveSeverity;
 
     private Result.Status status;
 
