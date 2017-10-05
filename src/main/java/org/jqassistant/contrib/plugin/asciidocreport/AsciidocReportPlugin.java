@@ -94,9 +94,11 @@ public class AsciidocReportPlugin implements ReportPlugin {
                 LOGGER.info("Using report directory " + reportDirectory.getAbsolutePath());
                 for (File file : files) {
                     LOGGER.info("  " + file.getPath());
-                    extensionRegistry.blockMacro(new MacroProcessor(conceptResults, constraintResults));
+                    Document document = asciidoctor.loadFile(file, optionsBuilder.asMap());
+                    extensionRegistry.blockMacro(new MacroProcessor(document, conceptResults, constraintResults));
                     extensionRegistry.treeprocessor(new ResultTreePreprocessor(conceptResults, constraintResults));
                     asciidoctor.convertFile(file, optionsBuilder);
+                    asciidoctor.unregisterAllExtensions();
                 }
                 LOGGER.info("Finished rendering.");
             }

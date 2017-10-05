@@ -1,0 +1,10 @@
+= Rules
+
+[[test:ImportedRule]]
+[source,cypher,role=concept]
+.Rule Description
+----
+MATCH (n) RETURN n
+----
+
+

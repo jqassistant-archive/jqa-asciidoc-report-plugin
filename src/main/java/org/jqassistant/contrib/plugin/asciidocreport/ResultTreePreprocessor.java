@@ -25,32 +25,38 @@ public class ResultTreePreprocessor extends Treeprocessor {
     }
 
     public Document process(Document document) {
-        DocumentParser documentParser = new DocumentParser(document, conceptResults, constraintResults);
-        enrichResults(documentParser.getConceptBlocks());
-        enrichResults(documentParser.getConstraintBlocks());
+        DocumentParser documentParser = DocumentParser.parse(document);
+        enrichResults(documentParser.getConceptBlocks(), conceptResults);
+        enrichResults(documentParser.getConstraintBlocks(), constraintResults);
         return document;
     }
 
-    private void enrichResults(Map<AbstractBlock, RuleResult> blocks) {
-        for (Map.Entry<AbstractBlock, RuleResult> blockEntry : blocks.entrySet()) {
-            AbstractBlock block = blockEntry.getKey();
-            RuleResult result = blockEntry.getValue();
+    private void enrichResults(Map<String, AbstractBlock> blocks, Map<String, RuleResult> results) {
+        for (Map.Entry<String, AbstractBlock> blockEntry : blocks.entrySet()) {
+            String id = blockEntry.getKey();
+            AbstractBlock block = blockEntry.getValue();
+            RuleResult result = results.get(id);
+            List<String> content = renderRuleResult(result);
             AbstractNode parent = block.getParent();
             List<AbstractBlock> siblings = ((AbstractBlock) parent).getBlocks();
             int i = siblings.indexOf(block);
-            List<String> content = new ArrayList<>();
-            if (result != null) {
-                Result.Status status = result.getStatus();
-                String tableContent = createResultTable(result);
-                content.add(getStatusContent(status));
-                Severity severity = result.getRule().getSeverity();
-                content.add("Severity: " + severity.getInfo(result.getEffectiveSeverity()));
-                content.add(tableContent);
-            } else {
-                content.add("Status: Not Available");
-            }
             siblings.add(i + 1, createBlock((AbstractBlock) parent, "paragraph", content, new HashMap<String, Object>(), new HashMap<>()));
         }
+    }
+
+    private List<String> renderRuleResult(RuleResult result) {
+        List<String> content = new ArrayList<>();
+        if (result != null) {
+            Result.Status status = result.getStatus();
+            String tableContent = createResultTable(result);
+            content.add(getStatusContent(status));
+            Severity severity = result.getRule().getSeverity();
+            content.add("Severity: " + severity.getInfo(result.getEffectiveSeverity()));
+            content.add(tableContent);
+        } else {
+            content.add("Status: Not Available");
+        }
+        return content;
     }
 
     private String getStatusContent(Result.Status status) {
@@ -82,5 +88,4 @@ public class ResultTreePreprocessor extends Treeprocessor {
         tableBuilder.append("</table>");
         return tableBuilder.toString();
     }
-
 }

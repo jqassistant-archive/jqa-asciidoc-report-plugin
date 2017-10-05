@@ -1,0 +1,18 @@
+:toc: left
+= Rules
+
+== Summary
+
+jQA::Summary[]
+
+== Rules
+
+[[test:Rule]]
+[source,cypher,role=concept,requiresConcepts="test:ImportedRule"]
+.Rule Description
+----
+MATCH (n) RETURN n
+----
+
+
+
