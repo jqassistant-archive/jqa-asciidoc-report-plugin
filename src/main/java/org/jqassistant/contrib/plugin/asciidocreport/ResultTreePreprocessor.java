@@ -1,10 +1,9 @@
 package org.jqassistant.contrib.plugin.asciidocreport;
 
-import static com.buschmais.jqassistant.core.rule.impl.reader.AsciiDocRuleSetReader.CONCEPT;
-import static com.buschmais.jqassistant.core.rule.impl.reader.AsciiDocRuleSetReader.CONSTRAINT;
-import static java.util.Collections.singletonList;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.asciidoctor.ast.AbstractBlock;
@@ -17,15 +16,8 @@ import com.buschmais.jqassistant.core.analysis.api.rule.Severity;
 
 public class ResultTreePreprocessor extends Treeprocessor {
 
-    public static final String ID = "id";
-
     private final Map<String, RuleResult> conceptResults;
-
     private final Map<String, RuleResult> constraintResults;
-
-    private Map<AbstractBlock, RuleResult> conceptBlocks = new HashMap<>();
-
-    private Map<AbstractBlock, RuleResult> constraintBlocks = new HashMap<>();
 
     public ResultTreePreprocessor(Map<String, RuleResult> conceptResults, Map<String, RuleResult> constraintResults) {
         this.conceptResults = conceptResults;
@@ -33,30 +25,10 @@ public class ResultTreePreprocessor extends Treeprocessor {
     }
 
     public Document process(Document document) {
-        parse(singletonList(document));
-        enrichResults(conceptBlocks);
-        enrichResults(constraintBlocks);
+        DocumentParser documentParser = new DocumentParser(document, conceptResults, constraintResults);
+        enrichResults(documentParser.getConceptBlocks());
+        enrichResults(documentParser.getConstraintBlocks());
         return document;
-    }
-
-    private void parse(Collection<?> blocks) {
-        for (Object element : blocks) {
-            if (element instanceof AbstractBlock) {
-                AbstractBlock block = (AbstractBlock) element;
-                parse(block.getBlocks());
-                String role = block.getRole();
-                if (role != null) {
-                    String id = (String) block.getAttr(ID);
-                    if (CONCEPT.equalsIgnoreCase(role)) {
-                        conceptBlocks.put(block, conceptResults.get(id));
-                    } else if (CONSTRAINT.equalsIgnoreCase(role)) {
-                        constraintBlocks.put(block, constraintResults.get(id));
-                    }
-                }
-            } else if (element instanceof Collection<?>) {
-                parse((Collection<?>) element);
-            }
-        }
     }
 
     private void enrichResults(Map<AbstractBlock, RuleResult> blocks) {
