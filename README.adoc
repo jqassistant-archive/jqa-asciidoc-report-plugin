@@ -10,7 +10,7 @@ The plugin records the results of executed rules (i.e. concepts and constraints)
 At the end of the analysis phase http://www.asciidoctor[Asciidoctor] is used for rendering the input documents providing the rules
 to HTML documents. The listings containing rules are identified and their status and results appended.
 
-Furthermore a macro `jQA:Summary[]` can be used to embed a summary about the executed rules and their status.
+Furthermore a macro `jQA::Summary[]` can be used to embed a summary about the executed rules and their status.
 
 == Prerequisites
 
@@ -73,7 +73,7 @@ The plugin can be enabled in a Maven based project by adding it as a dependency 
 
 == Summary
 
-A summary of executed rules and their status may be embedded in the document by using the macro `jQA:Summary[]`.
+A summary of executed rules and their status may be embedded in the document by using the macro `jQA::Summary[]`.
 
 .jqassistant/index.adoc
 ....
@@ -83,7 +83,7 @@ This document describes architectural and design rules for My Project.
 
 == Summary
 
-jQA:Summary[]
+jQA::Summary[]
 
 [[default]]
 [role=group,includesGroups="..."]
