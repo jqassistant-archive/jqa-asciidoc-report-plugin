@@ -11,7 +11,7 @@ jQA::Summary[]
 [source,cypher,role=concept,requiresConcepts="test:ImportedRule"]
 .Rule Description
 ----
-MATCH (n) RETURN n
+MATCH (n) RETURN n as Value
 ----
 
 
