@@ -26,6 +26,6 @@ public class RuleResult {
     private List<String> columnNames;
 
     @Singular
-    private List<Map<String, String>> rows;
+    private List<Map<String, List<String>>> rows;
 
 }

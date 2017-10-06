@@ -4,10 +4,7 @@ import static java.util.Collections.singletonList;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.asciidoctor.Asciidoctor;
 import org.asciidoctor.AttributesBuilder;
@@ -153,11 +150,20 @@ public class AsciidocReportPlugin implements ReportPlugin {
         RuleResult.RuleResultBuilder ruleResultBuilder = RuleResult.builder();
         List<String> columnNames = result.getColumnNames();
         ruleResultBuilder.rule(result.getRule()).effectiveSeverity(result.getSeverity()).status(result.getStatus())
-                .columnNames(columnNames != null ? columnNames : singletonList("No Result"));
+                .columnNames(columnNames != null ? columnNames : singletonList("Empty Result"));
         for (Map<String, Object> row : result.getRows()) {
-            Map<String, String> resultRow = new LinkedHashMap<>();
+            Map<String, List<String>> resultRow = new LinkedHashMap<>();
             for (Map.Entry<String, Object> rowEntry : row.entrySet()) {
-                resultRow.put(rowEntry.getKey(), ReportHelper.getLabel(rowEntry.getValue()));
+                Object value = rowEntry.getValue();
+                List<String> values = new ArrayList<>();
+                if (value instanceof Iterable<?>) {
+                    for (Object o : ((Iterable) value)) {
+                        values.add(ReportHelper.getLabel(o));
+                    }
+                } else {
+                    values.add(ReportHelper.getLabel(value));
+                }
+                resultRow.put(rowEntry.getKey(), values);
             }
             ruleResultBuilder.row(resultRow);
         }

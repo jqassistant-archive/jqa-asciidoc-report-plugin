@@ -66,26 +66,28 @@ public class ResultTreePreprocessor extends Treeprocessor {
     private String createResultTable(RuleResult result) {
         List<String> columnNames = result.getColumnNames();
         StringBuilder tableBuilder = new StringBuilder();
-        tableBuilder.append("<table>");
-        tableBuilder.append("<thead>");
-        tableBuilder.append("<tr>");
+        tableBuilder.append("<table>").append('\n');
+        tableBuilder.append("<thead>").append('\n');
+        tableBuilder.append("<tr>").append('\n');
         for (String columnName : columnNames) {
-            tableBuilder.append("<th>").append(columnName).append("</th>");
+            tableBuilder.append("<th>").append(columnName).append("</th>").append('\n');
         }
-        tableBuilder.append("</tr>");
-        tableBuilder.append("</thead>");
-        tableBuilder.append("<tbody>");
-        for (Map<String, String> row : result.getRows()) {
-            tableBuilder.append("<tr>");
+        tableBuilder.append("</tr>").append('\n');
+        tableBuilder.append("</thead>").append('\n');
+        tableBuilder.append("<tbody>").append('\n');
+        for (Map<String, List<String>> row : result.getRows()) {
+            tableBuilder.append("<tr>").append('\n');
             for (String columnName : columnNames) {
-                tableBuilder.append("<td>");
-                tableBuilder.append(StringEscapeUtils.escapeHtml(row.get(columnName)));
-                tableBuilder.append("</td>");
+                tableBuilder.append("<td>").append('\n');
+                for (String value : row.get(columnName)) {
+                    tableBuilder.append(StringEscapeUtils.escapeHtml(value)).append('\n');
+                }
+                tableBuilder.append("</td>").append('\n');
             }
-            tableBuilder.append("</tr>");
+            tableBuilder.append("</tr>").append('\n');
         }
-        tableBuilder.append("</tbody>");
-        tableBuilder.append("</table>");
+        tableBuilder.append("</tbody>").append('\n');
+        tableBuilder.append("</table>").append('\n');
         return tableBuilder.toString();
     }
 }
