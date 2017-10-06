@@ -1,0 +1,117 @@
+:toc:
+= jQAssistant Asciidoc Report Plugin
+
+This project provides a http://jqassistant.org/[jQAssistant] report plugin for rendering
+http://www.methods.co.nz/asciidoc/[Asciidoc] documents containing rules and embedding their results.
+
+== How It Works
+
+The plugin records the results of executed rules (i.e. concepts and constraints).
+At the end of the analysis phase http://www.asciidoctor[Asciidoctor] is used for rendering the input documents providing the rules
+to HTML documents. The listings containing rules are identified and their status and results appended.
+
+Furthermore a macro `jQA:Summary[]` can be used to embed a summary about the executed rules and their status.
+
+== Prerequisites
+
+* Java 7 or higher
+* Maven 3.2.5 or higher
+* jQAssistant 1.3.0 or higher (see below)
+
+== Setup
+
+The plugin can be enabled in a Maven based project by adding it as a dependency to the jQAssistant Maven plugin:
+
+.pom.xml
+[source,xml]
+----
+<build>
+    <plugins>
+        <plugin>
+            <groupId>com.buschmais.jqassistant</groupId>
+            <artifactId>jqassistant-maven-plugin</artifactId>
+            <version>1.3.0</version>
+            <executions>
+                <execution>
+                    <id>default-cli</id>
+                    <goals>
+                        <goal>scan</goal>
+                        <goal>analyze</goal>
+                    </goals>
+                    <configuration>
+                        <failOnSeverity>MAJOR</failOnSeverity>
+                        <warnOnSeverity>MINOR</warnOnSeverity>
+                        <useExecutionRootAsProjectRoot>true</useExecutionRootAsProjectRoot>
+                        <scanIncludes>
+                            <scanInclude>
+                                <path>${project.basedir}/.git</path>
+                            </scanInclude>
+                        </scanIncludes>
+                        <reportProperties>
+                            <asciidoc.report.directory>${session.executionRootDirectory}/asciidoc</asciidoc.report.directory>              <!--1-->
+                            <asciidoc.report.rule.directory>${session.executionRootDirectory}/jqassistant</asciidoc.report.rule.directory> <!--2-->
+                            <asciidoc.report.file.include>index.adoc</asciidoc.report.file.include>                                        <!--3-->
+                        </reportProperties>
+                    </configuration>
+                </execution>
+            </executions>
+            <dependencies>
+                <dependency>                                                                                                               <!--4-->
+                    <groupId>org.jqassistant.contrib.plugin</groupId>
+                    <artifactId>jqassistant-asciidoc-report-plugin</artifactId>
+                    <version>1.0.0-SNAPSHOT</version>
+                </dependency>
+            </dependencies>
+        </plugin>
+    </plugins>
+</build>
+----
+<1> Configures the directory where the jQAssistant Asciidoc Report plugin will create the rendered HTML files.
+<2> Defines the directory where the source Asciidoc files are located.
+<3> The filter specifying the source file which should be rendered (optional).
+<4> Declares the plugin as dependency for jQAssistant
+
+== Summary
+
+A summary of executed rules and their status may be embedded in the document by using the macro `jQA:Summary[]`.
+
+.jqassistant/index.adoc
+....
+= My Project
+
+This document describes architectural and design rules for My Project.
+
+== Summary
+
+jQA:Summary[]
+
+[[default]]
+[role=group,includesGroups="..."]
+== Rules
+....
+
+== Configuration
+
+The Asciidoc Report plugin accepts several options that might be passed as report properties to jQAssistant:
+
+[options="header"]
+|===
+| Property                                   | Description                                                      | Default
+| asciidoc.report.directory      | Specifies the directory where the HTML files will be written                 | jqassistant/report/asciidoc
+| asciidoc.report.rule.directory | Specifies the directory where the Asciidoc files are located                 | jqassistant/rules
+| asciidoc.report.file.include   | A comma separated list of filter of Asciidoc files to be included (optional) |
+| asciidoc.report.file.exclude   | A comma separated list of filter of Asciidoc files to be included (optional) |
+|===
+
+== Limitations
+
+Currently only results are embedded for rules that either specify no report type or explicity select `asciidoc` for it (i.e. 'reportType=asciidoc').
+
+[[feedback]]
+== Feedback
+
+Please report any issues https://github.com/jqassistant-contrib/jqassistant-asciidoc-report-plugin/issues[here].
+
+== Acknowledgements
+
+The plugin is based on https://asciidoctor.org[Asciidoctor].

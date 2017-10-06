@@ -35,10 +35,11 @@ public class AsciidocReportPlugin implements ReportPlugin {
     private static final String PROPERTY_FILE_EXCLUDE = "asciidoc.report.file.exclude";
 
     private static final String DEFAULT_DIRECTORY = "jqassistant/report/asciidoc";
-    private static final String DEFAULT_RULE_DIRECTORY = "jqassistant/report/asciidoc";
-    public static final String BACKEND_HTML5 = "html5";
-    public static final String CODERAY = "coderay";
-    public static final String ASCIIDOCTOR_DIAGRAM = "asciidoctor-diagram";
+    private static final String DEFAULT_RULE_DIRECTORY = "jqassistant/rules";
+
+    private static final String BACKEND_HTML5 = "html5";
+    private static final String CODERAY = "coderay";
+    private static final String ASCIIDOCTOR_DIAGRAM = "asciidoctor-diagram";
 
     private File reportDirectory;
 
