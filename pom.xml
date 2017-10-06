@@ -111,7 +111,8 @@
         </dependency>
         <dependency>
             <groupId>com.buschmais.jqassistant.plugin</groupId>
-            <artifactId>junit</artifactId>
+            <artifactId>common</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.asciidoctor</groupId>
@@ -152,46 +153,6 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.buschmais.jqassistant.core</groupId>
-            <artifactId>store</artifactId>
-            <type>test-jar</type>
-            <version>${com.buschmais.jqassistant.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.buschmais.jqassistant.core</groupId>
-            <artifactId>analysis</artifactId>
-            <type>test-jar</type>
-            <version>${com.buschmais.jqassistant.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.buschmais.jqassistant.plugin</groupId>
-            <artifactId>common</artifactId>
-            <type>test-jar</type>
-            <version>${com.buschmais.jqassistant.plugin.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.buschmais.xo</groupId>
-            <artifactId>xo.neo4j.embedded</artifactId>
-            <version>${com.buschmais.xo.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.neo4j</groupId>
-            <artifactId>neo4j</artifactId>
-            <version>${org.neo4j.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.buschmais.jqassistant.plugin</groupId>
-            <artifactId>java</artifactId>
-            <type>test-jar</type>
-            <version>${com.buschmais.jqassistant.plugin.version}</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 
