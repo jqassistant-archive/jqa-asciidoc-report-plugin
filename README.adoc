@@ -10,7 +10,7 @@ The plugin records the results of executed rules (i.e. concepts and constraints)
 At the end of the analysis phase http://www.asciidoctor[Asciidoctor] is used for rendering the input documents providing the rules
 to HTML documents. The listings containing rules are identified and their status and results appended.
 
-Furthermore a macro `jQA::Summary[]` can be used to embed a summary about the executed rules and their status.
+Furthermore include directives are provided for embedding a summary about executed and imported rules.
 
 == Prerequisites
 
@@ -59,7 +59,7 @@ The plugin can be enabled in a Maven based project by adding it as a dependency 
                 <dependency>                                                                                                               <!--4-->
                     <groupId>org.jqassistant.contrib.plugin</groupId>
                     <artifactId>jqassistant-asciidoc-report-plugin</artifactId>
-                    <version>1.0.0-RC1</version>
+                    <version>1.0.0-RC2</version>
                 </dependency>
             </dependencies>
         </plugin>
@@ -71,9 +71,14 @@ The plugin can be enabled in a Maven based project by adding it as a dependency 
 <3> The filter specifying the source file which should be rendered (optional).
 <4> Declares the plugin as dependency for jQAssistant
 
-== Summary
+== Includes
 
-A summary of executed rules and their status may be embedded in the document by using the macro `jQA::Summary[]`.
+The report may be enhanced by `jQA`include directives:
+
+`jQA:Summary[]`::
+  Summary table containing all executed rules and their state
+`jQA:ImportedRules[]`::
+  Descriptions for all rules which have been executed but which are not part of the document itself (i.e. provided by plugins)
 
 .jqassistant/index.adoc
 ....
@@ -83,12 +88,21 @@ This document describes architectural and design rules for My Project.
 
 == Summary
 
-jQA::Summary[]
+include::jQA:Summary[]
 
 [[default]]
 [role=group,includesGroups="..."]
 == Rules
+
+...
+project specific rules
+...
+
+== Imported Rules
+
+include::jQA:ImportedRules[]
 ....
+
 
 == Configuration
 
