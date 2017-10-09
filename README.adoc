@@ -88,7 +88,7 @@ This document describes architectural and design rules for My Project.
 
 == Summary
 
-include::jQA:Summary[]
+\include::jQA:Summary[]
 
 [[default]]
 [role=group,includesGroups="..."]
@@ -100,7 +100,7 @@ project specific rules
 
 == Imported Rules
 
-include::jQA:ImportedRules[]
+\include::jQA:ImportedRules[]
 ....
 
 
