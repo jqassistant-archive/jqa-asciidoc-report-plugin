@@ -93,7 +93,8 @@ public class AsciidocReportPlugin implements ReportPlugin {
                 for (File file : files) {
                     LOGGER.info("  " + file.getPath());
                     Document document = asciidoctor.loadFile(file, optionsBuilder.asMap());
-                    extensionRegistry.blockMacro(new MacroProcessor(document, conceptResults, constraintResults));
+                    extensionRegistry.includeProcessor(new IncludeProcessor(document, conceptResults, constraintResults));
+                    extensionRegistry.inlineMacro(new InlineMacroProcessor());
                     extensionRegistry.treeprocessor(new ResultTreePreprocessor(conceptResults, constraintResults));
                     asciidoctor.convertFile(file, optionsBuilder);
                     asciidoctor.unregisterAllExtensions();

@@ -8,7 +8,10 @@ import static org.junit.Assert.assertThat;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
@@ -38,18 +41,23 @@ public class AsciidocReportPluginTest {
         plugin.configure(properties);
 
         RuleSet ruleSet = getRuleSet(ruleDirectory);
-        Concept rule = ruleSet.getConceptBucket().getById("test:Rule");
-        Concept importedRule = ruleSet.getConceptBucket().getById("test:ImportedRule");
 
         plugin.begin();
 
+        Concept concept = ruleSet.getConceptBucket().getById("test:Concept");
         List<Map<String, Object>> rows = new ArrayList<>();
-        Map<String, Object> row = new HashMap<>();
-        row.put("Value", asList("Foo","Bar"));
-        rows.add(row);
-        processRule(plugin, rule, new Result<>(rule, Result.Status.SUCCESS, Severity.MAJOR, singletonList("Value"), rows));
-        processRule(plugin, importedRule,
-                new Result<>(importedRule, Result.Status.SUCCESS, Severity.MINOR, singletonList("n"), Collections.<Map<String, Object>> emptyList()));
+        Map<String, Object> conceptRow = new HashMap<>();
+        conceptRow.put("Value", asList("Foo", "Bar"));
+        rows.add(conceptRow);
+        processRule(plugin, concept, new Result<>(concept, Result.Status.SUCCESS, Severity.MAJOR, singletonList("Value"), rows));
+
+        Concept importedConcept = ruleSet.getConceptBucket().getById("test:ImportedConcept");
+        List<Map<String, Object>> importedConceptRows = new ArrayList<>();
+        Map<String, Object> importedConceptRow = new HashMap<>();
+        importedConceptRow.put("ImportedConceptValue", asList("FooBar"));
+        importedConceptRows.add(importedConceptRow);
+        processRule(plugin, importedConcept,
+                new Result<>(importedConcept, Result.Status.FAILURE, Severity.MINOR, singletonList("ImportedConceptValue"), importedConceptRows));
 
         plugin.end();
 
@@ -58,15 +66,20 @@ public class AsciidocReportPluginTest {
 
         String html = FileUtils.readFileToString(indexHtml);
         // Summary
-        assertThat(html, containsString("<td><a href=\"#test:Rule\">test:Rule</a></td>"));
-        assertThat(html, containsString("<td>Rule Description</td>"));
-        assertThat(html, containsString("<td>MAJOR (from MINOR)</td>"));
-        assertThat(html, containsString("<td class=\"green\">SUCCESS</td>"));
-        // test:Rule
+        assertThat(html, containsString("<td class=\"tableblock halign-left valign-top\"><p class=\"tableblock\"><a href=\"#test:Concept\">test:Concept</a></p></td>"));
+        assertThat(html, containsString("<td class=\"tableblock halign-left valign-top\"><p class=\"tableblock\">Concept Description</p></td>"));
+        assertThat(html, containsString("<td class=\"tableblock halign-left valign-top\"><p class=\"tableblock\">MAJOR (from MINOR)</p></td>"));
+        assertThat(html, containsString("<td class=\"tableblock halign-left valign-top\"><p class=\"tableblock\"><span class=\"green\">SUCCESS</span></p></td>"));
+        // test:Concept
         assertThat(html, containsString("Status: <span class=\"green\">SUCCESS</span>"));
         assertThat(html, containsString("Severity: MAJOR (from MINOR)"));
         assertThat(html, containsString("<th>Value</th>"));
         assertThat(html, containsString("<td>\nFoo\nBar\n</td>"));
+        // test:ImportedConcept
+        assertThat(html, containsString("Status: <span class=\"red\">FAILURE</span>"));
+        assertThat(html, containsString("Severity: MINOR"));
+        assertThat(html, containsString("<th>ImportedConceptValue</th>"));
+        assertThat(html, containsString("<td>\nFooBar\n</td>"));
     }
 
     private RuleSet getRuleSet(File ruleDirectory) throws RuleException {

@@ -9,6 +9,7 @@ import java.util.*;
 
 import org.asciidoctor.ast.AbstractBlock;
 import org.asciidoctor.ast.Document;
+import org.asciidoctor.ast.DocumentRuby;
 
 public class DocumentParser {
 
@@ -50,6 +51,12 @@ public class DocumentParser {
     }
 
     public static DocumentParser parse(Document document) {
+        DocumentParser documentParser = new DocumentParser();
+        documentParser.parse(singletonList(document));
+        return documentParser;
+    }
+
+    public static DocumentParser parse(DocumentRuby document) {
         DocumentParser documentParser = new DocumentParser();
         documentParser.parse(singletonList(document));
         return documentParser;

@@ -3,16 +3,27 @@
 
 == Summary
 
-jQA::Summary[]
+include::jQA:Summary[]
 
 == Rules
 
-[[test:Rule]]
-[source,cypher,role=concept,requiresConcepts="test:ImportedRule"]
-.Rule Description
+[[test:Concept]]
+[source,cypher,role=concept,requiresConcepts="test:ImportedConcept"]
+.Concept Description
 ----
 MATCH (n) RETURN n as Value
 ----
 
+[[test:Constraint]]
+[source,cypher,role=concept,requiresConcepts="test:ImportedConcept"]
+.Constraint Description
+----
+MATCH (n) RETURN n as Value
+----
 
+== Imported Rules
+
+include::jQA:ImportedRules[]
+
+*Test*
 
