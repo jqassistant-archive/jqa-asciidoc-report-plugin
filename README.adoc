@@ -73,7 +73,7 @@ The plugin can be enabled in a Maven based project by adding it as a dependency 
 
 == Includes
 
-The report may be enhanced by `jQA`include directives:
+The report may be enhanced by `jQA` include directives:
 
 `jQA:Summary[]`::
   Summary table containing all executed rules and their state
