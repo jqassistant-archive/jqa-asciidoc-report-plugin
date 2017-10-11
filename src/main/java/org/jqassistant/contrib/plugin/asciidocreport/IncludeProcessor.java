@@ -94,7 +94,7 @@ public class IncludeProcessor extends org.asciidoctor.extension.IncludeProcessor
 
     private void includeSummaryTable(String title, String referenceMacro, Map<String, RuleResult> results, StringBuilder content) {
         content.append('.').append(title).append('\n');
-        content.append("[options=\"header\"]").append('\n');
+        content.append("[options=header,role=summary]").append('\n');
         content.append("|===").append('\n');
         content.append("| Id | Description | Severity | Status").append('\n');
         Set<RuleResult> entries = new TreeSet<>(StatusHelper.getRuleResultComparator());
