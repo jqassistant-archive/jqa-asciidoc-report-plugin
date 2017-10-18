@@ -9,6 +9,8 @@ import org.asciidoctor.ast.AbstractBlock;
 import org.asciidoctor.ast.AbstractNode;
 import org.asciidoctor.ast.Document;
 import org.asciidoctor.extension.Treeprocessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.buschmais.jqassistant.core.analysis.api.Result;
 import com.buschmais.jqassistant.core.analysis.api.rule.ExecutableRule;
@@ -18,9 +20,10 @@ import com.buschmais.jqassistant.core.report.api.graph.model.Relationship;
 import com.buschmais.jqassistant.core.report.api.graph.model.SubGraph;
 
 import net.sourceforge.plantuml.SourceStringReader;
-import net.sourceforge.plantuml.core.DiagramDescription;
 
 public class TreePreprocessor extends Treeprocessor {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Treeprocessor.class);
 
     private final Map<String, RuleResult> conceptResults;
     private final Map<String, RuleResult> constraintResults;
@@ -52,36 +55,48 @@ public class TreePreprocessor extends Treeprocessor {
         }
     }
 
+    /**
+     * Renders a {@link RuleResult} to HTML.
+     *
+     * @param result
+     *            The {@link RuleResult}.
+     * @return The HTML to be embedded into the document.
+     */
     private List<String> renderRuleResult(RuleResult result) {
         List<String> content = new ArrayList<>();
         if (result != null) {
             Result.Status status = result.getStatus();
-            String resultContent;
             switch (result.getType()) {
             case COMPONENT_DIAGRAM:
-                resultContent = createComponentDiagram(result);
+                content.add(renderComponentDiagram(result));
                 break;
             case TABLE:
-                resultContent = createResultTable(result);
+                content.add(renderStatusContent(status));
+                Severity severity = result.getRule().getSeverity();
+                content.add("Severity: " + severity.getInfo(result.getEffectiveSeverity()));
+                content.add(renderResultTable(result));
                 break;
             default:
-                throw new IllegalArgumentException("Unknown diagram type '" + result.getType() + "'");
+                throw new IllegalArgumentException("Unknown result type '" + result.getType() + "'");
             }
-            content.add(getStatusContent(status));
-            Severity severity = result.getRule().getSeverity();
-            content.add("Severity: " + severity.getInfo(result.getEffectiveSeverity()));
-            content.add(resultContent);
         } else {
             content.add("Status: Not Available");
         }
         return content;
     }
 
-    private String getStatusContent(Result.Status status) {
+    private String renderStatusContent(Result.Status status) {
         return "Status: " + "<span class=\"" + StatusHelper.getStatusColor(status) + "\">" + status.toString() + "</span>";
     }
 
-    private String createResultTable(RuleResult result) {
+    /**
+     * Renders a {@link RuleResult }as table.
+     *
+     * @param result
+     *            The {@link RuleResult}.
+     * @return The rendered table.
+     */
+    private String renderResultTable(RuleResult result) {
         List<String> columnNames = result.getColumnNames();
         StringBuilder tableBuilder = new StringBuilder();
         tableBuilder.append("<table>").append('\n');
@@ -109,7 +124,14 @@ public class TreePreprocessor extends Treeprocessor {
         return tableBuilder.toString();
     }
 
-    private String createComponentDiagram(RuleResult result) {
+    /**
+     * Renders a {@link RuleResult }as PlantUML component diagram.
+     *
+     * @param result
+     *            The {@link RuleResult}.
+     * @return The rendered diagram (as image reference).
+     */
+    private String renderComponentDiagram(RuleResult result) {
         // create plantuml
         SubGraph subGraph = result.getSubGraph();
         StringBuilder plantumlBuilder = new StringBuilder();
@@ -126,11 +148,26 @@ public class TreePreprocessor extends Treeprocessor {
         plantumlBuilder.append('\n');
         plantumlBuilder.append("@enduml").append('\n');
         // render plantuml
-        ExecutableRule rule = result.getRule();
+        return renderPlantUMLDiagram(plantumlBuilder.toString(), result.getRule());
+    }
+
+    /**
+     * Renders a PlantUML diagram.
+     *
+     * @param plantuml
+     *            The diagram as {@link String} representation.
+     * @param rule
+     *            The rule that created the diagram.
+     * @return The HTML to be embedded in the document.
+     */
+    private String renderPlantUMLDiagram(String plantuml, ExecutableRule rule) {
         String fileName = rule.getId().replaceAll("\\:", "_") + ".png";
-        SourceStringReader reader = new SourceStringReader(plantumlBuilder.toString());
+        SourceStringReader reader = new SourceStringReader(plantuml.toString());
         try {
-            DiagramDescription diagramDescription = reader.outputImage(new File(reportDirectoy, fileName));
+            File file = new File(reportDirectoy, fileName);
+            reader.outputImage(file);
+            LOGGER.info("Rendered diagram for '" + rule.getId() + " to " + file.getPath());
+
         } catch (IOException e) {
             throw new IllegalStateException("Cannot create component diagram for rule " + rule);
         }
