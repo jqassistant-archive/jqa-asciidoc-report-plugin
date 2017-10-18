@@ -44,6 +44,10 @@ public class AsciidocReportPlugin implements ReportPlugin {
     private static final String CODERAY = "coderay";
     private static final String ASCIIDOCTOR_DIAGRAM = "asciidoctor-diagram";
 
+    private static final String REPORT_PROPERTY_RENDER = "render";
+    private static final String RENDER_TABLE = "table";
+    private static final String RENDER_COMPONENT_DIAGRAM = "component-diagram";
+
     private File reportDirectory;
 
     private File ruleDirectory;
@@ -86,15 +90,15 @@ public class AsciidocReportPlugin implements ReportPlugin {
         if (ruleDirectory.exists()) {
             File[] files = getAsciidocFiles();
             if (files.length > 0) {
-                LOGGER.info("Initializing Asciidoctor...");
+                LOGGER.info("Calling for the Asciidoctor...");
                 Asciidoctor asciidoctor = Asciidoctor.Factory.create();
                 asciidoctor.requireLibrary(ASCIIDOCTOR_DIAGRAM);
                 JavaExtensionRegistry extensionRegistry = asciidoctor.javaExtensionRegistry();
                 OptionsBuilder optionsBuilder = OptionsBuilder.options().mkDirs(true).baseDir(ruleDirectory).toDir(reportDirectory).backend(BACKEND_HTML5)
                         .safe(SafeMode.UNSAFE).attributes(AttributesBuilder.attributes().experimental(true).sourceHighlighter(CODERAY));
-                LOGGER.info("Using report directory " + reportDirectory.getAbsolutePath());
+                LOGGER.info("Writing to report directory " + reportDirectory.getAbsolutePath());
                 for (File file : files) {
-                    LOGGER.info("  " + file.getPath());
+                    LOGGER.info("-> " + file.getPath());
                     Document document = asciidoctor.loadFile(file, optionsBuilder.asMap());
                     extensionRegistry.includeProcessor(new IncludeProcessor(document, conceptResults, constraintResults));
                     extensionRegistry.inlineMacro(new InlineMacroProcessor());
@@ -102,7 +106,7 @@ public class AsciidocReportPlugin implements ReportPlugin {
                     asciidoctor.convertFile(file, optionsBuilder);
                     asciidoctor.unregisterAllExtensions();
                 }
-                LOGGER.info("Finished rendering.");
+                LOGGER.info("The Asciidoctor finished his work successfully.");
             }
         }
     }
@@ -157,14 +161,14 @@ public class AsciidocReportPlugin implements ReportPlugin {
         ruleResultBuilder.rule(result.getRule()).effectiveSeverity(result.getSeverity()).status(result.getStatus())
                 .columnNames(columnNames != null ? columnNames : singletonList("Empty Result"));
         Properties properties = result.getRule().getReport().getProperties();
-        String diagramType = properties.getProperty("diagram", "table");
+        String diagramType = properties.getProperty(REPORT_PROPERTY_RENDER, RENDER_TABLE);
         switch (diagramType) {
-        case "component":
+        case RENDER_COMPONENT_DIAGRAM:
             ruleResultBuilder.type(COMPONENT_DIAGRAM);
             SubGraphFactory subGraphFactory = new SubGraphFactory();
             ruleResultBuilder.subGraph(subGraphFactory.createSubGraph(result));
             break;
-        case "table":
+        case RENDER_TABLE:
             ruleResultBuilder.type(TABLE);
             for (Map<String, Object> row : result.getRows()) {
                 Map<String, List<String>> resultRow = new LinkedHashMap<>();

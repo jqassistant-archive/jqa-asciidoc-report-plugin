@@ -1,9 +1,12 @@
 package org.jqassistant.contrib.plugin.asciidocreport;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.*;
 
+import net.sourceforge.plantuml.FileFormat;
+import net.sourceforge.plantuml.FileFormatOption;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.asciidoctor.ast.AbstractBlock;
 import org.asciidoctor.ast.AbstractNode;
@@ -24,6 +27,7 @@ import net.sourceforge.plantuml.SourceStringReader;
 public class TreePreprocessor extends Treeprocessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Treeprocessor.class);
+    private static final FileFormat PLANTUML_FILE_FORMAT = FileFormat.SVG;
 
     private final Map<String, RuleResult> conceptResults;
     private final Map<String, RuleResult> constraintResults;
@@ -136,6 +140,7 @@ public class TreePreprocessor extends Treeprocessor {
         SubGraph subGraph = result.getSubGraph();
         StringBuilder plantumlBuilder = new StringBuilder();
         plantumlBuilder.append("@startuml").append('\n');
+        plantumlBuilder.append("skinparam componentStyle uml2").append('\n');
         for (Node node : getAllNodes(subGraph)) {
             plantumlBuilder.append('[').append(node.getLabel()).append("] as ").append(node.getId()).append('\n');
         }
@@ -154,25 +159,32 @@ public class TreePreprocessor extends Treeprocessor {
     /**
      * Renders a PlantUML diagram.
      *
-     * @param plantuml
+     * @param plantUML
      *            The diagram as {@link String} representation.
      * @param rule
      *            The rule that created the diagram.
      * @return The HTML to be embedded in the document.
      */
-    private String renderPlantUMLDiagram(String plantuml, ExecutableRule rule) {
-        String fileName = rule.getId().replaceAll("\\:", "_") + ".png";
-        SourceStringReader reader = new SourceStringReader(plantuml.toString());
+    private String renderPlantUMLDiagram(String plantUML, ExecutableRule rule) {
+        String fileName = rule.getId().replaceAll("\\:", "_") + PLANTUML_FILE_FORMAT.getFileSuffix();
+        SourceStringReader reader = new SourceStringReader(plantUML);
         try {
             File file = new File(reportDirectoy, fileName);
-            reader.outputImage(file);
-            LOGGER.info("Rendered diagram for '" + rule.getId() + " to " + file.getPath());
+            LOGGER.info("Rendering diagram for '" + rule.getId() + "' to " + file.getPath());
+            try (FileOutputStream os = new FileOutputStream(file)) {
+                reader.outputImage(os, new FileFormatOption(PLANTUML_FILE_FORMAT));
+            }
 
         } catch (IOException e) {
             throw new IllegalStateException("Cannot create component diagram for rule " + rule);
         }
-
-        return "<div><img src=\"" + fileName + "\"/></div>";
+        StringBuilder content = new StringBuilder();
+        content.append("<div>");
+        content.append("<a href=\"" + fileName + "\">");
+        content.append("<img src=\"" + fileName + "\"/>");
+        content.append("</a>");
+        content.append("</div>");
+        return content.toString();
     }
 
     private Collection<Node> getAllNodes(SubGraph graph) {
