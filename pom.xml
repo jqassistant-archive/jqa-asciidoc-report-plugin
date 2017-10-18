@@ -37,6 +37,7 @@
         <org.asciidoctorj.version>1.5.6</org.asciidoctorj.version>
         <org.asciidoctorj-diagram.version>1.5.4.1</org.asciidoctorj-diagram.version>
         <org.asciidoctorj-pdf.version>1.5.0-alpha.16</org.asciidoctorj-pdf.version>
+        <net.sourceforge.plantuml.version>1.2017.18</net.sourceforge.plantuml.version>
         <org.jruby-stdlib.version>9.1.13.0</org.jruby-stdlib.version>
         <org.neo4j.version>3.1.3</org.neo4j.version>
         <org.slf4j.version>1.7.12</org.slf4j.version>
@@ -141,6 +142,11 @@
                     <artifactId>jruby-complete</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>net.sourceforge.plantuml</groupId>
+            <artifactId>plantuml</artifactId>
+            <version>${net.sourceforge.plantuml.version}</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>

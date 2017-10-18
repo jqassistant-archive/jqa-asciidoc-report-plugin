@@ -1,6 +1,8 @@
 package org.jqassistant.contrib.plugin.asciidocreport;
 
 import static java.util.Collections.singletonList;
+import static org.jqassistant.contrib.plugin.asciidocreport.RuleResult.Type.COMPONENT_DIAGRAM;
+import static org.jqassistant.contrib.plugin.asciidocreport.RuleResult.Type.TABLE;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -23,6 +25,7 @@ import com.buschmais.jqassistant.core.analysis.api.rule.Group;
 import com.buschmais.jqassistant.core.report.api.ReportException;
 import com.buschmais.jqassistant.core.report.api.ReportHelper;
 import com.buschmais.jqassistant.core.report.api.ReportPlugin;
+import com.buschmais.jqassistant.core.report.api.graph.SubGraphFactory;
 import com.buschmais.jqassistant.plugin.common.api.scanner.filesystem.FilePatternMatcher;
 
 public class AsciidocReportPlugin implements ReportPlugin {
@@ -95,7 +98,7 @@ public class AsciidocReportPlugin implements ReportPlugin {
                     Document document = asciidoctor.loadFile(file, optionsBuilder.asMap());
                     extensionRegistry.includeProcessor(new IncludeProcessor(document, conceptResults, constraintResults));
                     extensionRegistry.inlineMacro(new InlineMacroProcessor());
-                    extensionRegistry.treeprocessor(new ResultTreePreprocessor(conceptResults, constraintResults));
+                    extensionRegistry.treeprocessor(new TreePreprocessor(conceptResults, constraintResults, reportDirectory));
                     asciidoctor.convertFile(file, optionsBuilder);
                     asciidoctor.unregisterAllExtensions();
                 }
@@ -148,26 +151,40 @@ public class AsciidocReportPlugin implements ReportPlugin {
         }
     }
 
-    private RuleResult getRuleResult(Result<? extends ExecutableRule> result) {
+    private RuleResult getRuleResult(Result<? extends ExecutableRule> result) throws ReportException {
         RuleResult.RuleResultBuilder ruleResultBuilder = RuleResult.builder();
         List<String> columnNames = result.getColumnNames();
         ruleResultBuilder.rule(result.getRule()).effectiveSeverity(result.getSeverity()).status(result.getStatus())
                 .columnNames(columnNames != null ? columnNames : singletonList("Empty Result"));
-        for (Map<String, Object> row : result.getRows()) {
-            Map<String, List<String>> resultRow = new LinkedHashMap<>();
-            for (Map.Entry<String, Object> rowEntry : row.entrySet()) {
-                Object value = rowEntry.getValue();
-                List<String> values = new ArrayList<>();
-                if (value instanceof Iterable<?>) {
-                    for (Object o : ((Iterable) value)) {
-                        values.add(ReportHelper.getLabel(o));
+        Properties properties = result.getRule().getReport().getProperties();
+        String diagramType = properties.getProperty("diagram", "table");
+        switch (diagramType) {
+        case "component":
+            ruleResultBuilder.type(COMPONENT_DIAGRAM);
+            SubGraphFactory subGraphFactory = new SubGraphFactory();
+            ruleResultBuilder.subGraph(subGraphFactory.createSubGraph(result));
+            break;
+        case "table":
+            ruleResultBuilder.type(TABLE);
+            for (Map<String, Object> row : result.getRows()) {
+                Map<String, List<String>> resultRow = new LinkedHashMap<>();
+                for (Map.Entry<String, Object> rowEntry : row.entrySet()) {
+                    Object value = rowEntry.getValue();
+                    List<String> values = new ArrayList<>();
+                    if (value instanceof Iterable<?>) {
+                        for (Object o : ((Iterable) value)) {
+                            values.add(ReportHelper.getLabel(o));
+                        }
+                    } else {
+                        values.add(ReportHelper.getLabel(value));
                     }
-                } else {
-                    values.add(ReportHelper.getLabel(value));
+                    resultRow.put(rowEntry.getKey(), values);
                 }
-                resultRow.put(rowEntry.getKey(), values);
+                ruleResultBuilder.row(resultRow);
             }
-            ruleResultBuilder.row(resultRow);
+            break;
+        default:
+            throw new IllegalArgumentException("Unknown diagram type '" + diagramType + "'");
         }
         return ruleResultBuilder.build();
     }
