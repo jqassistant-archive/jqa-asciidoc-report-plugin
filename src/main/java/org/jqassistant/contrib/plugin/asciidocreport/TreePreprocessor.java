@@ -1,42 +1,37 @@
 package org.jqassistant.contrib.plugin.asciidocreport;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import net.sourceforge.plantuml.FileFormat;
-import net.sourceforge.plantuml.FileFormatOption;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.asciidoctor.ast.AbstractBlock;
 import org.asciidoctor.ast.AbstractNode;
 import org.asciidoctor.ast.Document;
 import org.asciidoctor.extension.Treeprocessor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.buschmais.jqassistant.core.analysis.api.Result;
-import com.buschmais.jqassistant.core.analysis.api.rule.ExecutableRule;
 import com.buschmais.jqassistant.core.analysis.api.rule.Severity;
-import com.buschmais.jqassistant.core.report.api.graph.model.Node;
-import com.buschmais.jqassistant.core.report.api.graph.model.Relationship;
 import com.buschmais.jqassistant.core.report.api.graph.model.SubGraph;
 
-import net.sourceforge.plantuml.SourceStringReader;
+import net.sourceforge.plantuml.FileFormat;
 
 public class TreePreprocessor extends Treeprocessor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Treeprocessor.class);
-    private static final FileFormat PLANTUML_FILE_FORMAT = FileFormat.SVG;
+    public static final FileFormat PLANTUML_FILE_FORMAT = FileFormat.SVG;
 
     private final Map<String, RuleResult> conceptResults;
     private final Map<String, RuleResult> constraintResults;
-    private final File reportDirectoy;
+    private final File reportDirectory;
+    private final PlantUMLRenderer plantUMLRenderer;
 
     public TreePreprocessor(Map<String, RuleResult> conceptResults, Map<String, RuleResult> constraintResults, File reportDirectory) {
         this.conceptResults = conceptResults;
         this.constraintResults = constraintResults;
-        this.reportDirectoy = reportDirectory;
+        this.reportDirectory = reportDirectory;
+        this.plantUMLRenderer = new PlantUMLRenderer(PLANTUML_FILE_FORMAT);
     }
 
     public Document process(Document document) {
@@ -69,6 +64,7 @@ public class TreePreprocessor extends Treeprocessor {
     private List<String> renderRuleResult(RuleResult result) {
         List<String> content = new ArrayList<>();
         if (result != null) {
+            content.add("<div id=\"result(" + result.getRule().getId() + ")\">");
             Result.Status status = result.getStatus();
             switch (result.getType()) {
             case COMPONENT_DIAGRAM:
@@ -83,6 +79,7 @@ public class TreePreprocessor extends Treeprocessor {
             default:
                 throw new IllegalArgumentException("Unknown result type '" + result.getType() + "'");
             }
+            content.add("</div>");
         } else {
             content.add("Status: Not Available");
         }
@@ -138,46 +135,21 @@ public class TreePreprocessor extends Treeprocessor {
     private String renderComponentDiagram(RuleResult result) {
         // create plantuml
         SubGraph subGraph = result.getSubGraph();
-        StringBuilder plantumlBuilder = new StringBuilder();
-        plantumlBuilder.append("@startuml").append('\n');
-        plantumlBuilder.append("skinparam componentStyle uml2").append('\n');
-        for (Node node : getAllNodes(subGraph)) {
-            plantumlBuilder.append('[').append(node.getLabel()).append("] as ").append(node.getId()).append('\n');
-        }
-        plantumlBuilder.append('\n');
-        for (Relationship relationship : getAllRelationships(subGraph)) {
-            Node startNode = relationship.getStartNode();
-            Node endNode = relationship.getEndNode();
-            plantumlBuilder.append(startNode.getId()).append("-->").append(endNode.getId()).append(" : ").append(relationship.getType()).append('\n');
-        }
-        plantumlBuilder.append('\n');
-        plantumlBuilder.append("@enduml").append('\n');
-        // render plantuml
-        return renderPlantUMLDiagram(plantumlBuilder.toString(), result.getRule());
+        String fileName = result.getRule().getId().replaceAll("\\:", "_") + PLANTUML_FILE_FORMAT.getFileSuffix();
+        File file = new File(reportDirectory, fileName);
+        String plantUML = plantUMLRenderer.createComponentDiagram(subGraph);
+        plantUMLRenderer.renderDiagram(plantUML, file);
+        return renderImage(fileName);
     }
 
     /**
-     * Renders a PlantUML diagram.
+     * Embed an image with the given file name.
      *
-     * @param plantUML
-     *            The diagram as {@link String} representation.
-     * @param rule
-     *            The rule that created the diagram.
+     * @param fileName
+     *            The file name of the image to embed
      * @return The HTML to be embedded in the document.
      */
-    private String renderPlantUMLDiagram(String plantUML, ExecutableRule rule) {
-        String fileName = rule.getId().replaceAll("\\:", "_") + PLANTUML_FILE_FORMAT.getFileSuffix();
-        SourceStringReader reader = new SourceStringReader(plantUML);
-        try {
-            File file = new File(reportDirectoy, fileName);
-            LOGGER.info("Rendering diagram for '" + rule.getId() + "' to " + file.getPath());
-            try (FileOutputStream os = new FileOutputStream(file)) {
-                reader.outputImage(os, new FileFormatOption(PLANTUML_FILE_FORMAT));
-            }
-
-        } catch (IOException e) {
-            throw new IllegalStateException("Cannot create component diagram for rule " + rule);
-        }
+    private String renderImage(String fileName) {
         StringBuilder content = new StringBuilder();
         content.append("<div>");
         content.append("<a href=\"" + fileName + "\">");
@@ -185,28 +157,6 @@ public class TreePreprocessor extends Treeprocessor {
         content.append("</a>");
         content.append("</div>");
         return content.toString();
-    }
-
-    private Collection<Node> getAllNodes(SubGraph graph) {
-        Map<Long, Node> allNodes = new LinkedHashMap<>();
-        Node parentNode = graph.getParent();
-        if (parentNode != null) {
-            allNodes.put(parentNode.getId(), parentNode);
-        }
-        allNodes.putAll(graph.getNodes());
-        for (SubGraph subgraph : graph.getSubGraphs().values()) {
-            allNodes.putAll(subgraph.getNodes());
-        }
-        return allNodes.values();
-    }
-
-    private Collection<Relationship> getAllRelationships(SubGraph graph) {
-        Map<Long, Relationship> allRels = new LinkedHashMap<>();
-        allRels.putAll(graph.getRelationships());
-        for (SubGraph subgraph : graph.getSubGraphs().values()) {
-            allRels.putAll(subgraph.getRelationships());
-        }
-        return allRels.values();
     }
 
 }
