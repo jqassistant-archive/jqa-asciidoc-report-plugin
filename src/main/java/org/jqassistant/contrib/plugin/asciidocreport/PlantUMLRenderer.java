@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,9 +39,7 @@ public class PlantUMLRenderer {
             Set<String> labels = node.getLabels();
             if (!labels.isEmpty()) {
                 plantumlBuilder.append("<<");
-                for (String label : labels) {
-                    plantumlBuilder.append(label).append(' ');
-                }
+                plantumlBuilder.append(StringUtils.join(labels, " "));
                 plantumlBuilder.append(">> ");
             }
             plantumlBuilder.append("as ").append(node.getId()).append('\n');
