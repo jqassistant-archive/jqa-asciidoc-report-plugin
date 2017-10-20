@@ -125,6 +125,9 @@ RETURN
 ----
 ....
 
+NOTE: The diagrams are generated using http://plantuml.com/[PlantUML] which itself is based on http://www.graphviz.org[Graphviz].
+The latter needs to be installed and the `dot` executable must be present on the system path.
+
 == Configuration
 
 The Asciidoc Report plugin accepts several options that might be passed as report properties to jQAssistant:
