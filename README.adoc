@@ -59,7 +59,7 @@ The plugin can be enabled in a Maven based project by adding it as a dependency 
                 <dependency>                                                                                                                <!--4-->
                     <groupId>org.jqassistant.contrib.plugin</groupId>
                     <artifactId>jqassistant-asciidoc-report-plugin</artifactId>
-                    <version>1.0.0-RC2</version>
+                    <version>1.0.0-RC3</version>
                 </dependency>
             </dependencies>
         </plugin>
