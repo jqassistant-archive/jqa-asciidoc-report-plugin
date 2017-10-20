@@ -25,10 +25,10 @@ public class PlantUMLRendererTest {
 
         String componentDiagram = plantUMLRenderer.createComponentDiagram(subGraph);
 
-        assertThat(componentDiagram, containsString("[a1] <<Artifact File>> as 1"));
-        assertThat(componentDiagram, containsString("[a2] <<Artifact File>> as 2"));
-        assertThat(componentDiagram, containsString("[a3] <<Artifact File>> as 3"));
-        assertThat(componentDiagram, containsString("1-->2 : DEPENDS_ON"));
+        assertThat(componentDiagram, containsString("[a1] <<Artifact File>> as n1"));
+        assertThat(componentDiagram, containsString("[a2] <<Artifact File>> as n2"));
+        assertThat(componentDiagram, containsString("[a3] <<Artifact File>> as n3"));
+        assertThat(componentDiagram, containsString("n1 --> n2 : DEPENDS_ON"));
     }
 
     @Test
