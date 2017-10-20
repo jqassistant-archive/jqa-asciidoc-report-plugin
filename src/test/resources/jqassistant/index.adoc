@@ -23,11 +23,16 @@ MATCH (n) RETURN n as Value
 
 == Reports
 
-[[test:Report]]
+[[test:ComponentDiagram]]
 [source,cypher,role=concept,reportProperties="render=component-diagram"]
-.Report Description
+.Component Diagram Description
 ----
-MATCH (n) RETURN n as Value
+MATCH
+  (n)
+OPTIONAL MATCH
+  (n)-[d:DEPENDS_ON]->()
+RETURN
+  n as Node, d as DependsOn
 ----
 
 == Imported Rules

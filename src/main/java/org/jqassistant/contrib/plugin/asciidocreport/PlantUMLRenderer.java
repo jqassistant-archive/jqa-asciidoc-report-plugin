@@ -40,19 +40,24 @@ public class PlantUMLRenderer {
             if (!labels.isEmpty()) {
                 plantumlBuilder.append("<<");
                 plantumlBuilder.append(StringUtils.join(labels, " "));
-                plantumlBuilder.append(">> ");
+                plantumlBuilder.append(">>");
             }
-            plantumlBuilder.append("as ").append(node.getId()).append('\n');
+            plantumlBuilder.append(" as ").append(getNodeId(node)).append('\n');
         }
         plantumlBuilder.append('\n');
         for (Relationship relationship : getAllRelationships(subGraph)) {
             Node startNode = relationship.getStartNode();
             Node endNode = relationship.getEndNode();
-            plantumlBuilder.append(startNode.getId()).append("-->").append(endNode.getId()).append(" : ").append(relationship.getType()).append('\n');
+            plantumlBuilder.append(getNodeId(startNode)).append(" --> ").append(getNodeId(endNode)).append(" : ").append(relationship.getType()).append('\n');
         }
         plantumlBuilder.append('\n');
         plantumlBuilder.append("@enduml").append('\n');
         return plantumlBuilder.toString();
+    }
+
+    private String getNodeId(Node node) {
+        String id = "n" + node.getId();
+        return id.replaceAll("-", "_");
     }
 
     public void renderDiagram(String plantUML, File file) {

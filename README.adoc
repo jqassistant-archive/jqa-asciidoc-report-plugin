@@ -103,6 +103,27 @@ project specific rules
 \include::jQA:ImportedRules[]
 ....
 
+== Component Diagrams
+
+The plugin provides supports generating component diagrams from rule results.
+Therefore a report property `render=component-diagram` must be set and the result of the rule simply needs to return all required nodes and their relationships:
+
+.jqassistant/index.adoc
+....
+[[package:DependencyDiagram]]
+[source,cypher,role=concept,requiresConcepts="dependency:Package",reportProperties="render=component-diagram"]
+.Creates a diagram about dependencies between packages containing Java types (test artifacts are excluded).
+----
+MATCH
+  (artifact:Artifact)-[:CONTAINS]->(package:Package)-[:CONTAINS]->(:Type)
+WHERE
+  artifact.type <> "test-jar"
+OPTIONAL MATCH
+  (package)-[dependsOn:DEPENDS_ON]->(:Package)
+RETURN
+  package, dependsOn
+----
+....
 
 == Configuration
 
