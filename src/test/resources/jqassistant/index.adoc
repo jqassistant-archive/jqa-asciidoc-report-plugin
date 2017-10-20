@@ -21,6 +21,15 @@ MATCH (n) RETURN n as Value
 MATCH (n) RETURN n as Value
 ----
 
+== Reports
+
+[[test:Report]]
+[source,cypher,role=concept,reportProperties="render=component-diagram"]
+.Report Description
+----
+MATCH (n) RETURN n as Value
+----
+
 == Imported Rules
 
 include::jQA:ImportedRules[]
