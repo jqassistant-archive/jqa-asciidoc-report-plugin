@@ -3,7 +3,6 @@ package org.jqassistant.contrib.plugin.asciidocreport;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -34,7 +33,9 @@ public class PlantUMLRenderer {
         StringBuilder plantumlBuilder = new StringBuilder();
         plantumlBuilder.append("@startuml").append('\n');
         plantumlBuilder.append("skinparam componentStyle uml2").append('\n');
-        for (Node node : getAllNodes(subGraph)) {
+        Map<Long, Node> nodes = getNodes(subGraph);
+        Map<Long, Relationship> relationships = getRelationships(subGraph, nodes);
+        for (Node node : nodes.values()) {
             plantumlBuilder.append('[').append(node.getLabel()).append("] ");
             Set<String> labels = node.getLabels();
             if (!labels.isEmpty()) {
@@ -45,7 +46,7 @@ public class PlantUMLRenderer {
             plantumlBuilder.append(" as ").append(getNodeId(node)).append('\n');
         }
         plantumlBuilder.append('\n');
-        for (Relationship relationship : getAllRelationships(subGraph)) {
+        for (Relationship relationship : relationships.values()) {
             Node startNode = relationship.getStartNode();
             Node endNode = relationship.getEndNode();
             plantumlBuilder.append(getNodeId(startNode)).append(" --> ").append(getNodeId(endNode)).append(" : ").append(relationship.getType()).append('\n');
@@ -73,26 +74,32 @@ public class PlantUMLRenderer {
         }
     }
 
-    private Collection<Node> getAllNodes(SubGraph graph) {
-        Map<Long, Node> allNodes = new LinkedHashMap<>();
+    private Map<Long, Node> getNodes(SubGraph graph) {
+        Map<Long, Node> nodes = new LinkedHashMap<>();
         Node parentNode = graph.getParent();
         if (parentNode != null) {
-            allNodes.put(parentNode.getId(), parentNode);
+            nodes.put(parentNode.getId(), parentNode);
         }
-        allNodes.putAll(graph.getNodes());
+        nodes.putAll(graph.getNodes());
         for (SubGraph subgraph : graph.getSubGraphs().values()) {
-            allNodes.putAll(subgraph.getNodes());
+            nodes.putAll(getNodes(subgraph));
         }
-        return allNodes.values();
+        return nodes;
     }
 
-    private Collection<Relationship> getAllRelationships(SubGraph graph) {
-        Map<Long, Relationship> allRels = new LinkedHashMap<>();
-        allRels.putAll(graph.getRelationships());
-        for (SubGraph subgraph : graph.getSubGraphs().values()) {
-            allRels.putAll(subgraph.getRelationships());
+    private Map<Long, Relationship> getRelationships(SubGraph graph, Map<Long, Node> nodes) {
+        Map<Long, Relationship> relationships = new LinkedHashMap<>();
+        for (Map.Entry<Long, Relationship> entry : graph.getRelationships().entrySet()) {
+            Relationship relationship = entry.getValue();
+            // inlcude only those relationships where both start and ende node are part of the graph
+            if (nodes.containsKey(relationship.getStartNode().getId()) && nodes.containsKey(relationship.getEndNode().getId())) {
+                relationships.put(entry.getKey(), relationship);
+            }
         }
-        return allRels.values();
+        for (SubGraph subgraph : graph.getSubGraphs().values()) {
+            relationships.putAll(getRelationships(subgraph, nodes));
+        }
+        return relationships;
     }
 
 }

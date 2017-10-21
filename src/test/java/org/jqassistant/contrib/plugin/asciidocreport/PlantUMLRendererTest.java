@@ -1,8 +1,7 @@
 package org.jqassistant.contrib.plugin.asciidocreport;
 
 import static java.util.Arrays.asList;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
 import java.io.File;
@@ -29,6 +28,8 @@ public class PlantUMLRendererTest {
         assertThat(componentDiagram, containsString("[a2] <<Artifact File>> as n2"));
         assertThat(componentDiagram, containsString("[a3] <<Artifact File>> as n3"));
         assertThat(componentDiagram, containsString("n1 --> n2 : DEPENDS_ON"));
+        assertThat(componentDiagram, not(containsString("[a4] <<Artifact File>> as n4")));
+        assertThat(componentDiagram, not(containsString("n1 --> n4 : DEPENDS_ON")));
     }
 
     @Test
@@ -48,12 +49,15 @@ public class PlantUMLRendererTest {
         Node a1 = getNode(1, "a1", "Artifact", "File");
         Node a2 = getNode(2, "a2", "Artifact", "File");
         Node a3 = getNode(3, "a3", "Artifact", "File");
+        Node a4 = getNode(4, "a4", "Artifact", "File");
         Relationship a1DependsOnA3 = getRelationship(1, a1, "DEPENDS_ON", a2);
+        Relationship a1DependsOnA4 = getRelationship(2, a1, "DEPENDS_ON", a4);
         SubGraph subGraph = new SubGraph();
         subGraph.getNodes().put(a1.getId(), a1);
         subGraph.getNodes().put(a2.getId(), a2);
         subGraph.getNodes().put(a3.getId(), a3);
         subGraph.getRelationships().put(a1DependsOnA3.getId(), a1DependsOnA3);
+        subGraph.getRelationships().put(a1DependsOnA4.getId(), a1DependsOnA4);
         return subGraph;
     }
 
