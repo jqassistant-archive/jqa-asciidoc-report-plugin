@@ -33,6 +33,38 @@ public class PlantUMLRendererTest {
     }
 
     @Test
+    public void componentDiagramInFolder() {
+        Node rootFolder = getNode(-1, "a0", "Artifact", "File", "Container");
+        Node a1 = getNode(1, "a1", "Artifact", "File");
+        SubGraph rootGraph = new SubGraph();
+        rootGraph.setId(-1);
+        rootGraph.getNodes().put(a1.getId(), a1);
+        rootGraph.getNodes().put(rootFolder.getId(), rootFolder); // current behavior of SubGraphFactory
+        rootGraph.setParent(rootFolder);
+        Node nestedFolder = getNode(2, "a2", "Artifact", "File", "Container");
+        Node a2 = getNode(3, "a3", "Artifact", "File");
+        SubGraph nestedGraph = new SubGraph();
+        nestedGraph.setId(-2);
+        nestedGraph.setParent(nestedFolder);
+        nestedGraph.getNodes().put(nestedFolder.getId(), nestedFolder);
+        nestedGraph.getNodes().put(a2.getId(), a2);
+        Relationship a2DependsOnA1 = getRelationship(1, a2, "DEPENDS_ON", a1);
+        nestedGraph.getRelationships().put(a2DependsOnA1.getId(), a2DependsOnA1);
+
+        rootGraph.getSubGraphs().put(nestedGraph.getId(), nestedGraph);
+
+        String componentDiagram = plantUMLRenderer.createComponentDiagram(rootGraph);
+
+        assertThat(componentDiagram, containsString("folder \"a0\" {\n" +
+            "    [a1] <<Artifact File>> as n1\n" +
+            "    folder \"a2\" {\n" +
+            "        [a3] <<Artifact File>> as n3\n" +
+            "    }\n" +
+            "}"));
+        assertThat(componentDiagram, containsString("n3 --> n1 : DEPENDS_ON"));
+    }
+
+    @Test
     public void renderDiagram() {
         File file = new File("target/test.plantuml.svg");
         if (file.exists()) {
@@ -50,13 +82,13 @@ public class PlantUMLRendererTest {
         Node a2 = getNode(2, "a2", "Artifact", "File");
         Node a3 = getNode(3, "a3", "Artifact", "File");
         Node a4 = getNode(4, "a4", "Artifact", "File");
-        Relationship a1DependsOnA3 = getRelationship(1, a1, "DEPENDS_ON", a2);
+        Relationship a1DependsOnA2 = getRelationship(1, a1, "DEPENDS_ON", a2);
         Relationship a1DependsOnA4 = getRelationship(2, a1, "DEPENDS_ON", a4);
         SubGraph subGraph = new SubGraph();
         subGraph.getNodes().put(a1.getId(), a1);
         subGraph.getNodes().put(a2.getId(), a2);
         subGraph.getNodes().put(a3.getId(), a3);
-        subGraph.getRelationships().put(a1DependsOnA3.getId(), a1DependsOnA3);
+        subGraph.getRelationships().put(a1DependsOnA2.getId(), a1DependsOnA2);
         subGraph.getRelationships().put(a1DependsOnA4.getId(), a1DependsOnA4);
         return subGraph;
     }
