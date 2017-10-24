@@ -76,9 +76,9 @@ public class TreePreprocessor extends Treeprocessor {
             case TABLE:
                 content.add("<div>");
                 content.add(renderStatusContent(status));
-                content.add("</div>");
                 Severity severity = result.getRule().getSeverity();
                 content.add("Severity: " + severity.getInfo(result.getEffectiveSeverity()));
+                content.add("</div>");
                 content.add(renderResultTable(result));
                 break;
             default:
