@@ -105,6 +105,7 @@ public class AsciidocReportPluginTest {
         assertThat(html, containsString("<td>\nFoo\nBar\n</td>"));
         // test:ComponentDiagram
         assertThat(new File(reportDirectory, "test_ComponentDiagram.svg").exists(), equalTo(true));
+        assertThat(new File(reportDirectory, "test_ComponentDiagram.plantuml").exists(), equalTo(true));
         assertThat(html, containsString("<a href=\"test_ComponentDiagram.svg\"><img src=\"test_ComponentDiagram.svg\"/></a>"));
         // test:ImportedConcept
         assertThat(html, containsString("Status: <span class=\"red\">FAILURE</span>"));

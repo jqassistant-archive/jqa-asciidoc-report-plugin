@@ -106,12 +106,17 @@ project specific rules
 == Component Diagrams
 
 The plugin provides supports generating component diagrams from rule results.
-Therefore a report property `render=component-diagram` must be set and the result of the rule simply needs to return all required nodes and their relationships:
+
+NOTE: This feature is based on http://plantuml.com/[PlantUML] which itself relies on http://www.graphviz.org[Graphviz].
+The latter needs to be installed and the `dot` executable must be present on the system path.
+
+To activate diagram rendering a report property `render=component-diagram` must be set.
+The result of the rule simply needs to return all required nodes and their relationships:
 
 .jqassistant/index.adoc
 ....
 [[package:DependencyDiagram]]
-[source,cypher,role=concept,requiresConcepts="dependency:Package",reportProperties="render=component-diagram"]
+[source,cypher,role=concept,requiresConcepts="dependency:Package",reportProperties="render=component-diagram"] // (1)
 .Creates a diagram about dependencies between packages containing Java types (test artifacts are excluded).
 ----
 MATCH
@@ -121,12 +126,41 @@ WHERE
 OPTIONAL MATCH
   (package)-[dependsOn:DEPENDS_ON]->(:Package)
 RETURN
-  package, dependsOn
+  package, dependsOn                                                                                           // (2)
 ----
 ....
+(1) The report property `render` is set to `component-diagram` for activating the PlantUML support.
+(2) The packages are returned as nodes and their dependencies (dependsOn) as relationships.
 
-NOTE: The diagrams are generated using http://plantuml.com/[PlantUML] which itself is based on http://www.graphviz.org[Graphviz].
-The latter needs to be installed and the `dot` executable must be present on the system path.
+The result might also specify graph-alike structures which will be rendered as PlantUML folders.
+The following example therefore uses a modified return clause:
+
+.jqassistant/index.adoc
+....
+[[package:DependencyPerArtifactDiagram]]
+[source,cypher,role=concept,requiresConcepts="dependency:Package",reportProperties="render=component-diagram"]
+.Creates a diagram about dependencies between packages containing Java types (per artifact, test artifacts are excluded).
+----
+MATCH
+  (artifact:Artifact)-[:CONTAINS]->(package:Package)-[:CONTAINS]->(:Type)
+WHERE
+  artifact.type <> "test-jar"
+OPTIONAL MATCH
+  (package)-[dependsOn:DEPENDS_ON]->(:Package)
+RETURN
+  {                                   // (1)
+    role : "graph",                   // (2)
+    parent : artifact,                // (3)
+    nodes : collect(package),         // (4)
+    relationships: collect(dependsOn) // (5)
+  }
+----
+....
+<1> Instead of nodes and relations a map-like structure is returned
+<2> `role` determines that the map shall be interpreted as graph containing nodes and relationships
+<3> `parent` specifies the node that shall be rendered as folder, i.e. the container of nodes
+<4> `nodes` are the nodes to be included in the folder
+<5> `relationships` are the relationships between the nodes, they may reference nodes of other parents/folders
 
 == Configuration
 
@@ -152,4 +186,11 @@ Please report any issues https://github.com/jqassistant-contrib/jqassistant-asci
 
 == Acknowledgements
 
-The plugin is based on https://asciidoctor.org[Asciidoctor].
+The plugin could not provide its functionality without the support of the following open source projects:
+
+* https://asciidoctor.org[Asciidoctor]
+* https://plantuml.com/[PlantUML]
+* https://neo4j.org[Neo4j]
+* https://jqassistant.org[jQAssistant]
+
+

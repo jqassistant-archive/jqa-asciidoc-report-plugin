@@ -21,6 +21,9 @@ import net.sourceforge.plantuml.FileFormat;
 import net.sourceforge.plantuml.FileFormatOption;
 import net.sourceforge.plantuml.SourceStringReader;
 
+/**
+ * A renderer for PlantUML diagrams.
+ */
 public class PlantUMLRenderer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PlantUMLRenderer.class);
@@ -31,6 +34,18 @@ public class PlantUMLRenderer {
         this.fileFormat = fileFormat;
     }
 
+    /**
+     * Creates a component diagram from the given {@link SubGraph}.
+     *
+     * <p>
+     * The {@link SubGraph} may contain {@link Node}s, {@link Relationship}s and
+     * {@link SubGraph}s. The latter are rendered as folders.
+     * </p>
+     *
+     * @param subGraph
+     *            The {@link SubGraph}.
+     * @return The {@link String} representation of the PlantUML diagram.
+     */
     public String createComponentDiagram(SubGraph subGraph) {
         StringBuilder plantumlBuilder = new StringBuilder();
         plantumlBuilder.append("@startuml").append('\n');
@@ -42,23 +57,47 @@ public class PlantUMLRenderer {
         return plantumlBuilder.toString();
     }
 
+    /**
+     * Render a {@link SubGraph}.
+     *
+     * @param graph
+     *            The {@link SubGraph}.
+     * @param plantUMLBuilder
+     *            The {@link StringBuilder} containing the PlantUML diagram.
+     * @param level
+     *            The current folder level.
+     * @return A {@link Map} of all {@link Node}s in the {@link SubGraph} identified
+     *         by their ids.
+     */
     private Map<Long, Node> render(SubGraph graph, StringBuilder plantUMLBuilder, int level) {
         Map<Long, Node> nodes = new LinkedHashMap<>();
         Node parentNode = graph.getParent();
         if (parentNode != null) {
             nodes.put(parentNode.getId(), parentNode);
             plantUMLBuilder.append(indent(level)).append("folder ").append('"').append(parentNode.getLabel()).append('"').append(" {\n");
-            renderNodes(graph, plantUMLBuilder, level + 1, nodes);
-            renderSubGraphs(graph, plantUMLBuilder, level + 1, nodes);
+            nodes.putAll(renderNodes(graph, plantUMLBuilder, level + 1));
+            nodes.putAll(renderSubGraphs(graph, plantUMLBuilder, level + 1));
             plantUMLBuilder.append(indent(level)).append("}\n");
         } else {
-            renderNodes(graph, plantUMLBuilder, level, nodes);
-            renderSubGraphs(graph, plantUMLBuilder, level, nodes);
+            nodes.putAll(renderNodes(graph, plantUMLBuilder, level));
+            nodes.putAll(renderSubGraphs(graph, plantUMLBuilder, level));
         }
         return nodes;
     }
 
-    private void renderNodes(SubGraph graph, StringBuilder plantUMLBuilder, int level, Map<Long, Node> nodes) {
+    /**
+     * Render the {@link Node}s of a {@link SubGraph}.
+     *
+     * @param graph
+     *            The {@link SubGraph}.
+     * @param plantUMLBuilder
+     *            The {@link StringBuilder} containing the PlantUML diagram.
+     * @param level
+     *            The current folder level.
+     * @return The {@link Map} of rendered {@link Node}s.
+     */
+    private Map<Long, Node> renderNodes(SubGraph graph, StringBuilder plantUMLBuilder, int level) {
+        Map<Long, Node> nodes = new LinkedHashMap<>();
         for (Node node : graph.getNodes().values()) {
             if (!node.equals(graph.getParent())) {
                 nodes.put(node.getId(), node);
@@ -72,35 +111,109 @@ public class PlantUMLRenderer {
                 plantUMLBuilder.append(" as ").append(getNodeId(node)).append('\n');
             }
         }
+        return nodes;
     }
 
-    private void renderSubGraphs(SubGraph graph, StringBuilder plantUMLBuilder, int level, Map<Long, Node> nodes) {
+    /**
+     * Render the {@link SubGraph}s of a {@link SubGraph}.
+     *
+     * @param graph
+     *            The {@link SubGraph}.
+     * @param plantUMLBuilder
+     *            The {@link StringBuilder} containing the PlantUML diagram.
+     * @param level
+     *            The current folder level.
+     * @return The {@link Map} of rendered {@link Node}s.
+     */
+    private Map<Long, Node> renderSubGraphs(SubGraph graph, StringBuilder plantUMLBuilder, int level) {
+        Map<Long, Node> nodes = new LinkedHashMap<>();
         for (SubGraph subgraph : graph.getSubGraphs().values()) {
             nodes.putAll(render(subgraph, plantUMLBuilder, level + 1));
         }
+        return nodes;
     }
 
+    /**
+     * Creates a white-space based indent from the given folder level.
+     *
+     * @param level
+     *            The level.
+     * @return The indent.
+     */
     private String indent(int level) {
         char[] indent = new char[level * 2];
         fill(indent, ' ');
         return new String(indent);
     }
 
-    private void renderRelationships(SubGraph subGraph, StringBuilder plantumlBuilder, Map<Long, Node> nodes) {
+    /**
+     * Render the relationships of a {@link SubGraph}.
+     *
+     * @param subGraph
+     *            The {@link SubGraph}, for PlantUML the root graph.
+     * @param plantUMLBuilder
+     *            The {@link StringBuilder} containing the PlantUML diagram.
+     * @param nodes
+     *            The {@link Node}s of the graph (including all {@link SubGraph}s.
+     */
+    private void renderRelationships(SubGraph subGraph, StringBuilder plantUMLBuilder, Map<Long, Node> nodes) {
         Map<Long, Relationship> relationships = getRelationships(subGraph, nodes);
         for (Relationship relationship : relationships.values()) {
             Node startNode = relationship.getStartNode();
             Node endNode = relationship.getEndNode();
-            plantumlBuilder.append(getNodeId(startNode)).append(" --> ").append(getNodeId(endNode)).append(" : ").append(relationship.getType()).append('\n');
+            plantUMLBuilder.append(getNodeId(startNode)).append(" --> ").append(getNodeId(endNode)).append(" : ").append(relationship.getType()).append('\n');
         }
-        plantumlBuilder.append('\n');
+        plantUMLBuilder.append('\n');
     }
 
+    /**
+     * Generate a unique id {@link String} for a {@link Node}.
+     *
+     * @param node
+     *            The {@link Node}.
+     * @return The id.
+     */
     private String getNodeId(Node node) {
         String id = "n" + node.getId();
         return id.replaceAll("-", "_");
     }
 
+    /**
+     * Collect all {@link Relationship}s of a {@link SubGraph} and all its children.
+     *
+     * <p>
+     * Only those {@link Relationship}s are considered where both start and end
+     * {@link Node} are also part of the {@link SubGraph} and its children.
+     * </p>
+     *
+     * @param graph
+     *            The {@link SubGraph}.
+     * @param nodes
+     *            The {@link Node}s of the SubGraph and its children.
+     * @return A {@link Map} of {@link Relationship}s idendified by their ids.
+     */
+    private Map<Long, Relationship> getRelationships(SubGraph graph, Map<Long, Node> nodes) {
+        Map<Long, Relationship> relationships = new LinkedHashMap<>();
+        for (Map.Entry<Long, Relationship> entry : graph.getRelationships().entrySet()) {
+            Relationship relationship = entry.getValue();
+            if (nodes.containsKey(relationship.getStartNode().getId()) && nodes.containsKey(relationship.getEndNode().getId())) {
+                relationships.put(entry.getKey(), relationship);
+            }
+        }
+        for (SubGraph subgraph : graph.getSubGraphs().values()) {
+            relationships.putAll(getRelationships(subgraph, nodes));
+        }
+        return relationships;
+    }
+
+    /**
+     * Render a diagram given as {@link String} to a {@link File}.
+     *
+     * @param plantUML
+     *            The diagram.
+     * @param file
+     *            The {@link File}.
+     */
     public void renderDiagram(String plantUML, File file) {
         SourceStringReader reader = new SourceStringReader(plantUML);
         try {
@@ -113,21 +226,4 @@ public class PlantUMLRenderer {
             throw new IllegalStateException("Cannot create component diagram for file " + file.getPath());
         }
     }
-
-    private Map<Long, Relationship> getRelationships(SubGraph graph, Map<Long, Node> nodes) {
-        Map<Long, Relationship> relationships = new LinkedHashMap<>();
-        for (Map.Entry<Long, Relationship> entry : graph.getRelationships().entrySet()) {
-            Relationship relationship = entry.getValue();
-            // inlcude only those relationships where both start and ende node are part of
-            // the graph
-            if (nodes.containsKey(relationship.getStartNode().getId()) && nodes.containsKey(relationship.getEndNode().getId())) {
-                relationships.put(entry.getKey(), relationship);
-            }
-        }
-        for (SubGraph subgraph : graph.getSubGraphs().values()) {
-            relationships.putAll(getRelationships(subgraph, nodes));
-        }
-        return relationships;
-    }
-
 }

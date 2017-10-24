@@ -1,11 +1,13 @@
 package org.jqassistant.contrib.plugin.asciidocreport;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.asciidoctor.ast.AbstractBlock;
 import org.asciidoctor.ast.AbstractNode;
@@ -13,6 +15,7 @@ import org.asciidoctor.ast.Document;
 import org.asciidoctor.extension.Treeprocessor;
 
 import com.buschmais.jqassistant.core.analysis.api.Result;
+import com.buschmais.jqassistant.core.analysis.api.rule.ExecutableRule;
 import com.buschmais.jqassistant.core.analysis.api.rule.Severity;
 import com.buschmais.jqassistant.core.report.api.graph.model.SubGraph;
 
@@ -135,13 +138,34 @@ public class TreePreprocessor extends Treeprocessor {
      * @return The rendered diagram (as image reference).
      */
     private String renderComponentDiagram(RuleResult result) {
-        // create plantuml
+        // create PlantUML diagram
         SubGraph subGraph = result.getSubGraph();
-        String fileName = result.getRule().getId().replaceAll("\\:", "_") + PLANTUML_FILE_FORMAT.getFileSuffix();
-        File file = new File(reportDirectory, fileName);
         String plantUML = plantUMLRenderer.createComponentDiagram(subGraph);
+        ExecutableRule rule = result.getRule();
+        return storeDiagram(plantUML, rule);
+    }
+
+    /**
+     * Writes the a diagram as PlantUML and rendered image.
+     *
+     * @param plantUML
+     *            The PlantUML diagram.
+     * @param rule
+     *            The {@link ExecutableRule} that created the diagram.
+     * @return The HTML to be embedded in the document.
+     */
+    private String storeDiagram(String plantUML, ExecutableRule rule) {
+        String diagramFileNamePrefix = rule.getId().replaceAll("\\:", "_");
+        File plantUMLFile = new File(reportDirectory, diagramFileNamePrefix + ".plantuml");
+        try {
+            FileUtils.writeStringToFile(plantUMLFile, plantUML);
+        } catch (IOException e) {
+            throw new IllegalStateException("Cannot write PlantUML diagram to " + plantUMLFile.getPath(), e);
+        }
+        String diagramFileName = diagramFileNamePrefix + PLANTUML_FILE_FORMAT.getFileSuffix();
+        File file = new File(reportDirectory, diagramFileName);
         plantUMLRenderer.renderDiagram(plantUML, file);
-        return renderImage(fileName);
+        return renderImage(diagramFileName);
     }
 
     /**
@@ -160,5 +184,4 @@ public class TreePreprocessor extends Treeprocessor {
         content.append("</div>");
         return content.toString();
     }
-
 }

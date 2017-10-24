@@ -14,6 +14,9 @@ import com.buschmais.jqassistant.core.report.api.graph.model.SubGraph;
 
 import net.sourceforge.plantuml.FileFormat;
 
+/**
+ * Tests for the {@link PlantUMLRenderer}.
+ */
 public class PlantUMLRendererTest {
 
     private PlantUMLRenderer plantUMLRenderer = new PlantUMLRenderer(FileFormat.SVG);
@@ -50,17 +53,12 @@ public class PlantUMLRendererTest {
         nestedGraph.getNodes().put(a2.getId(), a2);
         Relationship a2DependsOnA1 = getRelationship(1, a2, "DEPENDS_ON", a1);
         nestedGraph.getRelationships().put(a2DependsOnA1.getId(), a2DependsOnA1);
-
         rootGraph.getSubGraphs().put(nestedGraph.getId(), nestedGraph);
 
         String componentDiagram = plantUMLRenderer.createComponentDiagram(rootGraph);
 
-        assertThat(componentDiagram, containsString("folder \"a0\" {\n" +
-            "    [a1] <<Artifact File>> as n1\n" +
-            "    folder \"a2\" {\n" +
-            "        [a3] <<Artifact File>> as n3\n" +
-            "    }\n" +
-            "}"));
+        assertThat(componentDiagram, containsString("folder \"a0\" {\n" + "    [a1] <<Artifact File>> as n1\n" + "    folder \"a2\" {\n"
+                + "        [a3] <<Artifact File>> as n3\n" + "    }\n" + "}"));
         assertThat(componentDiagram, containsString("n3 --> n1 : DEPENDS_ON"));
     }
 
