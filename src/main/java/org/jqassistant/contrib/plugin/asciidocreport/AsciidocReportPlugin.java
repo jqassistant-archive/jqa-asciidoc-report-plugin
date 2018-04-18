@@ -1,6 +1,8 @@
 package org.jqassistant.contrib.plugin.asciidocreport;
 
 import static java.util.Collections.singletonList;
+import static org.asciidoctor.AttributesBuilder.attributes;
+import static org.asciidoctor.OptionsBuilder.options;
 import static org.jqassistant.contrib.plugin.asciidocreport.RuleResult.Type.COMPONENT_DIAGRAM;
 import static org.jqassistant.contrib.plugin.asciidocreport.RuleResult.Type.TABLE;
 
@@ -94,8 +96,9 @@ public class AsciidocReportPlugin implements ReportPlugin {
                 Asciidoctor asciidoctor = Asciidoctor.Factory.create();
                 asciidoctor.requireLibrary(ASCIIDOCTOR_DIAGRAM);
                 JavaExtensionRegistry extensionRegistry = asciidoctor.javaExtensionRegistry();
-                OptionsBuilder optionsBuilder = OptionsBuilder.options().mkDirs(true).baseDir(ruleDirectory).toDir(reportDirectory).backend(BACKEND_HTML5)
-                        .safe(SafeMode.UNSAFE).attributes(AttributesBuilder.attributes().experimental(true).sourceHighlighter(CODERAY));
+                OptionsBuilder optionsBuilder = options().mkDirs(true).baseDir(ruleDirectory).toDir(reportDirectory).backend(BACKEND_HTML5)
+                        .safe(SafeMode.UNSAFE).attributes(attributes().experimental(true).sourceHighlighter(CODERAY));
+                LOGGER.info("Using Asciidoctor " + asciidoctor.asciidoctorVersion());
                 LOGGER.info("Writing to report directory " + reportDirectory.getAbsolutePath());
                 for (File file : files) {
                     LOGGER.info("-> " + file.getPath());
