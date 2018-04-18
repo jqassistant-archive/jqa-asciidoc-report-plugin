@@ -1,23 +1,8 @@
 package org.jqassistant.contrib.plugin.asciidocreport;
 
-import static java.util.Collections.singletonList;
-import static org.asciidoctor.AttributesBuilder.attributes;
-import static org.asciidoctor.OptionsBuilder.options;
-import static org.jqassistant.contrib.plugin.asciidocreport.RuleResult.Type.COMPONENT_DIAGRAM;
-import static org.jqassistant.contrib.plugin.asciidocreport.RuleResult.Type.TABLE;
-
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.*;
-
-import org.asciidoctor.Asciidoctor;
-import org.asciidoctor.AttributesBuilder;
-import org.asciidoctor.OptionsBuilder;
-import org.asciidoctor.SafeMode;
-import org.asciidoctor.ast.Document;
-import org.asciidoctor.extension.JavaExtensionRegistry;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.buschmais.jqassistant.core.analysis.api.Result;
 import com.buschmais.jqassistant.core.analysis.api.rule.Concept;
@@ -28,7 +13,21 @@ import com.buschmais.jqassistant.core.report.api.ReportException;
 import com.buschmais.jqassistant.core.report.api.ReportHelper;
 import com.buschmais.jqassistant.core.report.api.ReportPlugin;
 import com.buschmais.jqassistant.core.report.api.graph.SubGraphFactory;
+import com.buschmais.jqassistant.core.shared.asciidoc.AsciidoctorFactory;
 import com.buschmais.jqassistant.plugin.common.api.scanner.filesystem.FilePatternMatcher;
+import org.asciidoctor.Asciidoctor;
+import org.asciidoctor.OptionsBuilder;
+import org.asciidoctor.SafeMode;
+import org.asciidoctor.ast.Document;
+import org.asciidoctor.extension.JavaExtensionRegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static java.util.Collections.singletonList;
+import static org.asciidoctor.AttributesBuilder.attributes;
+import static org.asciidoctor.OptionsBuilder.options;
+import static org.jqassistant.contrib.plugin.asciidocreport.RuleResult.Type.COMPONENT_DIAGRAM;
+import static org.jqassistant.contrib.plugin.asciidocreport.RuleResult.Type.TABLE;
 
 public class AsciidocReportPlugin implements ReportPlugin {
 
@@ -62,7 +61,7 @@ public class AsciidocReportPlugin implements ReportPlugin {
     private Map<String, RuleResult> constraintResults;
 
     @Override
-    public void initialize() throws ReportException {
+    public void initialize() {
     }
 
     @Override
@@ -82,24 +81,22 @@ public class AsciidocReportPlugin implements ReportPlugin {
     }
 
     @Override
-    public void begin() throws ReportException {
+    public void begin() {
         conceptResults = new HashMap<>();
         constraintResults = new HashMap<>();
     }
 
     @Override
-    public void end() throws ReportException {
+    public void end() {
         if (ruleDirectory.exists()) {
             File[] files = getAsciidocFiles();
             if (files.length > 0) {
                 LOGGER.info("Calling for the Asciidoctor...");
-                Asciidoctor asciidoctor = Asciidoctor.Factory.create();
-                asciidoctor.requireLibrary(ASCIIDOCTOR_DIAGRAM);
-                JavaExtensionRegistry extensionRegistry = asciidoctor.javaExtensionRegistry();
+                Asciidoctor asciidoctor = AsciidoctorFactory.getAsciidoctor();
                 OptionsBuilder optionsBuilder = options().mkDirs(true).baseDir(ruleDirectory).toDir(reportDirectory).backend(BACKEND_HTML5)
                         .safe(SafeMode.UNSAFE).attributes(attributes().experimental(true).sourceHighlighter(CODERAY));
-                LOGGER.info("Using Asciidoctor " + asciidoctor.asciidoctorVersion());
                 LOGGER.info("Writing to report directory " + reportDirectory.getAbsolutePath());
+                JavaExtensionRegistry extensionRegistry = asciidoctor.javaExtensionRegistry();
                 for (File file : files) {
                     LOGGER.info("-> " + file.getPath());
                     Document document = asciidoctor.loadFile(file, optionsBuilder.asMap());
@@ -125,27 +122,27 @@ public class AsciidocReportPlugin implements ReportPlugin {
     }
 
     @Override
-    public void beginConcept(Concept concept) throws ReportException {
+    public void beginConcept(Concept concept) {
     }
 
     @Override
-    public void endConcept() throws ReportException {
+    public void endConcept() {
     }
 
     @Override
-    public void beginGroup(Group group) throws ReportException {
+    public void beginGroup(Group group) {
     }
 
     @Override
-    public void endGroup() throws ReportException {
+    public void endGroup() {
     }
 
     @Override
-    public void beginConstraint(Constraint constraint) throws ReportException {
+    public void beginConstraint(Constraint constraint) {
     }
 
     @Override
-    public void endConstraint() throws ReportException {
+    public void endConstraint() {
     }
 
     @Override

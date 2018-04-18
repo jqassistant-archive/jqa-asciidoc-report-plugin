@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.jqassistant.contrib.common</groupId>
         <artifactId>parent</artifactId>
-        <version>1.0.0</version>
+        <version>1.1.0</version>
     </parent>
 
     <groupId>org.jqassistant.contrib.plugin</groupId>
@@ -32,14 +32,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <com.buschmais.jqassistant.plugin.version>1.3</com.buschmais.jqassistant.plugin.version>
-        <com.buschmais.xo.version>0.8.1</com.buschmais.xo.version>
-        <org.asciidoctorj.version>1.5.6</org.asciidoctorj.version>
-        <org.asciidoctorj-diagram.version>1.5.4.1</org.asciidoctorj-diagram.version>
-        <org.asciidoctorj-pdf.version>1.5.0-alpha.16</org.asciidoctorj-pdf.version>
-        <net.sourceforge.plantuml.version>1.2017.18</net.sourceforge.plantuml.version>
-        <org.jruby-stdlib.version>9.1.13.0</org.jruby-stdlib.version>
-        <org.neo4j.version>3.1.3</org.neo4j.version>
+        <com.buschmais.jqassistant.version>1.4.0-SNAPSHOT</com.buschmais.jqassistant.version>
+        <com.buschmais.jqassistant.plugin.version>1.4-SNAPSHOT</com.buschmais.jqassistant.plugin.version>
         <org.slf4j.version>1.7.12</org.slf4j.version>
         <org.jsoup.version>1.10.2</org.jsoup.version>
     </properties>
@@ -68,18 +62,23 @@
                 <scope>import</scope>
             </dependency>
             <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>1.16.20</version>
+                <scope>provided</scope>
+            </dependency>            <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
                 <version>${org.slf4j.version}</version>
                 <scope>provided</scope>
             </dependency>
+            <!-- unit tests -->
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-simple</artifactId>
                 <version>${org.slf4j.version}</version>
                 <scope>test</scope>
             </dependency>
-            <!-- unit tests -->
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
@@ -92,19 +91,20 @@
                 <version>1.10.19</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>org.jsoup</groupId>
+                <artifactId>jsoup</artifactId>
+                <version>${org.jsoup.version}</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
     <dependencies>
         <dependency>
-            <groupId>org.jruby</groupId>
-            <artifactId>jruby-core</artifactId>
-            <version>${org.jruby-stdlib.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jruby</groupId>
-            <artifactId>jruby-stdlib</artifactId>
-            <version>${org.jruby-stdlib.version}</version>
+            <groupId>com.buschmais.jqassistant.core</groupId>
+            <artifactId>shared</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.buschmais.jqassistant.core</groupId>
@@ -117,42 +117,8 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.asciidoctor</groupId>
-            <artifactId>asciidoctorj</artifactId>
-            <version>${org.asciidoctorj.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.jruby</groupId>
-                    <artifactId>jruby-complete</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.asciidoctor</groupId>
-            <artifactId>asciidoctorj-diagram</artifactId>
-            <version>${org.asciidoctorj-diagram.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.asciidoctor</groupId>
-            <artifactId>asciidoctorj-pdf</artifactId>
-            <version>${org.asciidoctorj-pdf.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.jruby</groupId>
-                    <artifactId>jruby-complete</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>net.sourceforge.plantuml</groupId>
-            <artifactId>plantuml</artifactId>
-            <version>${net.sourceforge.plantuml.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.16.18</version>
-            <scope>provided</scope>
         </dependency>
         <!-- unit tests -->
         <dependency>
@@ -170,8 +136,6 @@
         <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
-            <version>${org.jsoup.version}</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 
