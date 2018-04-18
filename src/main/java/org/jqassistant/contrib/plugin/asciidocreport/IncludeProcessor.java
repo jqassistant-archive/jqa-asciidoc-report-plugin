@@ -112,7 +112,7 @@ public class IncludeProcessor extends org.asciidoctor.extension.IncludeProcessor
     }
 
     private String escape(String content) {
-        return content.replace("\n", " ");
+        return content.trim().replace("\n", " ");
     }
 
 }
