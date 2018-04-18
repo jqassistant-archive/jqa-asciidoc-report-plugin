@@ -75,7 +75,7 @@ public class AsciidocReportPluginTest {
         diagramRow2.put("DependsOn", null);
         diagramRows.add(diagramRow2);
 
-        processRule(plugin, componentDiagram, new Result<>(componentDiagram, Result.Status.SUCCESS, Severity.MINOR, asList("Node", "DependsOn"), diagramRows));
+        processRule(plugin, componentDiagram, new Result<>(componentDiagram, Result.Status.SUCCESS, Severity.INFO, asList("Node", "DependsOn"), diagramRows));
 
         Concept importedConcept = ruleSet.getConceptBucket().getById("test:ImportedConcept");
         List<Map<String, Object>> importedConceptRows = new ArrayList<>();
@@ -104,6 +104,7 @@ public class AsciidocReportPluginTest {
         assertThat(html, containsString("<th>Value</th>"));
         assertThat(html, containsString("<td>\nFoo\nBar\n</td>"));
         // test:ComponentDiagram
+        assertThat(html, containsString("Severity: INFO (from MINOR)"));
         assertThat(new File(reportDirectory, "test_ComponentDiagram.svg").exists(), equalTo(true));
         assertThat(new File(reportDirectory, "test_ComponentDiagram.plantuml").exists(), equalTo(true));
         assertThat(html, containsString("<a href=\"test_ComponentDiagram.svg\"><img src=\"test_ComponentDiagram.svg\"/></a>"));
@@ -156,7 +157,7 @@ public class AsciidocReportPluginTest {
         assertThat(rows.size(), equalTo(3));
         verifyColumns(rows.get(0), "test:ImportedConcept", "Imported Concept", "MINOR", "FAILURE", "red");
         verifyColumns(rows.get(1), "test:Concept", "Concept Description", "MAJOR (from MINOR)", "SUCCESS", "green");
-        verifyColumns(rows.get(2), "test:ComponentDiagram", "Component Diagram Description", "MINOR", "SUCCESS", "green");
+        verifyColumns(rows.get(2), "test:ComponentDiagram", "Component Diagram Description", "INFO (from MINOR)", "SUCCESS", "green");
     }
 
     private void verifyColumns(Element row, String expectedId, String expectedDescription, String expectedSeverity, String expectedStatus,

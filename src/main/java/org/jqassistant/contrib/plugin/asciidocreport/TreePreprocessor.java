@@ -69,16 +69,18 @@ public class TreePreprocessor extends Treeprocessor {
         if (result != null) {
             content.add("<div id=\"result(" + result.getRule().getId() + ")\">");
             Result.Status status = result.getStatus();
+            content.add("<div class=\"paragraph\">");
+            content.add("<p>");
+            content.add(renderStatusContent(status));
+            Severity severity = result.getRule().getSeverity();
+            content.add("Severity: " + severity.getInfo(result.getEffectiveSeverity()));
+            content.add("</p>");
+            content.add("</div>");
             switch (result.getType()) {
             case COMPONENT_DIAGRAM:
                 content.add(renderComponentDiagram(result));
                 break;
             case TABLE:
-                content.add("<div>");
-                content.add(renderStatusContent(status));
-                Severity severity = result.getRule().getSeverity();
-                content.add("Severity: " + severity.getInfo(result.getEffectiveSeverity()));
-                content.add("</div>");
                 content.add(renderResultTable(result));
                 break;
             default:
