@@ -43,7 +43,6 @@ public class AsciidocReportPlugin implements ReportPlugin {
 
     private static final String BACKEND_HTML5 = "html5";
     private static final String CODERAY = "coderay";
-    private static final String ASCIIDOCTOR_DIAGRAM = "asciidoctor-diagram";
 
     private static final String REPORT_PROPERTY_RENDER = "render";
     private static final String RENDER_TABLE = "table";
