@@ -1,26 +1,10 @@
 package org.jqassistant.contrib.plugin.asciidocreport;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
-
-import org.apache.commons.io.FileUtils;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-import org.junit.Test;
-
 import com.buschmais.jqassistant.core.analysis.api.Result;
 import com.buschmais.jqassistant.core.analysis.api.rule.*;
+import com.buschmais.jqassistant.core.report.api.ReportContext;
 import com.buschmais.jqassistant.core.report.api.ReportException;
+import com.buschmais.jqassistant.core.report.impl.ReportContextImpl;
 import com.buschmais.jqassistant.core.rule.api.reader.RuleConfiguration;
 import com.buschmais.jqassistant.core.rule.api.source.FileRuleSource;
 import com.buschmais.jqassistant.core.rule.impl.reader.AsciiDocRuleSetReader;
@@ -31,22 +15,51 @@ import com.buschmais.xo.neo4j.api.model.Neo4jLabel;
 import com.buschmais.xo.neo4j.api.model.Neo4jNode;
 import com.buschmais.xo.neo4j.api.model.Neo4jRelationship;
 import com.buschmais.xo.neo4j.api.model.Neo4jRelationshipType;
+import org.apache.commons.io.FileUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import org.junit.Test;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class AsciidocReportPluginTest {
 
     private AsciidocReportPlugin plugin = new AsciidocReportPlugin();
 
     @Test
-    public void render() throws RuleException, IOException {
-        plugin.initialize();
+    public void defaultReportDirectory() throws RuleException, IOException {
+        verify(new HashMap<String, Object>());
+    }
+
+    @Test
+    public void customReportDirectory() throws RuleException, IOException {
+        File reportDirectory = new File("target/custom-report");
         HashMap<String, Object> properties = new HashMap<>();
-        File reportDirectory = new File("target/report");
         properties.put("asciidoc.report.directory", reportDirectory.getAbsolutePath());
+        verify(properties);
+    }
+
+    private void verify(Map<String, Object> properties) throws RuleException, IOException {
+        File reportDirectory = new File("target/report");
+        ReportContext reportContext = new ReportContextImpl(reportDirectory);
         File classesDirectory = ClasspathResource.getFile(AsciidocReportPluginTest.class, "/");
         File ruleDirectory = new File(classesDirectory, "jqassistant");
         properties.put("asciidoc.report.rule.directory", ruleDirectory.getAbsolutePath());
         properties.put("asciidoc.report.file.include", "index.adoc");
-        plugin.configure(properties);
+
+        plugin.initialize();
+        plugin.configure(reportContext, properties);
 
         RuleSet ruleSet = getRuleSet(ruleDirectory);
 
@@ -83,7 +96,7 @@ public class AsciidocReportPluginTest {
         importedConceptRow.put("ImportedConceptValue", asList("FooBar"));
         importedConceptRows.add(importedConceptRow);
         processRule(plugin, importedConcept,
-                new Result<>(importedConcept, Result.Status.FAILURE, Severity.MINOR, singletonList("ImportedConceptValue"), importedConceptRows));
+            new Result<>(importedConcept, Result.Status.FAILURE, Severity.MINOR, singletonList("ImportedConceptValue"), importedConceptRows));
 
         plugin.end();
 
@@ -161,7 +174,7 @@ public class AsciidocReportPluginTest {
     }
 
     private void verifyColumns(Element row, String expectedId, String expectedDescription, String expectedSeverity, String expectedStatus,
-            String expectedColor) {
+                               String expectedColor) {
         Elements columns = row.getElementsByTag("td");
         Element id = columns.get(0).getElementsByTag("a").first();
         assertThat(id, notNullValue());

@@ -1,17 +1,14 @@
 package org.jqassistant.contrib.plugin.asciidocreport;
 
-import java.io.File;
-import java.io.FilenameFilter;
-import java.util.*;
-
 import com.buschmais.jqassistant.core.analysis.api.Result;
 import com.buschmais.jqassistant.core.analysis.api.rule.Concept;
 import com.buschmais.jqassistant.core.analysis.api.rule.Constraint;
 import com.buschmais.jqassistant.core.analysis.api.rule.ExecutableRule;
 import com.buschmais.jqassistant.core.analysis.api.rule.Group;
+import com.buschmais.jqassistant.core.report.api.AbstractReportPlugin;
+import com.buschmais.jqassistant.core.report.api.ReportContext;
 import com.buschmais.jqassistant.core.report.api.ReportException;
 import com.buschmais.jqassistant.core.report.api.ReportHelper;
-import com.buschmais.jqassistant.core.report.api.ReportPlugin;
 import com.buschmais.jqassistant.core.report.api.graph.SubGraphFactory;
 import com.buschmais.jqassistant.core.shared.asciidoc.AsciidoctorFactory;
 import com.buschmais.jqassistant.plugin.common.api.scanner.filesystem.FilePatternMatcher;
@@ -23,13 +20,17 @@ import org.asciidoctor.extension.JavaExtensionRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.FilenameFilter;
+import java.util.*;
+
 import static java.util.Collections.singletonList;
 import static org.asciidoctor.AttributesBuilder.attributes;
 import static org.asciidoctor.OptionsBuilder.options;
 import static org.jqassistant.contrib.plugin.asciidocreport.RuleResult.Type.COMPONENT_DIAGRAM;
 import static org.jqassistant.contrib.plugin.asciidocreport.RuleResult.Type.TABLE;
 
-public class AsciidocReportPlugin implements ReportPlugin {
+public class AsciidocReportPlugin extends AbstractReportPlugin {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AsciidocReportPlugin.class);
 
@@ -38,7 +39,7 @@ public class AsciidocReportPlugin implements ReportPlugin {
     private static final String PROPERTY_FILE_INCLUDE = "asciidoc.report.file.include";
     private static final String PROPERTY_FILE_EXCLUDE = "asciidoc.report.file.exclude";
 
-    private static final String DEFAULT_DIRECTORY = "jqassistant/report/asciidoc";
+    private static final String DEFAULT_DIRECTORY = "html";
     private static final String DEFAULT_RULE_DIRECTORY = "jqassistant/rules";
 
     private static final String BACKEND_HTML5 = "html5";
@@ -60,13 +61,10 @@ public class AsciidocReportPlugin implements ReportPlugin {
     private Map<String, RuleResult> constraintResults;
 
     @Override
-    public void initialize() {
-    }
-
-    @Override
-    public void configure(Map<String, Object> properties) throws ReportException {
-        this.reportDirectory = getFile(PROPERTY_DIRECTORY, DEFAULT_DIRECTORY, properties);
-        this.ruleDirectory = getFile(PROPERTY_RULE_DIRECTORY, DEFAULT_RULE_DIRECTORY, properties);
+    public void configure(ReportContext reportContext, Map<String, Object> properties)  {
+        File defaultReportDirectory = new File(reportContext.getReportDirectory(), DEFAULT_DIRECTORY);
+        this.reportDirectory = getFile(PROPERTY_DIRECTORY, defaultReportDirectory, properties);
+        this.ruleDirectory = getFile(PROPERTY_RULE_DIRECTORY, new File(DEFAULT_RULE_DIRECTORY), properties);
         if (this.reportDirectory.mkdirs()) {
             LOGGER.info("Created directory '" + this.reportDirectory.getAbsolutePath() + "'.");
         }
@@ -74,9 +72,9 @@ public class AsciidocReportPlugin implements ReportPlugin {
         this.fileExclude = (String) properties.get(PROPERTY_FILE_EXCLUDE);
     }
 
-    private File getFile(String property, String defaultValue, Map<String, Object> properties) {
+    private File getFile(String property, File defaultValue, Map<String, Object> properties) {
         String directoryName = (String) properties.get(property);
-        return directoryName != null ? new File(directoryName) : new File(defaultValue);
+        return directoryName != null ? new File(directoryName) : defaultValue;
     }
 
     @Override
@@ -118,30 +116,6 @@ public class AsciidocReportPlugin implements ReportPlugin {
                 return filePatternMatcher.accepts(name);
             }
         });
-    }
-
-    @Override
-    public void beginConcept(Concept concept) {
-    }
-
-    @Override
-    public void endConcept() {
-    }
-
-    @Override
-    public void beginGroup(Group group) {
-    }
-
-    @Override
-    public void endGroup() {
-    }
-
-    @Override
-    public void beginConstraint(Constraint constraint) {
-    }
-
-    @Override
-    public void endConstraint() {
     }
 
     @Override
