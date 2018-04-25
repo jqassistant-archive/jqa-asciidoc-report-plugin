@@ -39,19 +39,18 @@ public class AsciidocReportPluginTest {
 
     @Test
     public void defaultReportDirectory() throws RuleException, IOException {
-        verify(new HashMap<String, Object>());
+        verify(new HashMap<String, Object>(), new File("target/report/html"));
     }
 
     @Test
     public void customReportDirectory() throws RuleException, IOException {
         File reportDirectory = new File("target/custom-report");
-        HashMap<String, Object> properties = new HashMap<>();
+        Map<String, Object> properties = new HashMap<>();
         properties.put("asciidoc.report.directory", reportDirectory.getAbsolutePath());
-        verify(properties);
+        verify(properties, reportDirectory);
     }
 
-    private void verify(Map<String, Object> properties) throws RuleException, IOException {
-        File reportDirectory = new File("target/report");
+    private void verify(Map<String, Object> properties, File reportDirectory) throws RuleException, IOException {
         ReportContext reportContext = new ReportContextImpl(reportDirectory);
         File classesDirectory = ClasspathResource.getFile(AsciidocReportPluginTest.class, "/");
         File ruleDirectory = new File(classesDirectory, "jqassistant");

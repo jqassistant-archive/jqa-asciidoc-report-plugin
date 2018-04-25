@@ -1,16 +1,17 @@
 package org.jqassistant.contrib.plugin.asciidocreport;
 
+import static org.jqassistant.contrib.plugin.asciidocreport.InlineMacroProcessor.CONCEPT_REF;
+import static org.jqassistant.contrib.plugin.asciidocreport.InlineMacroProcessor.CONSTRAINT_REF;
+
+import java.util.*;
+
 import com.buschmais.jqassistant.core.analysis.api.Result;
 import com.buschmais.jqassistant.core.analysis.api.rule.*;
+
 import org.asciidoctor.ast.AbstractBlock;
 import org.asciidoctor.ast.Document;
 import org.asciidoctor.ast.DocumentRuby;
 import org.asciidoctor.extension.PreprocessorReader;
-
-import java.util.*;
-
-import static org.jqassistant.contrib.plugin.asciidocreport.InlineMacroProcessor.CONCEPT_REF;
-import static org.jqassistant.contrib.plugin.asciidocreport.InlineMacroProcessor.CONSTRAINT_REF;
 
 public class IncludeProcessor extends org.asciidoctor.extension.IncludeProcessor {
 
@@ -71,7 +72,7 @@ public class IncludeProcessor extends org.asciidoctor.extension.IncludeProcessor
                 source = ((CypherExecutable) executable).getStatement();
             } else if (executable instanceof ScriptExecutable) {
                 ScriptExecutable scriptExecutable = (ScriptExecutable) executable;
-                language = scriptExecutable.getLanguage();
+                language = executable.getLanguage();
                 source = scriptExecutable.getSource();
             }
             String ruleType;
@@ -85,7 +86,9 @@ public class IncludeProcessor extends org.asciidoctor.extension.IncludeProcessor
             content.append("[source,").append(language).append(",role=").append(ruleType).append(",indent=0").append("]").append('\n');
             content.append('.').append(escape(rule.getDescription())).append('\n');
             content.append("----").append('\n');
-            content.append(source).append('\n');
+            if (source != null) {
+                content.append(source).append('\n');
+            }
             content.append("----").append('\n');
             content.append('\n');
         }
