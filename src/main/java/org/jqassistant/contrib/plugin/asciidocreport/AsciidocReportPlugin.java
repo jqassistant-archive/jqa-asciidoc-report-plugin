@@ -62,7 +62,7 @@ public class AsciidocReportPlugin extends AbstractReportPlugin {
 
     @Override
     public void configure(ReportContext reportContext, Map<String, Object> properties)  {
-        File defaultReportDirectory = new File(reportContext.getReportDirectory(DEFAULT_DIRECTORY), DEFAULT_DIRECTORY);
+        File defaultReportDirectory = reportContext.getReportDirectory(DEFAULT_DIRECTORY);
         this.reportDirectory = getFile(PROPERTY_DIRECTORY, defaultReportDirectory, properties);
         this.ruleDirectory = getFile(PROPERTY_RULE_DIRECTORY, new File(DEFAULT_RULE_DIRECTORY), properties);
         if (this.reportDirectory.mkdirs()) {
