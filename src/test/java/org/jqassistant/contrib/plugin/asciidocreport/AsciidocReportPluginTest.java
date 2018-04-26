@@ -39,18 +39,19 @@ public class AsciidocReportPluginTest {
 
     @Test
     public void defaultReportDirectory() throws RuleException, IOException {
-        verify(new HashMap<String, Object>(), new File("target/report/html"));
+        File reportDirectory = new File("target/report");
+        verify(new HashMap<String, Object>(), reportDirectory, new File(reportDirectory, "html"));
     }
 
     @Test
     public void customReportDirectory() throws RuleException, IOException {
-        File reportDirectory = new File("target/custom-report");
+        File customReportDirectory = new File("target/custom-report");
         Map<String, Object> properties = new HashMap<>();
-        properties.put("asciidoc.report.directory", reportDirectory.getAbsolutePath());
-        verify(properties, reportDirectory);
+        properties.put("asciidoc.report.directory", customReportDirectory.getAbsolutePath());
+        verify(properties, customReportDirectory, customReportDirectory);
     }
 
-    private void verify(Map<String, Object> properties, File reportDirectory) throws RuleException, IOException {
+    private void verify(Map<String, Object> properties, File reportDirectory, File expectedDirectory) throws RuleException, IOException {
         ReportContext reportContext = new ReportContextImpl(reportDirectory);
         File classesDirectory = ClasspathResource.getFile(AsciidocReportPluginTest.class, "/");
         File ruleDirectory = new File(classesDirectory, "jqassistant");
@@ -99,7 +100,7 @@ public class AsciidocReportPluginTest {
 
         plugin.end();
 
-        File indexHtml = new File(reportDirectory, "index.html");
+        File indexHtml = new File(expectedDirectory, "index.html");
         assertThat(indexHtml.exists(), equalTo(true));
 
         String html = FileUtils.readFileToString(indexHtml);
@@ -117,8 +118,8 @@ public class AsciidocReportPluginTest {
         assertThat(html, containsString("<td>\nFoo\nBar\n</td>"));
         // test:ComponentDiagram
         assertThat(html, containsString("Severity: INFO (from MINOR)"));
-        assertThat(new File(reportDirectory, "test_ComponentDiagram.svg").exists(), equalTo(true));
-        assertThat(new File(reportDirectory, "test_ComponentDiagram.plantuml").exists(), equalTo(true));
+        assertThat(new File(expectedDirectory, "test_ComponentDiagram.svg").exists(), equalTo(true));
+        assertThat(new File(expectedDirectory, "test_ComponentDiagram.plantuml").exists(), equalTo(true));
         assertThat(html, containsString("<a href=\"test_ComponentDiagram.svg\"><img src=\"test_ComponentDiagram.svg\"/></a>"));
         // test:ImportedConcept
         assertThat(html, containsString("Status: <span class=\"red\">FAILURE</span>"));
