@@ -1,5 +1,16 @@
 package org.jqassistant.contrib.plugin.asciidocreport;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+
 import com.buschmais.jqassistant.core.analysis.api.Result;
 import com.buschmais.jqassistant.core.analysis.api.rule.*;
 import com.buschmais.jqassistant.core.report.api.ReportContext;
@@ -15,6 +26,7 @@ import com.buschmais.xo.neo4j.api.model.Neo4jLabel;
 import com.buschmais.xo.neo4j.api.model.Neo4jNode;
 import com.buschmais.xo.neo4j.api.model.Neo4jRelationship;
 import com.buschmais.xo.neo4j.api.model.Neo4jRelationshipType;
+
 import org.apache.commons.io.FileUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -22,25 +34,15 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.junit.Test;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
-
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 public class AsciidocReportPluginTest {
 
     private AsciidocReportPlugin plugin = new AsciidocReportPlugin();
 
+    private File outputDirectory = new File("target/");
+
     @Test
     public void defaultReportDirectory() throws RuleException, IOException {
-        File reportDirectory = new File("target/report");
-        verify(new HashMap<String, Object>(), reportDirectory, new File(reportDirectory, "html"));
+        verify(new HashMap<String, Object>(), new File(outputDirectory, "report/html"));
     }
 
     @Test
@@ -48,11 +50,11 @@ public class AsciidocReportPluginTest {
         File customReportDirectory = new File("target/custom-report");
         Map<String, Object> properties = new HashMap<>();
         properties.put("asciidoc.report.directory", customReportDirectory.getAbsolutePath());
-        verify(properties, customReportDirectory, customReportDirectory);
+        verify(properties, customReportDirectory);
     }
 
-    private void verify(Map<String, Object> properties, File reportDirectory, File expectedDirectory) throws RuleException, IOException {
-        ReportContext reportContext = new ReportContextImpl(reportDirectory);
+    private void verify(Map<String, Object> properties, File expectedDirectory) throws RuleException, IOException {
+        ReportContext reportContext = new ReportContextImpl(outputDirectory);
         File classesDirectory = ClasspathResource.getFile(AsciidocReportPluginTest.class, "/");
         File ruleDirectory = new File(classesDirectory, "jqassistant");
         properties.put("asciidoc.report.rule.directory", ruleDirectory.getAbsolutePath());
@@ -96,7 +98,7 @@ public class AsciidocReportPluginTest {
         importedConceptRow.put("ImportedConceptValue", asList("FooBar"));
         importedConceptRows.add(importedConceptRow);
         processRule(plugin, importedConcept,
-            new Result<>(importedConcept, Result.Status.FAILURE, Severity.MINOR, singletonList("ImportedConceptValue"), importedConceptRows));
+                new Result<>(importedConcept, Result.Status.FAILURE, Severity.MINOR, singletonList("ImportedConceptValue"), importedConceptRows));
 
         plugin.end();
 
@@ -174,7 +176,7 @@ public class AsciidocReportPluginTest {
     }
 
     private void verifyColumns(Element row, String expectedId, String expectedDescription, String expectedSeverity, String expectedStatus,
-                               String expectedColor) {
+            String expectedColor) {
         Elements columns = row.getElementsByTag("td");
         Element id = columns.get(0).getElementsByTag("a").first();
         assertThat(id, notNullValue());
