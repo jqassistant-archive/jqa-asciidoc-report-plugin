@@ -28,6 +28,7 @@ import com.buschmais.xo.neo4j.api.model.Neo4jRelationship;
 import com.buschmais.xo.neo4j.api.model.Neo4jRelationshipType;
 
 import org.apache.commons.io.FileUtils;
+import org.hamcrest.CoreMatchers;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -122,7 +123,8 @@ public class AsciidocReportPluginTest {
         assertThat(html, containsString("Severity: INFO (from MINOR)"));
         assertThat(new File(expectedDirectory, "test_ComponentDiagram.svg").exists(), equalTo(true));
         assertThat(new File(expectedDirectory, "test_ComponentDiagram.plantuml").exists(), equalTo(true));
-        assertThat(html, containsString("<a href=\"test_ComponentDiagram.svg\"><img src=\"test_ComponentDiagram.svg\"/></a>"));
+        String expectedDiagram = expectedDirectory.toURI().toURL().toExternalForm() + "test_ComponentDiagram.svg";
+        assertThat(html, containsString("<a href=\"" + expectedDiagram + "\"><img src=\"" + expectedDiagram +"\"/></a>"));
         // test:ImportedConcept
         assertThat(html, containsString("Status: <span class=\"red\">FAILURE</span>"));
         assertThat(html, containsString("Severity: MINOR"));

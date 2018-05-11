@@ -6,6 +6,8 @@ import static org.junit.Assert.assertThat;
 
 import java.io.File;
 
+import com.buschmais.jqassistant.core.analysis.api.rule.Concept;
+import org.jqassistant.contrib.plugin.asciidocreport.plantuml.PlantUMLRenderer;
 import org.junit.Test;
 
 import com.buschmais.jqassistant.core.report.api.graph.model.Node;
@@ -19,7 +21,7 @@ import net.sourceforge.plantuml.FileFormat;
  */
 public class PlantUMLRendererTest {
 
-    private PlantUMLRenderer plantUMLRenderer = new PlantUMLRenderer(FileFormat.SVG);
+    private PlantUMLRenderer plantUMLRenderer = new PlantUMLRenderer();
 
     @Test
     public void componentDiagram() {
@@ -64,13 +66,16 @@ public class PlantUMLRendererTest {
 
     @Test
     public void renderDiagram() {
-        File file = new File("target/test.plantuml.svg");
+        Concept concept = Concept.builder().id("test:plantuml").build();
+        File directory = new File("target");
+        directory.mkdirs();
+        File file = new File(directory,"test_plantuml.svg");
         if (file.exists()) {
             assertThat(file.delete(), equalTo(true));
         }
         String componentDiagram = plantUMLRenderer.createComponentDiagram(getSubGraph());
 
-        plantUMLRenderer.renderDiagram(componentDiagram, file);
+        plantUMLRenderer.renderDiagram(componentDiagram, concept, directory);
 
         assertThat(file.exists(), equalTo(true));
     }

@@ -1,40 +1,43 @@
 package org.jqassistant.contrib.plugin.asciidocreport;
 
 import java.io.File;
-import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringEscapeUtils;
+import com.buschmais.jqassistant.core.analysis.api.Result;
+import com.buschmais.jqassistant.core.analysis.api.rule.ExecutableRule;
+import com.buschmais.jqassistant.core.analysis.api.rule.Severity;
+import com.buschmais.jqassistant.core.report.api.ReportContext;
+import com.buschmais.jqassistant.core.report.api.graph.model.SubGraph;
+
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.asciidoctor.ast.AbstractBlock;
 import org.asciidoctor.ast.AbstractNode;
 import org.asciidoctor.ast.Document;
 import org.asciidoctor.extension.Treeprocessor;
-
-import com.buschmais.jqassistant.core.analysis.api.Result;
-import com.buschmais.jqassistant.core.analysis.api.rule.ExecutableRule;
-import com.buschmais.jqassistant.core.analysis.api.rule.Severity;
-import com.buschmais.jqassistant.core.report.api.graph.model.SubGraph;
-
-import net.sourceforge.plantuml.FileFormat;
+import org.jqassistant.contrib.plugin.asciidocreport.plantuml.PlantUMLRenderer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TreePreprocessor extends Treeprocessor {
 
-    public static final FileFormat PLANTUML_FILE_FORMAT = FileFormat.SVG;
-
     private final Map<String, RuleResult> conceptResults;
     private final Map<String, RuleResult> constraintResults;
+    private ReportContext reportContext;
     private final File reportDirectory;
     private final PlantUMLRenderer plantUMLRenderer;
 
-    public TreePreprocessor(Map<String, RuleResult> conceptResults, Map<String, RuleResult> constraintResults, File reportDirectory) {
+    public TreePreprocessor(Map<String, RuleResult> conceptResults, Map<String, RuleResult> constraintResults, ReportContext reportContext,
+            File reportDirectory) {
         this.conceptResults = conceptResults;
         this.constraintResults = constraintResults;
+        this.reportContext = reportContext;
         this.reportDirectory = reportDirectory;
-        this.plantUMLRenderer = new PlantUMLRenderer(PLANTUML_FILE_FORMAT);
+        this.plantUMLRenderer = new PlantUMLRenderer();
     }
 
     public Document process(Document document) {
@@ -67,30 +70,53 @@ public class TreePreprocessor extends Treeprocessor {
     private List<String> renderRuleResult(RuleResult result) {
         List<String> content = new ArrayList<>();
         if (result != null) {
-            content.add("<div id=\"result(" + result.getRule().getId() + ")\">");
+            ExecutableRule<?> rule = result.getRule();
+            content.add("<div id=\"result(" + rule.getId() + ")\">");
             Result.Status status = result.getStatus();
             content.add("<div class=\"paragraph\">");
             content.add("<p>");
             content.add(renderStatusContent(status));
-            Severity severity = result.getRule().getSeverity();
+            Severity severity = rule.getSeverity();
             content.add("Severity: " + severity.getInfo(result.getEffectiveSeverity()));
             content.add("</p>");
             content.add("</div>");
-            switch (result.getType()) {
-            case COMPONENT_DIAGRAM:
-                content.add(renderComponentDiagram(result));
-                break;
-            case TABLE:
-                content.add(renderResultTable(result));
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown result type '" + result.getType() + "'");
+            List<ReportContext.Report<?>> reports = reportContext.getReports(rule);
+            if (!reports.isEmpty()) {
+                for (ReportContext.Report<?> report : reports) {
+                    switch (report.getReportType()) {
+                    case IMAGE:
+                        content.add(renderImage(report.getUrl()));
+                        break;
+                    case LINK:
+                        content.add(renderLink(report.getUrl(), report.getLabel()));
+                        break;
+                    }
+                }
+            } else {
+                switch (result.getType()) {
+                case COMPONENT_DIAGRAM:
+                    content.add(renderComponentDiagram(result));
+                    break;
+                case TABLE:
+                    content.add(renderResultTable(result));
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown result type '" + result.getType() + "'");
+                }
             }
             content.add("</div>");
         } else {
             content.add("Status: Not Available");
         }
         return content;
+    }
+
+    private String renderLink(URL url, String label) {
+        StringBuilder a = new StringBuilder();
+        a.append("<a href=").append('"').append(url.toExternalForm()).append('"').append(">");
+        a.append(label);
+        a.append("</a>");
+        return a.toString();
     }
 
     private String renderStatusContent(Result.Status status) {
@@ -121,7 +147,7 @@ public class TreePreprocessor extends Treeprocessor {
             for (String columnName : columnNames) {
                 tableBuilder.append("<td>").append('\n');
                 for (String value : row.get(columnName)) {
-                    tableBuilder.append(StringEscapeUtils.escapeHtml(value)).append('\n');
+                    tableBuilder.append(StringEscapeUtils.escapeHtml4(value)).append('\n');
                 }
                 tableBuilder.append("</td>").append('\n');
             }
@@ -143,8 +169,7 @@ public class TreePreprocessor extends Treeprocessor {
         // create PlantUML diagram
         SubGraph subGraph = result.getSubGraph();
         String plantUML = plantUMLRenderer.createComponentDiagram(subGraph);
-        ExecutableRule rule = result.getRule();
-        return storeDiagram(plantUML, rule);
+        return storeDiagram(plantUML, result.getRule(), reportDirectory);
     }
 
     /**
@@ -156,32 +181,28 @@ public class TreePreprocessor extends Treeprocessor {
      *            The {@link ExecutableRule} that created the diagram.
      * @return The HTML to be embedded in the document.
      */
-    private String storeDiagram(String plantUML, ExecutableRule rule) {
-        String diagramFileNamePrefix = rule.getId().replaceAll("\\:", "_");
-        File plantUMLFile = new File(reportDirectory, diagramFileNamePrefix + ".plantuml");
+    private String storeDiagram(String plantUML, ExecutableRule rule, File reportDirectory) {
+        File diagramFileName = plantUMLRenderer.renderDiagram(plantUML, rule, reportDirectory);
         try {
-            FileUtils.writeStringToFile(plantUMLFile, plantUML);
-        } catch (IOException e) {
-            throw new IllegalStateException("Cannot write PlantUML diagram to " + plantUMLFile.getPath(), e);
+            return renderImage(diagramFileName.toURI().toURL());
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException("Cannot create URL from file " + diagramFileName.getAbsolutePath(), e);
         }
-        String diagramFileName = diagramFileNamePrefix + PLANTUML_FILE_FORMAT.getFileSuffix();
-        File file = new File(reportDirectory, diagramFileName);
-        plantUMLRenderer.renderDiagram(plantUML, file);
-        return renderImage(diagramFileName);
     }
 
     /**
      * Embed an image with the given file name.
      *
-     * @param fileName
-     *            The file name of the image to embed
+     * @param url
+     *            The {@link URL} of the image to embed.
      * @return The HTML to be embedded in the document.
      */
-    private String renderImage(String fileName) {
+    private String renderImage(URL url) {
+        String externalForm = url.toExternalForm();
         StringBuilder content = new StringBuilder();
         content.append("<div>");
-        content.append("<a href=\"" + fileName + "\">");
-        content.append("<img src=\"" + fileName + "\"/>");
+        content.append("<a href=\"" + externalForm + "\">");
+        content.append("<img src=\"" + externalForm + "\"/>");
         content.append("</a>");
         content.append("</div>");
         return content.toString();

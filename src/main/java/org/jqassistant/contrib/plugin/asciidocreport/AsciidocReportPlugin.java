@@ -1,17 +1,25 @@
 package org.jqassistant.contrib.plugin.asciidocreport;
 
+import static java.util.Collections.singletonList;
+import static org.asciidoctor.AttributesBuilder.attributes;
+import static org.asciidoctor.OptionsBuilder.options;
+import static org.jqassistant.contrib.plugin.asciidocreport.RuleResult.Type.COMPONENT_DIAGRAM;
+import static org.jqassistant.contrib.plugin.asciidocreport.RuleResult.Type.TABLE;
+
+import java.io.File;
+import java.io.FilenameFilter;
+import java.util.*;
+
 import com.buschmais.jqassistant.core.analysis.api.Result;
 import com.buschmais.jqassistant.core.analysis.api.rule.Concept;
 import com.buschmais.jqassistant.core.analysis.api.rule.Constraint;
 import com.buschmais.jqassistant.core.analysis.api.rule.ExecutableRule;
-import com.buschmais.jqassistant.core.analysis.api.rule.Group;
-import com.buschmais.jqassistant.core.report.api.AbstractReportPlugin;
-import com.buschmais.jqassistant.core.report.api.ReportContext;
-import com.buschmais.jqassistant.core.report.api.ReportException;
-import com.buschmais.jqassistant.core.report.api.ReportHelper;
+import com.buschmais.jqassistant.core.report.api.*;
+import com.buschmais.jqassistant.core.report.api.ReportPlugin.Default;
 import com.buschmais.jqassistant.core.report.api.graph.SubGraphFactory;
 import com.buschmais.jqassistant.core.shared.asciidoc.AsciidoctorFactory;
 import com.buschmais.jqassistant.plugin.common.api.scanner.filesystem.FilePatternMatcher;
+
 import org.asciidoctor.Asciidoctor;
 import org.asciidoctor.OptionsBuilder;
 import org.asciidoctor.SafeMode;
@@ -20,16 +28,7 @@ import org.asciidoctor.extension.JavaExtensionRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FilenameFilter;
-import java.util.*;
-
-import static java.util.Collections.singletonList;
-import static org.asciidoctor.AttributesBuilder.attributes;
-import static org.asciidoctor.OptionsBuilder.options;
-import static org.jqassistant.contrib.plugin.asciidocreport.RuleResult.Type.COMPONENT_DIAGRAM;
-import static org.jqassistant.contrib.plugin.asciidocreport.RuleResult.Type.TABLE;
-
+@Default
 public class AsciidocReportPlugin extends AbstractReportPlugin {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AsciidocReportPlugin.class);
@@ -49,6 +48,8 @@ public class AsciidocReportPlugin extends AbstractReportPlugin {
     private static final String RENDER_TABLE = "table";
     private static final String RENDER_COMPONENT_DIAGRAM = "component-diagram";
 
+    private ReportContext reportContext;
+
     private File reportDirectory;
 
     private File ruleDirectory;
@@ -61,7 +62,8 @@ public class AsciidocReportPlugin extends AbstractReportPlugin {
     private Map<String, RuleResult> constraintResults;
 
     @Override
-    public void configure(ReportContext reportContext, Map<String, Object> properties)  {
+    public void configure(ReportContext reportContext, Map<String, Object> properties) {
+        this.reportContext = reportContext;
         File defaultReportDirectory = reportContext.getReportDirectory(DEFAULT_DIRECTORY);
         this.reportDirectory = getFile(PROPERTY_DIRECTORY, defaultReportDirectory, properties);
         this.ruleDirectory = getFile(PROPERTY_RULE_DIRECTORY, new File(DEFAULT_RULE_DIRECTORY), properties);
@@ -99,7 +101,7 @@ public class AsciidocReportPlugin extends AbstractReportPlugin {
                     Document document = asciidoctor.loadFile(file, optionsBuilder.asMap());
                     extensionRegistry.includeProcessor(new IncludeProcessor(document, conceptResults, constraintResults));
                     extensionRegistry.inlineMacro(new InlineMacroProcessor());
-                    extensionRegistry.treeprocessor(new TreePreprocessor(conceptResults, constraintResults, reportDirectory));
+                    extensionRegistry.treeprocessor(new TreePreprocessor(conceptResults, constraintResults, reportContext, reportDirectory));
                     asciidoctor.convertFile(file, optionsBuilder);
                     asciidoctor.unregisterAllExtensions();
                 }

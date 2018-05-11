@@ -20,6 +20,7 @@ public class RuleResult {
 
     enum Type {
         TABLE,
+        @Deprecated
         COMPONENT_DIAGRAM
     }
 

@@ -1,4 +1,4 @@
-package org.jqassistant.contrib.plugin.asciidocreport;
+package org.jqassistant.contrib.plugin.asciidocreport.plantuml;
 
 import static java.util.Arrays.fill;
 
@@ -9,10 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.buschmais.jqassistant.core.analysis.api.rule.ExecutableRule;
 import com.buschmais.jqassistant.core.report.api.graph.model.Node;
 import com.buschmais.jqassistant.core.report.api.graph.model.Relationship;
 import com.buschmais.jqassistant.core.report.api.graph.model.SubGraph;
@@ -20,19 +17,19 @@ import com.buschmais.jqassistant.core.report.api.graph.model.SubGraph;
 import net.sourceforge.plantuml.FileFormat;
 import net.sourceforge.plantuml.FileFormatOption;
 import net.sourceforge.plantuml.SourceStringReader;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A renderer for PlantUML diagrams.
  */
 public class PlantUMLRenderer {
 
+    public static final FileFormat PLANTUML_FILE_FORMAT = FileFormat.SVG;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(PlantUMLRenderer.class);
-
-    public final FileFormat fileFormat;
-
-    public PlantUMLRenderer(FileFormat fileFormat) {
-        this.fileFormat = fileFormat;
-    }
 
     /**
      * Creates a component diagram from the given {@link SubGraph}.
@@ -55,6 +52,20 @@ public class PlantUMLRenderer {
         renderRelationships(subGraph, plantumlBuilder, nodes);
         plantumlBuilder.append("@enduml").append('\n');
         return plantumlBuilder.toString();
+    }
+
+    public File renderDiagram(String plantUML, ExecutableRule rule, File directory) {
+        String diagramFileNamePrefix = rule.getId().replaceAll("\\:", "_");
+        File plantUMLFile = new File(directory, diagramFileNamePrefix + ".plantuml");
+        try {
+            FileUtils.writeStringToFile(plantUMLFile, plantUML);
+        } catch (IOException e) {
+            throw new IllegalStateException("Cannot write PlantUML diagram to " + plantUMLFile.getPath(), e);
+        }
+        String diagramFileName = diagramFileNamePrefix + PLANTUML_FILE_FORMAT.getFileSuffix();
+        File file = new File(directory, diagramFileName);
+        renderDiagram(plantUML, file);
+        return file;
     }
 
     /**
@@ -214,16 +225,17 @@ public class PlantUMLRenderer {
      * @param file
      *            The {@link File}.
      */
-    public void renderDiagram(String plantUML, File file) {
+    private void renderDiagram(String plantUML, File file) {
         SourceStringReader reader = new SourceStringReader(plantUML);
         try {
-            LOGGER.info("Rendering diagram to " + file.getPath());
+            LOGGER.info("Rendering diagram '{}' ", file.getPath());
             try (FileOutputStream os = new FileOutputStream(file)) {
-                reader.outputImage(os, new FileFormatOption(fileFormat));
+                reader.outputImage(os, new FileFormatOption(PLANTUML_FILE_FORMAT));
             }
 
         } catch (IOException e) {
             throw new IllegalStateException("Cannot create component diagram for file " + file.getPath());
         }
     }
+
 }
