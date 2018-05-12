@@ -15,6 +15,8 @@ import com.buschmais.jqassistant.core.analysis.api.Result;
 import com.buschmais.jqassistant.core.analysis.api.rule.*;
 import com.buschmais.jqassistant.core.report.api.ReportContext;
 import com.buschmais.jqassistant.core.report.api.ReportException;
+import com.buschmais.jqassistant.core.report.api.ReportPlugin;
+import com.buschmais.jqassistant.core.report.impl.CompositeReportPlugin;
 import com.buschmais.jqassistant.core.report.impl.ReportContextImpl;
 import com.buschmais.jqassistant.core.rule.api.reader.RuleConfiguration;
 import com.buschmais.jqassistant.core.rule.api.source.FileRuleSource;
@@ -28,18 +30,36 @@ import com.buschmais.xo.neo4j.api.model.Neo4jRelationship;
 import com.buschmais.xo.neo4j.api.model.Neo4jRelationshipType;
 
 import org.apache.commons.io.FileUtils;
-import org.hamcrest.CoreMatchers;
+import org.jqassistant.contrib.plugin.asciidocreport.plantuml.ComponentDiagramReportPlugin;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.junit.Before;
 import org.junit.Test;
 
 public class AsciidocReportPluginTest {
 
-    private AsciidocReportPlugin plugin = new AsciidocReportPlugin();
+    private Map<String, ReportPlugin> reportPlugins;
+
+    private File ruleDirectory;
 
     private File outputDirectory = new File("target/");
+
+    private RuleSet ruleSet;
+
+    @Before
+    public void setUp() throws RuleException {
+        File classesDirectory = ClasspathResource.getFile(AsciidocReportPluginTest.class, "/");
+        ruleDirectory = new File(classesDirectory, "jqassistant");
+        ruleSet = getRuleSet(ruleDirectory);
+        reportPlugins = new HashMap<>();
+        reportPlugins.put("asciidoc", new AsciidocReportPlugin());
+        reportPlugins.put("plantuml-component-diagram", new ComponentDiagramReportPlugin());
+        for (ReportPlugin reportPlugin : reportPlugins.values()) {
+            reportPlugin.initialize();
+        }
+    }
 
     @Test
     public void defaultReportDirectory() throws RuleException, IOException {
@@ -55,17 +75,15 @@ public class AsciidocReportPluginTest {
     }
 
     private void verify(Map<String, Object> properties, File expectedDirectory) throws RuleException, IOException {
-        ReportContext reportContext = new ReportContextImpl(outputDirectory);
-        File classesDirectory = ClasspathResource.getFile(AsciidocReportPluginTest.class, "/");
-        File ruleDirectory = new File(classesDirectory, "jqassistant");
         properties.put("asciidoc.report.rule.directory", ruleDirectory.getAbsolutePath());
         properties.put("asciidoc.report.file.include", "index.adoc");
 
-        plugin.initialize();
-        plugin.configure(reportContext, properties);
+        ReportContext reportContext = new ReportContextImpl(outputDirectory);
+        for (ReportPlugin reportPlugin : reportPlugins.values()) {
+            reportPlugin.configure(reportContext, properties);
+        }
 
-        RuleSet ruleSet = getRuleSet(ruleDirectory);
-
+        ReportPlugin plugin = new CompositeReportPlugin(reportPlugins);
         plugin.begin();
 
         Concept concept = ruleSet.getConceptBucket().getById("test:Concept");
@@ -121,10 +139,14 @@ public class AsciidocReportPluginTest {
         assertThat(html, containsString("<td>\nFoo\nBar\n</td>"));
         // test:ComponentDiagram
         assertThat(html, containsString("Severity: INFO (from MINOR)"));
-        assertThat(new File(expectedDirectory, "test_ComponentDiagram.svg").exists(), equalTo(true));
-        assertThat(new File(expectedDirectory, "test_ComponentDiagram.plantuml").exists(), equalTo(true));
-        String expectedDiagram = expectedDirectory.toURI().toURL().toExternalForm() + "test_ComponentDiagram.svg";
-        assertThat(html, containsString("<a href=\"" + expectedDiagram + "\"><img src=\"" + expectedDiagram +"\"/></a>"));
+        File plantumlReportDirectory = reportContext.getReportDirectory("plantuml");
+        assertThat(new File(plantumlReportDirectory, "test_ComponentDiagram.svg").exists(), equalTo(true));
+        assertThat(new File(plantumlReportDirectory, "test_ComponentDiagram.plantuml").exists(), equalTo(true));
+        List<ReportContext.Report<?>> componentDiagrams = reportContext.getReports(componentDiagram);
+        assertThat(componentDiagrams.size(), equalTo(1));
+        ReportContext.Report<?> report = componentDiagrams.get(0);
+        String expectedDiagram = report.getUrl().toExternalForm();
+        assertThat(html, containsString("<a href=\"" + expectedDiagram + "\"><img src=\"" + expectedDiagram + "\"/></a>"));
         // test:ImportedConcept
         assertThat(html, containsString("Status: <span class=\"red\">FAILURE</span>"));
         assertThat(html, containsString("Severity: MINOR"));
@@ -208,7 +230,7 @@ public class AsciidocReportPluginTest {
         return ruleSetBuilder.getRuleSet();
     }
 
-    private void processRule(AsciidocReportPlugin plugin, Concept rule, Result<Concept> result) throws ReportException {
+    private void processRule(ReportPlugin plugin, Concept rule, Result<Concept> result) throws ReportException {
         plugin.beginConcept(rule);
         plugin.setResult(result);
         plugin.endConcept();

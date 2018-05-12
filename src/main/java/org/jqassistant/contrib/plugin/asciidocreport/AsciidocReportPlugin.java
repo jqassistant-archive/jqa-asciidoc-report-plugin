@@ -3,8 +3,6 @@ package org.jqassistant.contrib.plugin.asciidocreport;
 import static java.util.Collections.singletonList;
 import static org.asciidoctor.AttributesBuilder.attributes;
 import static org.asciidoctor.OptionsBuilder.options;
-import static org.jqassistant.contrib.plugin.asciidocreport.RuleResult.Type.COMPONENT_DIAGRAM;
-import static org.jqassistant.contrib.plugin.asciidocreport.RuleResult.Type.TABLE;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -14,9 +12,11 @@ import com.buschmais.jqassistant.core.analysis.api.Result;
 import com.buschmais.jqassistant.core.analysis.api.rule.Concept;
 import com.buschmais.jqassistant.core.analysis.api.rule.Constraint;
 import com.buschmais.jqassistant.core.analysis.api.rule.ExecutableRule;
-import com.buschmais.jqassistant.core.report.api.*;
+import com.buschmais.jqassistant.core.report.api.AbstractReportPlugin;
+import com.buschmais.jqassistant.core.report.api.ReportContext;
+import com.buschmais.jqassistant.core.report.api.ReportException;
+import com.buschmais.jqassistant.core.report.api.ReportHelper;
 import com.buschmais.jqassistant.core.report.api.ReportPlugin.Default;
-import com.buschmais.jqassistant.core.report.api.graph.SubGraphFactory;
 import com.buschmais.jqassistant.core.shared.asciidoc.AsciidoctorFactory;
 import com.buschmais.jqassistant.plugin.common.api.scanner.filesystem.FilePatternMatcher;
 
@@ -43,10 +43,6 @@ public class AsciidocReportPlugin extends AbstractReportPlugin {
 
     private static final String BACKEND_HTML5 = "html5";
     private static final String CODERAY = "coderay";
-
-    private static final String REPORT_PROPERTY_RENDER = "render";
-    private static final String RENDER_TABLE = "table";
-    private static final String RENDER_COMPONENT_DIAGRAM = "component-diagram";
 
     private ReportContext reportContext;
 
@@ -101,9 +97,8 @@ public class AsciidocReportPlugin extends AbstractReportPlugin {
                     Document document = asciidoctor.loadFile(file, optionsBuilder.asMap());
                     extensionRegistry.includeProcessor(new IncludeProcessor(document, conceptResults, constraintResults));
                     extensionRegistry.inlineMacro(new InlineMacroProcessor());
-                    extensionRegistry.treeprocessor(new TreePreprocessor(conceptResults, constraintResults, reportContext, reportDirectory));
+                    extensionRegistry.treeprocessor(new TreePreprocessor(conceptResults, constraintResults, reportContext));
                     asciidoctor.convertFile(file, optionsBuilder);
-                    asciidoctor.unregisterAllExtensions();
                 }
                 LOGGER.info("The Asciidoctor finished his work successfully.");
             }
@@ -130,40 +125,26 @@ public class AsciidocReportPlugin extends AbstractReportPlugin {
         }
     }
 
-    private RuleResult getRuleResult(Result<? extends ExecutableRule> result) throws ReportException {
+    private RuleResult getRuleResult(Result<? extends ExecutableRule> result) {
         RuleResult.RuleResultBuilder ruleResultBuilder = RuleResult.builder();
         List<String> columnNames = result.getColumnNames();
         ruleResultBuilder.rule(result.getRule()).effectiveSeverity(result.getSeverity()).status(result.getStatus())
                 .columnNames(columnNames != null ? columnNames : singletonList("Empty Result"));
-        Properties properties = result.getRule().getReport().getProperties();
-        String diagramType = properties.getProperty(REPORT_PROPERTY_RENDER, RENDER_TABLE);
-        switch (diagramType) {
-        case RENDER_COMPONENT_DIAGRAM:
-            ruleResultBuilder.type(COMPONENT_DIAGRAM);
-            SubGraphFactory subGraphFactory = new SubGraphFactory();
-            ruleResultBuilder.subGraph(subGraphFactory.createSubGraph(result));
-            break;
-        case RENDER_TABLE:
-            ruleResultBuilder.type(TABLE);
-            for (Map<String, Object> row : result.getRows()) {
-                Map<String, List<String>> resultRow = new LinkedHashMap<>();
-                for (Map.Entry<String, Object> rowEntry : row.entrySet()) {
-                    Object value = rowEntry.getValue();
-                    List<String> values = new ArrayList<>();
-                    if (value instanceof Iterable<?>) {
-                        for (Object o : ((Iterable) value)) {
-                            values.add(ReportHelper.getLabel(o));
-                        }
-                    } else {
-                        values.add(ReportHelper.getLabel(value));
+        for (Map<String, Object> row : result.getRows()) {
+            Map<String, List<String>> resultRow = new LinkedHashMap<>();
+            for (Map.Entry<String, Object> rowEntry : row.entrySet()) {
+                Object value = rowEntry.getValue();
+                List<String> values = new ArrayList<>();
+                if (value instanceof Iterable<?>) {
+                    for (Object o : ((Iterable) value)) {
+                        values.add(ReportHelper.getLabel(o));
                     }
-                    resultRow.put(rowEntry.getKey(), values);
+                } else {
+                    values.add(ReportHelper.getLabel(value));
                 }
-                ruleResultBuilder.row(resultRow);
+                resultRow.put(rowEntry.getKey(), values);
             }
-            break;
-        default:
-            throw new IllegalArgumentException("Unknown diagram type '" + diagramType + "'");
+            ruleResultBuilder.row(resultRow);
         }
         return ruleResultBuilder.build();
     }

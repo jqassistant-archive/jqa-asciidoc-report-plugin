@@ -24,7 +24,7 @@ MATCH (n) RETURN n as Value
 == Reports
 
 [[test:ComponentDiagram]]
-[source,cypher,role=concept,reportProperties="render=component-diagram"]
+[source,cypher,role=concept,reportType="plantuml-component-diagram"]
 .Component Diagram Description
 ----
 MATCH

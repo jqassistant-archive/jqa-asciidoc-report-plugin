@@ -12,7 +12,6 @@ import com.buschmais.jqassistant.core.analysis.api.Result;
 import com.buschmais.jqassistant.core.analysis.api.rule.ExecutableRule;
 import com.buschmais.jqassistant.core.analysis.api.rule.Severity;
 import com.buschmais.jqassistant.core.report.api.ReportContext;
-import com.buschmais.jqassistant.core.report.api.graph.model.SubGraph;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.asciidoctor.ast.AbstractBlock;
@@ -20,23 +19,18 @@ import org.asciidoctor.ast.AbstractNode;
 import org.asciidoctor.ast.Document;
 import org.asciidoctor.extension.Treeprocessor;
 import org.jqassistant.contrib.plugin.asciidocreport.plantuml.PlantUMLRenderer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class TreePreprocessor extends Treeprocessor {
 
     private final Map<String, RuleResult> conceptResults;
     private final Map<String, RuleResult> constraintResults;
     private ReportContext reportContext;
-    private final File reportDirectory;
     private final PlantUMLRenderer plantUMLRenderer;
 
-    public TreePreprocessor(Map<String, RuleResult> conceptResults, Map<String, RuleResult> constraintResults, ReportContext reportContext,
-            File reportDirectory) {
+    public TreePreprocessor(Map<String, RuleResult> conceptResults, Map<String, RuleResult> constraintResults, ReportContext reportContext) {
         this.conceptResults = conceptResults;
         this.constraintResults = constraintResults;
         this.reportContext = reportContext;
-        this.reportDirectory = reportDirectory;
         this.plantUMLRenderer = new PlantUMLRenderer();
     }
 
@@ -93,16 +87,7 @@ public class TreePreprocessor extends Treeprocessor {
                     }
                 }
             } else {
-                switch (result.getType()) {
-                case COMPONENT_DIAGRAM:
-                    content.add(renderComponentDiagram(result));
-                    break;
-                case TABLE:
-                    content.add(renderResultTable(result));
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unknown result type '" + result.getType() + "'");
-                }
+                content.add(renderResultTable(result));
             }
             content.add("</div>");
         } else {
@@ -156,20 +141,6 @@ public class TreePreprocessor extends Treeprocessor {
         tableBuilder.append("</tbody>").append('\n');
         tableBuilder.append("</table>").append('\n');
         return tableBuilder.toString();
-    }
-
-    /**
-     * Renders a {@link RuleResult }as PlantUML component diagram.
-     *
-     * @param result
-     *            The {@link RuleResult}.
-     * @return The rendered diagram (as image reference).
-     */
-    private String renderComponentDiagram(RuleResult result) {
-        // create PlantUML diagram
-        SubGraph subGraph = result.getSubGraph();
-        String plantUML = plantUMLRenderer.createComponentDiagram(subGraph);
-        return storeDiagram(plantUML, result.getRule(), reportDirectory);
     }
 
     /**
