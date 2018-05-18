@@ -68,7 +68,7 @@ public class AsciidocReportPluginTest {
 
     @Test
     public void customReportDirectory() throws RuleException, IOException {
-        File customReportDirectory = new File("target/custom-report");
+        File customReportDirectory = new File(outputDirectory, "report/custom-report");
         Map<String, Object> properties = new HashMap<>();
         properties.put("asciidoc.report.directory", customReportDirectory.getAbsolutePath());
         verify(properties, customReportDirectory);
@@ -144,9 +144,8 @@ public class AsciidocReportPluginTest {
         assertThat(new File(plantumlReportDirectory, "test_ComponentDiagram.plantuml").exists(), equalTo(true));
         List<ReportContext.Report<?>> componentDiagrams = reportContext.getReports(componentDiagram);
         assertThat(componentDiagrams.size(), equalTo(1));
-        ReportContext.Report<?> report = componentDiagrams.get(0);
-        String expectedDiagram = report.getUrl().toExternalForm();
-        assertThat(html, containsString("<a href=\"" + expectedDiagram + "\"><img src=\"" + expectedDiagram + "\"/></a>"));
+        String expectedDiagramUrl = "../plantuml/test_ComponentDiagram.svg" ;
+        assertThat(html, containsString("<a href=\"" + expectedDiagramUrl + "\"><img src=\"" + expectedDiagramUrl + "\"/></a>"));
         // test:ImportedConcept
         assertThat(html, containsString("Status: <span class=\"red\">FAILURE</span>"));
         assertThat(html, containsString("Severity: MINOR"));

@@ -7,14 +7,12 @@ import static org.junit.Assert.assertThat;
 import java.io.File;
 
 import com.buschmais.jqassistant.core.analysis.api.rule.Concept;
-import org.jqassistant.contrib.plugin.asciidocreport.plantuml.PlantUMLRenderer;
-import org.junit.Test;
-
 import com.buschmais.jqassistant.core.report.api.graph.model.Node;
 import com.buschmais.jqassistant.core.report.api.graph.model.Relationship;
 import com.buschmais.jqassistant.core.report.api.graph.model.SubGraph;
 
-import net.sourceforge.plantuml.FileFormat;
+import org.jqassistant.contrib.plugin.asciidocreport.plantuml.PlantUMLRenderer;
+import org.junit.Test;
 
 /**
  * Tests for the {@link PlantUMLRenderer}.

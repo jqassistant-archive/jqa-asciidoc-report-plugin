@@ -14,7 +14,6 @@ import com.buschmais.jqassistant.core.analysis.api.rule.Constraint;
 import com.buschmais.jqassistant.core.analysis.api.rule.ExecutableRule;
 import com.buschmais.jqassistant.core.report.api.AbstractReportPlugin;
 import com.buschmais.jqassistant.core.report.api.ReportContext;
-import com.buschmais.jqassistant.core.report.api.ReportException;
 import com.buschmais.jqassistant.core.report.api.ReportHelper;
 import com.buschmais.jqassistant.core.report.api.ReportPlugin.Default;
 import com.buschmais.jqassistant.core.shared.asciidoc.AsciidoctorFactory;
@@ -61,7 +60,7 @@ public class AsciidocReportPlugin extends AbstractReportPlugin {
     public void configure(ReportContext reportContext, Map<String, Object> properties) {
         this.reportContext = reportContext;
         File defaultReportDirectory = reportContext.getReportDirectory(DEFAULT_DIRECTORY);
-        this.reportDirectory = getFile(PROPERTY_DIRECTORY, defaultReportDirectory, properties);
+        this.reportDirectory = getFile(PROPERTY_DIRECTORY, defaultReportDirectory, properties).getAbsoluteFile();
         this.ruleDirectory = getFile(PROPERTY_RULE_DIRECTORY, new File(DEFAULT_RULE_DIRECTORY), properties);
         if (this.reportDirectory.mkdirs()) {
             LOGGER.info("Created directory '" + this.reportDirectory.getAbsolutePath() + "'.");
@@ -97,7 +96,7 @@ public class AsciidocReportPlugin extends AbstractReportPlugin {
                     Document document = asciidoctor.loadFile(file, optionsBuilder.asMap());
                     extensionRegistry.includeProcessor(new IncludeProcessor(document, conceptResults, constraintResults));
                     extensionRegistry.inlineMacro(new InlineMacroProcessor());
-                    extensionRegistry.treeprocessor(new TreePreprocessor(conceptResults, constraintResults, reportContext));
+                    extensionRegistry.treeprocessor(new TreePreprocessor(conceptResults, constraintResults, reportDirectory, reportContext));
                     asciidoctor.convertFile(file, optionsBuilder);
                 }
                 LOGGER.info("The Asciidoctor finished his work successfully.");
@@ -116,7 +115,7 @@ public class AsciidocReportPlugin extends AbstractReportPlugin {
     }
 
     @Override
-    public void setResult(Result<? extends ExecutableRule> result) throws ReportException {
+    public void setResult(Result<? extends ExecutableRule> result) {
         ExecutableRule rule = result.getRule();
         if (rule instanceof Concept) {
             this.conceptResults.put(rule.getId(), getRuleResult(result));
