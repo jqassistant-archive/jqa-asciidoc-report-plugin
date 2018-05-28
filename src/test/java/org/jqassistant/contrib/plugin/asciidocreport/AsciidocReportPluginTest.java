@@ -45,6 +45,8 @@ import org.junit.Test;
 
 public class AsciidocReportPluginTest {
 
+    private static final String LINE_SEPARATOR = System.lineSeparator();
+
     private Map<String, ReportPlugin> reportPlugins;
 
     private File ruleDirectory;
@@ -141,7 +143,7 @@ public class AsciidocReportPluginTest {
         assertThat(html, containsString("Status: <span class=\"green\">SUCCESS</span>"));
         assertThat(html, containsString("Severity: MAJOR (from MINOR)"));
         assertThat(html, containsString("<th>Value</th>"));
-        assertThat(html, containsString("<td>\nFoo\nBar\n</td>"));
+        assertThat(html, containsString("<td>" + LINE_SEPARATOR + "Foo" + LINE_SEPARATOR + "Bar" + LINE_SEPARATOR + "</td>"));
         // test:ComponentDiagram
         assertThat(html, containsString("Severity: INFO (from MINOR)"));
         File plantumlReportDirectory = reportContext.getReportDirectory("plantuml");
@@ -155,7 +157,7 @@ public class AsciidocReportPluginTest {
         assertThat(html, containsString("Status: <span class=\"red\">FAILURE</span>"));
         assertThat(html, containsString("Severity: MINOR"));
         assertThat(html, containsString("<th>ImportedConceptValue</th>"));
-        assertThat(html, containsString("<td>\nFooBar\n</td>"));
+        assertThat(html, containsString("<td>" + LINE_SEPARATOR + "FooBar" + LINE_SEPARATOR + "</td>"));
     }
 
     private ArtifactFileDescriptor createNode(long id, String name) {
