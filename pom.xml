@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.jqassistant.contrib.common</groupId>
         <artifactId>parent</artifactId>
-        <version>1.1.0</version>
+        <version>1.2.0-SNAPSHOT</version>
     </parent>
 
     <groupId>org.jqassistant.contrib.plugin</groupId>
@@ -34,10 +34,6 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <com.buschmais.jqassistant.version>1.4.0-SNAPSHOT</com.buschmais.jqassistant.version>
-        <com.buschmais.jqassistant.plugin.version>1.4-SNAPSHOT</com.buschmais.jqassistant.plugin.version>
-        <com.buschmais.xo.version>0.9.0</com.buschmais.xo.version>
-        <org.slf4j.version>1.7.12</org.slf4j.version>
         <org.jsoup.version>1.10.2</org.jsoup.version>
     </properties>
 
@@ -56,24 +52,10 @@
 
     <dependencyManagement>
         <dependencies>
-            <!-- jQAssistant -->
-            <dependency>
-                <groupId>com.buschmais.jqassistant</groupId>
-                <artifactId>jqa-distribution-specification</artifactId>
-                <version>${com.buschmais.jqassistant.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
                 <version>1.16.20</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>${org.slf4j.version}</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
@@ -83,19 +65,6 @@
                 <scope>provided</scope>
             </dependency>
             <!-- unit tests -->
-            <dependency>
-                <groupId>com.buschmais.xo</groupId>
-                <artifactId>xo.api</artifactId>
-                <version>${com.buschmais.xo.version}</version>
-                <scope>test</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-simple</artifactId>
-                <version>${org.slf4j.version}</version>
-                <scope>test</scope>
-            </dependency>
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>

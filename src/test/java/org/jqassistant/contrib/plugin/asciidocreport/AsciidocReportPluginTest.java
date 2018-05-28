@@ -12,15 +12,20 @@ import java.io.IOException;
 import java.util.*;
 
 import com.buschmais.jqassistant.core.analysis.api.Result;
-import com.buschmais.jqassistant.core.analysis.api.rule.*;
+import com.buschmais.jqassistant.core.analysis.api.rule.Concept;
+import com.buschmais.jqassistant.core.analysis.api.rule.RuleException;
+import com.buschmais.jqassistant.core.analysis.api.rule.RuleSet;
+import com.buschmais.jqassistant.core.analysis.api.rule.Severity;
 import com.buschmais.jqassistant.core.report.api.ReportContext;
 import com.buschmais.jqassistant.core.report.api.ReportException;
 import com.buschmais.jqassistant.core.report.api.ReportPlugin;
 import com.buschmais.jqassistant.core.report.impl.CompositeReportPlugin;
 import com.buschmais.jqassistant.core.report.impl.ReportContextImpl;
 import com.buschmais.jqassistant.core.rule.api.reader.RuleConfiguration;
+import com.buschmais.jqassistant.core.rule.api.reader.RuleParserPlugin;
 import com.buschmais.jqassistant.core.rule.api.source.FileRuleSource;
-import com.buschmais.jqassistant.core.rule.impl.reader.AsciiDocRuleSetReader;
+import com.buschmais.jqassistant.core.rule.impl.reader.AsciidocRuleParserPlugin;
+import com.buschmais.jqassistant.core.rule.impl.reader.RuleParser;
 import com.buschmais.jqassistant.core.shared.io.ClasspathResource;
 import com.buschmais.jqassistant.plugin.common.api.model.ArtifactFileDescriptor;
 import com.buschmais.jqassistant.plugin.common.api.model.DependsOnDescriptor;
@@ -144,7 +149,7 @@ public class AsciidocReportPluginTest {
         assertThat(new File(plantumlReportDirectory, "test_ComponentDiagram.plantuml").exists(), equalTo(true));
         List<ReportContext.Report<?>> componentDiagrams = reportContext.getReports(componentDiagram);
         assertThat(componentDiagrams.size(), equalTo(1));
-        String expectedDiagramUrl = "../plantuml/test_ComponentDiagram.svg" ;
+        String expectedDiagramUrl = "../plantuml/test_ComponentDiagram.svg";
         assertThat(html, containsString("<a href=\"" + expectedDiagramUrl + "\"><img src=\"" + expectedDiagramUrl + "\"/></a>"));
         // test:ImportedConcept
         assertThat(html, containsString("Status: <span class=\"red\">FAILURE</span>"));
@@ -221,12 +226,13 @@ public class AsciidocReportPluginTest {
     }
 
     private RuleSet getRuleSet(File ruleDirectory) throws RuleException {
-        AsciiDocRuleSetReader asciiDocRuleSetReader = new AsciiDocRuleSetReader(RuleConfiguration.DEFAULT);
+        AsciidocRuleParserPlugin ruleParserPlugin = new AsciidocRuleParserPlugin();
+        ruleParserPlugin.initialize();
+        ruleParserPlugin.configure(RuleConfiguration.DEFAULT);
+        RuleParser ruleParser = new RuleParser(Arrays.<RuleParserPlugin> asList(ruleParserPlugin));
         File indexFile = new File(ruleDirectory, "index.adoc");
         File otherFile = new File(ruleDirectory, "other.adoc");
-        RuleSetBuilder ruleSetBuilder = RuleSetBuilder.newInstance();
-        asciiDocRuleSetReader.read(asList(new FileRuleSource(indexFile), new FileRuleSource(otherFile)), ruleSetBuilder);
-        return ruleSetBuilder.getRuleSet();
+        return ruleParser.parse(asList(new FileRuleSource(otherFile), new FileRuleSource(indexFile)));
     }
 
     private void processRule(ReportPlugin plugin, Concept rule, Result<Concept> result) throws ReportException {

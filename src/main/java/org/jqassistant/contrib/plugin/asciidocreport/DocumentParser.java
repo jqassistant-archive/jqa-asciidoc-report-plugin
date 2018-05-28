@@ -1,11 +1,13 @@
 package org.jqassistant.contrib.plugin.asciidocreport;
 
-import static com.buschmais.jqassistant.core.rule.impl.reader.AsciiDocRuleSetReader.CONCEPT;
-import static com.buschmais.jqassistant.core.rule.impl.reader.AsciiDocRuleSetReader.CONSTRAINT;
+import static com.buschmais.jqassistant.core.rule.impl.reader.AsciidocRuleParserPlugin.CONCEPT;
+import static com.buschmais.jqassistant.core.rule.impl.reader.AsciidocRuleParserPlugin.CONSTRAINT;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.unmodifiableMap;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.asciidoctor.ast.AbstractBlock;
 import org.asciidoctor.ast.Document;
