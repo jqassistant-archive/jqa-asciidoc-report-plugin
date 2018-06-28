@@ -39,5 +39,5 @@ RETURN
 
 include::jQA:ImportedRules[]
 
-*Test*
+
 

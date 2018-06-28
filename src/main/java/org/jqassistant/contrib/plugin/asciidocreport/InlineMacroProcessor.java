@@ -15,7 +15,7 @@ public class InlineMacroProcessor extends org.asciidoctor.extension.InlineMacroP
     }
 
     @Override
-    protected Object process(AbstractBlock parent, String target, Map<String, Object> attributes) {
+    public Object process(AbstractBlock parent, String target, Map<String, Object> attributes) {
         if (CONCEPT_REF.equals(target)) {
             DocumentParser documentParser = DocumentParser.parse(parent.getDocument());
             return processRef(parent, attributes, documentParser.getConceptBlocks());
