@@ -45,7 +45,7 @@ import org.junit.Test;
 
 public class AsciidocReportPluginTest {
 
-    private static final String LINE_SEPARATOR = System.lineSeparator();
+    private static final String LINE_SEPARATOR = "\n";
 
     private Map<String, ReportPlugin> reportPlugins;
 
@@ -70,7 +70,7 @@ public class AsciidocReportPluginTest {
 
     @Test
     public void defaultReportDirectory() throws RuleException, IOException {
-        verify(new HashMap<String, Object>(), new File(outputDirectory, "report/html"));
+        verify(new HashMap<String, Object>(), new File(outputDirectory, "report/asciidoc"));
     }
 
     @Test
@@ -116,15 +116,16 @@ public class AsciidocReportPluginTest {
         diagramRow2.put("DependsOn", null);
         diagramRows.add(diagramRow2);
 
-        processRule(plugin, componentDiagram, new Result<>(componentDiagram, Result.Status.SUCCESS, Severity.INFO, asList("Node", "DependsOn"), diagramRows));
+        processRule(plugin, componentDiagram, Result.<Concept> builder().rule(componentDiagram).status(Result.Status.SUCCESS).severity(Severity.INFO)
+                .columnNames(asList("Node", "DependsOn")).rows(diagramRows).build());
 
         Concept importedConcept = ruleSet.getConceptBucket().getById("test:ImportedConcept");
         List<Map<String, Object>> importedConceptRows = new ArrayList<>();
         Map<String, Object> importedConceptRow = new HashMap<>();
         importedConceptRow.put("ImportedConceptValue", asList("FooBar"));
         importedConceptRows.add(importedConceptRow);
-        processRule(plugin, importedConcept,
-                new Result<>(importedConcept, Result.Status.FAILURE, Severity.MINOR, singletonList("ImportedConceptValue"), importedConceptRows));
+        processRule(plugin, importedConcept, Result.<Concept> builder().rule(importedConcept).status(Result.Status.FAILURE).severity(Severity.MINOR)
+                .columnNames(singletonList("ImportedConceptValue")).rows(importedConceptRows).build());
 
         plugin.end();
 

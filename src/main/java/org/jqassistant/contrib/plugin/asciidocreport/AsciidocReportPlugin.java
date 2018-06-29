@@ -37,7 +37,7 @@ public class AsciidocReportPlugin extends AbstractReportPlugin {
     private static final String PROPERTY_FILE_INCLUDE = "asciidoc.report.file.include";
     private static final String PROPERTY_FILE_EXCLUDE = "asciidoc.report.file.exclude";
 
-    private static final String DEFAULT_DIRECTORY = "html";
+    private static final String DEFAULT_DIRECTORY = "asciidoc";
     private static final String DEFAULT_RULE_DIRECTORY = "jqassistant/rules";
 
     private static final String BACKEND_HTML5 = "html5";

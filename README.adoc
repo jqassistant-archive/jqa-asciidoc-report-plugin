@@ -16,7 +16,7 @@ Furthermore include directives are provided for embedding a summary about execut
 
 * Java 7 or higher
 * Maven 3.2.5 or higher
-* jQAssistant 1.3.0 or higher (see below)
+* jQAssistant 1.4.0 (see below)
 
 == Setup
 
@@ -30,7 +30,7 @@ The plugin can be enabled in a Maven based project by adding it as a dependency 
         <plugin>
             <groupId>com.buschmais.jqassistant</groupId>
             <artifactId>jqassistant-maven-plugin</artifactId>
-            <version>1.3.0</version>
+            <version>1.4.0</version>
             <executions>
                 <execution>
                     <id>default-cli</id>
@@ -48,28 +48,26 @@ The plugin can be enabled in a Maven based project by adding it as a dependency 
                             </scanInclude>
                         </scanIncludes>
                         <reportProperties>
-                            <asciidoc.report.directory>${session.topLevelProject.build.directory}/html</asciidoc.report.directory>          <!--1-->
-                            <asciidoc.report.rule.directory>${session.topLevelProject.basedir}/jqassistant</asciidoc.report.rule.directory> <!--2-->
-                            <asciidoc.report.file.include>index.adoc</asciidoc.report.file.include>                                         <!--3-->
+                            <asciidoc.report.rule.directory>${session.topLevelProject.basedir}/jqassistant</asciidoc.report.rule.directory> <!--1-->
+                            <asciidoc.report.file.include>index.adoc</asciidoc.report.file.include>                                         <!--2-->
                         </reportProperties>
                     </configuration>
                 </execution>
             </executions>
             <dependencies>
-                <dependency>                                                                                                                <!--4-->
+                <dependency>                                                                                                                <!--3-->
                     <groupId>org.jqassistant.contrib.plugin</groupId>
                     <artifactId>jqassistant-asciidoc-report-plugin</artifactId>
-                    <version>1.0.0</version>
+                    <version>1.1.0</version>
                 </dependency>
             </dependencies>
         </plugin>
     </plugins>
 </build>
 ----
-<1> Configures the directory where the jQAssistant Asciidoc Report plugin will create the rendered HTML files.
-<2> Defines the directory where the source Asciidoc files are located.
-<3> The filter specifying the source file which should be rendered (optional).
-<4> Declares the plugin as dependency for jQAssistant
+<1> Defines the directory where the source Asciidoc files are located.
+<2> The filter specifying the source file which should be rendered (optional).
+<3> Declares the plugin as dependency for jQAssistant
 
 == Includes
 
@@ -116,7 +114,7 @@ The result of the rule simply needs to return all required nodes and their relat
 .jqassistant/index.adoc
 ....
 [[package:DependencyDiagram]]
-[source,cypher,role=concept,requiresConcepts="dependency:Package",reportProperties="render=component-diagram"] // (1)
+[source,cypher,role=concept,requiresConcepts="dependency:Package",reportType="plantuml-component-diagram"] // (1)
 .Creates a diagram about dependencies between packages containing Java types (test artifacts are excluded).
 ----
 MATCH
@@ -129,7 +127,7 @@ RETURN
   package, dependsOn                                                                                           // (2)
 ----
 ....
-(1) The report property `render` is set to `component-diagram` for activating the PlantUML support.
+(1) The report type is set to `plantuml-component-diagram`.
 (2) The packages are returned as nodes and their dependencies (dependsOn) as relationships.
 
 The result might also specify graph-alike structures which will be rendered as PlantUML folders.
@@ -138,7 +136,7 @@ The following example therefore uses a modified return clause:
 .jqassistant/index.adoc
 ....
 [[package:DependencyPerArtifactDiagram]]
-[source,cypher,role=concept,requiresConcepts="dependency:Package",reportProperties="render=component-diagram"]
+[source,cypher,role=concept,requiresConcepts="dependency:Package",reportType="plantuml-component-diagram"]
 .Creates a diagram about dependencies between packages containing Java types (per artifact, test artifacts are excluded).
 ----
 MATCH
@@ -174,10 +172,6 @@ The Asciidoc Report plugin accepts several options that might be passed as repor
 | asciidoc.report.file.include   | A comma separated list of filter of Asciidoc files to be included (optional) |
 | asciidoc.report.file.exclude   | A comma separated list of filter of Asciidoc files to be included (optional) |
 |===
-
-== Limitations
-
-Currently only results are embedded for rules that either specify no report type or explicity select `asciidoc` for it (i.e. 'reportType=asciidoc').
 
 [[feedback]]
 == Feedback
