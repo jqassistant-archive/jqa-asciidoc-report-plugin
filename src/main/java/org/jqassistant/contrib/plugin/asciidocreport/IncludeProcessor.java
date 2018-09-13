@@ -69,7 +69,7 @@ public class IncludeProcessor extends org.asciidoctor.extension.IncludeProcessor
             Executable executable = rule.getExecutable();
             if (executable instanceof CypherExecutable) {
                 language = "cypher";
-                source = ((CypherExecutable) executable).getStatement();
+                source = ((CypherExecutable) executable).getSource();
             } else if (executable instanceof ScriptExecutable) {
                 ScriptExecutable scriptExecutable = (ScriptExecutable) executable;
                 language = executable.getLanguage();
