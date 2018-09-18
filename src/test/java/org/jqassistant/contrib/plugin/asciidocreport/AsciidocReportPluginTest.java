@@ -12,10 +12,7 @@ import java.io.IOException;
 import java.util.*;
 
 import com.buschmais.jqassistant.core.analysis.api.Result;
-import com.buschmais.jqassistant.core.analysis.api.rule.Concept;
-import com.buschmais.jqassistant.core.analysis.api.rule.RuleException;
-import com.buschmais.jqassistant.core.analysis.api.rule.RuleSet;
-import com.buschmais.jqassistant.core.analysis.api.rule.Severity;
+import com.buschmais.jqassistant.core.analysis.api.rule.*;
 import com.buschmais.jqassistant.core.report.api.ReportContext;
 import com.buschmais.jqassistant.core.report.api.ReportException;
 import com.buschmais.jqassistant.core.report.api.ReportPlugin;
@@ -24,6 +21,7 @@ import com.buschmais.jqassistant.core.report.impl.ReportContextImpl;
 import com.buschmais.jqassistant.core.rule.api.reader.RuleConfiguration;
 import com.buschmais.jqassistant.core.rule.api.reader.RuleParserPlugin;
 import com.buschmais.jqassistant.core.rule.api.source.FileRuleSource;
+import com.buschmais.jqassistant.core.rule.api.source.RuleSource;
 import com.buschmais.jqassistant.core.rule.impl.reader.AsciidocRuleParserPlugin;
 import com.buschmais.jqassistant.core.rule.impl.reader.RuleParser;
 import com.buschmais.jqassistant.core.shared.io.ClasspathResource;
@@ -59,7 +57,7 @@ public class AsciidocReportPluginTest {
     public void setUp() throws RuleException {
         File classesDirectory = ClasspathResource.getFile(AsciidocReportPluginTest.class, "/");
         ruleDirectory = new File(classesDirectory, "jqassistant");
-        ruleSet = getRuleSet(ruleDirectory);
+        ruleSet = getRuleSet(ruleDirectory, "index.adoc", "other.adoc");
         reportPlugins = new HashMap<>();
         reportPlugins.put("asciidoc", new AsciidocReportPlugin());
         reportPlugins.put("plantuml-component-diagram", new ComponentDiagramReportPlugin());
@@ -69,27 +67,58 @@ public class AsciidocReportPluginTest {
     }
 
     @Test
+    public void defaultIndexDocument() throws RuleException, IOException {
+        verify(Collections.<String, Object> emptyMap(), new File(outputDirectory, "report/asciidoc"));
+    }
+
+    @Test
     public void defaultReportDirectory() throws RuleException, IOException {
-        verify(new HashMap<String, Object>(), new File(outputDirectory, "report/asciidoc"));
+        HashMap<String, Object> properties = new HashMap<>();
+        properties.put("asciidoc.report.rule.directory", ruleDirectory.getAbsolutePath());
+        properties.put("asciidoc.report.file.include", "index.adoc");
+        verify(properties, new File(outputDirectory, "report/asciidoc"));
     }
 
     @Test
     public void customReportDirectory() throws RuleException, IOException {
         File customReportDirectory = new File(outputDirectory, "report/custom-report");
         Map<String, Object> properties = new HashMap<>();
+        properties.put("asciidoc.report.rule.directory", ruleDirectory.getAbsolutePath());
+        properties.put("asciidoc.report.file.include", "index.adoc");
         properties.put("asciidoc.report.directory", customReportDirectory.getAbsolutePath());
         verify(properties, customReportDirectory);
     }
 
     private void verify(Map<String, Object> properties, File expectedDirectory) throws RuleException, IOException {
-        properties.put("asciidoc.report.rule.directory", ruleDirectory.getAbsolutePath());
-        properties.put("asciidoc.report.file.include", "index.adoc");
+        ReportContext reportContext = getReportContext(properties);
 
+        Concept componentDiagram = execute();
+
+        File indexHtml = new File(expectedDirectory, "index.html");
+        assertThat(indexHtml.exists(), equalTo(true));
+
+        String html = FileUtils.readFileToString(indexHtml);
+
+        Document document = Jsoup.parse(html);
+        Elements summaryTables = document.getElementsByClass("summary");
+        assertThat(summaryTables.size(), equalTo(2));
+        verifyConstraintsSummary(summaryTables.get(0));
+        verifyConceptsSummary(summaryTables.get(1));
+        verifyIndexResults(reportContext, componentDiagram, html);
+        // test:ImportedConcept
+        verifyRuleResult(html, "Status: <span class=\"red\">FAILURE</span>", "Severity: MINOR", "<th>ImportedConceptValue</th>",
+                "<td>" + LINE_SEPARATOR + "FooBar" + LINE_SEPARATOR + "</td>");
+    }
+
+    private ReportContext getReportContext(Map<String, Object> properties) throws ReportException {
         ReportContext reportContext = new ReportContextImpl(outputDirectory);
         for (ReportPlugin reportPlugin : reportPlugins.values()) {
             reportPlugin.configure(reportContext, properties);
         }
+        return reportContext;
+    }
 
+    private Concept execute() throws ReportException, NoConceptException {
         ReportPlugin plugin = new CompositeReportPlugin(reportPlugins);
         plugin.begin();
 
@@ -128,23 +157,13 @@ public class AsciidocReportPluginTest {
                 .columnNames(singletonList("ImportedConceptValue")).rows(importedConceptRows).build());
 
         plugin.end();
+        return componentDiagram;
+    }
 
-        File indexHtml = new File(expectedDirectory, "index.html");
-        assertThat(indexHtml.exists(), equalTo(true));
-
-        String html = FileUtils.readFileToString(indexHtml);
-
-        Document document = Jsoup.parse(html);
-        Elements summaryTables = document.getElementsByClass("summary");
-        assertThat(summaryTables.size(), equalTo(2));
-        verifyConstraintsSummary(summaryTables.get(0));
-        verifyConceptsSummary(summaryTables.get(1));
-
+    private void verifyIndexResults(ReportContext reportContext, Concept componentDiagram, String html) {
         // test:Concept
-        assertThat(html, containsString("Status: <span class=\"green\">SUCCESS</span>"));
-        assertThat(html, containsString("Severity: MAJOR (from MINOR)"));
-        assertThat(html, containsString("<th>Value</th>"));
-        assertThat(html, containsString("<td>" + LINE_SEPARATOR + "Foo" + LINE_SEPARATOR + "Bar" + LINE_SEPARATOR + "</td>"));
+        verifyRuleResult(html, "Status: <span class=\"green\">SUCCESS</span>", "Severity: MAJOR (from MINOR)", "<th>Value</th>",
+                "<td>" + LINE_SEPARATOR + "Foo" + LINE_SEPARATOR + "Bar" + LINE_SEPARATOR + "</td>");
         // test:ComponentDiagram
         assertThat(html, containsString("Severity: INFO (from MINOR)"));
         File plantumlReportDirectory = reportContext.getReportDirectory("plantuml");
@@ -154,40 +173,12 @@ public class AsciidocReportPluginTest {
         assertThat(componentDiagrams.size(), equalTo(1));
         String expectedDiagramUrl = "../plantuml/test_ComponentDiagram.svg";
         assertThat(html, containsString("<a href=\"" + expectedDiagramUrl + "\"><img src=\"" + expectedDiagramUrl + "\"/></a>"));
-        // test:ImportedConcept
-        assertThat(html, containsString("Status: <span class=\"red\">FAILURE</span>"));
-        assertThat(html, containsString("Severity: MINOR"));
-        assertThat(html, containsString("<th>ImportedConceptValue</th>"));
-        assertThat(html, containsString("<td>" + LINE_SEPARATOR + "FooBar" + LINE_SEPARATOR + "</td>"));
     }
 
-    private ArtifactFileDescriptor createNode(long id, String name) {
-        Neo4jNode node = mock(Neo4jNode.class);
-        when(node.getId()).thenReturn(id);
-        Neo4jLabel artifactLabel = mock(Neo4jLabel.class);
-        when(artifactLabel.getName()).thenReturn("Artifact");
-        when(node.getLabels()).thenReturn(Arrays.asList(artifactLabel));
-        ArtifactFileDescriptor artifactFileDescriptor = mock(ArtifactFileDescriptor.class);
-        when(artifactFileDescriptor.getFullQualifiedName()).thenReturn(name);
-        when(artifactFileDescriptor.getDelegate()).thenReturn(node);
-        return artifactFileDescriptor;
-    }
-
-    private DependsOnDescriptor createRelationship(long id, ArtifactFileDescriptor start, ArtifactFileDescriptor end) {
-        Neo4jRelationshipType relationshipType = mock(Neo4jRelationshipType.class);
-        when(relationshipType.getName()).thenReturn("DEPENDS_ON");
-        Neo4jRelationship relationship = mock(Neo4jRelationship.class);
-        when(relationship.getId()).thenReturn(id);
-        when(relationship.getType()).thenReturn(relationshipType);
-        Neo4jNode startNode = start.getDelegate();
-        Neo4jNode endNode = end.getDelegate();
-        when(relationship.getStartNode()).thenReturn(startNode);
-        when(relationship.getEndNode()).thenReturn(endNode);
-        DependsOnDescriptor dependsOnDescriptor = mock(DependsOnDescriptor.class);
-        when(dependsOnDescriptor.getDependent()).thenReturn(start);
-        when(dependsOnDescriptor.getDependency()).thenReturn(end);
-        when(dependsOnDescriptor.getDelegate()).thenReturn(relationship);
-        return dependsOnDescriptor;
+    private void verifyRuleResult(String html, String... expectedValues) {
+        for (String expectedValue : expectedValues) {
+            assertThat(html, containsString(expectedValue));
+        }
     }
 
     private void verifyConstraintsSummary(Element constraintSummaryTable) {
@@ -228,14 +219,45 @@ public class AsciidocReportPluginTest {
         assertThat(status.hasClass(expectedColor), equalTo(true));
     }
 
-    private RuleSet getRuleSet(File ruleDirectory) throws RuleException {
+    private ArtifactFileDescriptor createNode(long id, String name) {
+        Neo4jNode node = mock(Neo4jNode.class);
+        when(node.getId()).thenReturn(id);
+        Neo4jLabel artifactLabel = mock(Neo4jLabel.class);
+        when(artifactLabel.getName()).thenReturn("Artifact");
+        when(node.getLabels()).thenReturn(Arrays.asList(artifactLabel));
+        ArtifactFileDescriptor artifactFileDescriptor = mock(ArtifactFileDescriptor.class);
+        when(artifactFileDescriptor.getFullQualifiedName()).thenReturn(name);
+        when(artifactFileDescriptor.getDelegate()).thenReturn(node);
+        return artifactFileDescriptor;
+    }
+
+    private DependsOnDescriptor createRelationship(long id, ArtifactFileDescriptor start, ArtifactFileDescriptor end) {
+        Neo4jRelationshipType relationshipType = mock(Neo4jRelationshipType.class);
+        when(relationshipType.getName()).thenReturn("DEPENDS_ON");
+        Neo4jRelationship relationship = mock(Neo4jRelationship.class);
+        when(relationship.getId()).thenReturn(id);
+        when(relationship.getType()).thenReturn(relationshipType);
+        Neo4jNode startNode = start.getDelegate();
+        Neo4jNode endNode = end.getDelegate();
+        when(relationship.getStartNode()).thenReturn(startNode);
+        when(relationship.getEndNode()).thenReturn(endNode);
+        DependsOnDescriptor dependsOnDescriptor = mock(DependsOnDescriptor.class);
+        when(dependsOnDescriptor.getDependent()).thenReturn(start);
+        when(dependsOnDescriptor.getDependency()).thenReturn(end);
+        when(dependsOnDescriptor.getDelegate()).thenReturn(relationship);
+        return dependsOnDescriptor;
+    }
+
+    private RuleSet getRuleSet(File ruleDirectory, String... adocFiles) throws RuleException {
         AsciidocRuleParserPlugin ruleParserPlugin = new AsciidocRuleParserPlugin();
         ruleParserPlugin.initialize();
         ruleParserPlugin.configure(RuleConfiguration.DEFAULT);
         RuleParser ruleParser = new RuleParser(Arrays.<RuleParserPlugin> asList(ruleParserPlugin));
-        File indexFile = new File(ruleDirectory, "index.adoc");
-        File otherFile = new File(ruleDirectory, "other.adoc");
-        return ruleParser.parse(asList(new FileRuleSource(otherFile), new FileRuleSource(indexFile)));
+        List<RuleSource> ruleSources = new ArrayList<>();
+        for (String adocFile : adocFiles) {
+            ruleSources.add(new FileRuleSource(new File(ruleDirectory, adocFile)));
+        }
+        return ruleParser.parse(ruleSources);
     }
 
     private void processRule(ReportPlugin plugin, Concept rule, Result<Concept> result) throws ReportException {
