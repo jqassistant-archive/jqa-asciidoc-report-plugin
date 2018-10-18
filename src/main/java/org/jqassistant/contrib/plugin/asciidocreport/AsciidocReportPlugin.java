@@ -104,6 +104,7 @@ public class AsciidocReportPlugin extends AbstractReportPlugin {
                     extensionRegistry.includeProcessor(includeProcessor);
                     extensionRegistry.inlineMacro(new InlineMacroProcessor());
                     extensionRegistry.treeprocessor(new TreePreprocessor(conceptResults, constraintResults, reportDirectory, reportContext));
+                    extensionRegistry.postprocessor(new RuleTogglePostProcessor());
                     asciidoctor.convertFile(file, optionsBuilder);
                     asciidoctor.unregisterAllExtensions();
                 }

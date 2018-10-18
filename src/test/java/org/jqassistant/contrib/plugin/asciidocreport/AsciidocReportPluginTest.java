@@ -1,16 +1,5 @@
 package org.jqassistant.contrib.plugin.asciidocreport;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
-
 import com.buschmais.jqassistant.core.analysis.api.Result;
 import com.buschmais.jqassistant.core.analysis.api.rule.*;
 import com.buschmais.jqassistant.core.report.api.ReportContext;
@@ -31,7 +20,6 @@ import com.buschmais.xo.neo4j.api.model.Neo4jLabel;
 import com.buschmais.xo.neo4j.api.model.Neo4jNode;
 import com.buschmais.xo.neo4j.api.model.Neo4jRelationship;
 import com.buschmais.xo.neo4j.api.model.Neo4jRelationshipType;
-
 import org.apache.commons.io.FileUtils;
 import org.jqassistant.contrib.plugin.asciidocreport.plantuml.ComponentDiagramReportPlugin;
 import org.jsoup.Jsoup;
@@ -40,6 +28,17 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class AsciidocReportPluginTest {
 
@@ -68,7 +67,7 @@ public class AsciidocReportPluginTest {
 
     @Test
     public void defaultIndexDocument() throws RuleException, IOException {
-        verify(Collections.<String, Object> emptyMap(), new File(outputDirectory, "report/asciidoc"));
+        verify(Collections.<String, Object>emptyMap(), new File(outputDirectory, "report/asciidoc"));
     }
 
     @Test
@@ -104,10 +103,10 @@ public class AsciidocReportPluginTest {
         assertThat(summaryTables.size(), equalTo(2));
         verifyConstraintsSummary(summaryTables.get(0));
         verifyConceptsSummary(summaryTables.get(1));
-        verifyIndexResults(reportContext, componentDiagram, html);
+        verifyConceptResult(reportContext, componentDiagram, html);
         // test:ImportedConcept
         verifyRuleResult(html, "Status: <span class=\"red\">FAILURE</span>", "Severity: MINOR", "<th>ImportedConceptValue</th>",
-                "<td>" + LINE_SEPARATOR + "FooBar" + LINE_SEPARATOR + "</td>");
+            "<td> FooBar </td>");
     }
 
     private ReportContext getReportContext(Map<String, Object> properties) throws ReportException {
@@ -145,34 +144,42 @@ public class AsciidocReportPluginTest {
         diagramRow2.put("DependsOn", null);
         diagramRows.add(diagramRow2);
 
-        processRule(plugin, componentDiagram, Result.<Concept> builder().rule(componentDiagram).status(Result.Status.SUCCESS).severity(Severity.INFO)
-                .columnNames(asList("Node", "DependsOn")).rows(diagramRows).build());
+        processRule(plugin, componentDiagram, Result.<Concept>builder().rule(componentDiagram).status(Result.Status.SUCCESS).severity(Severity.INFO)
+            .columnNames(asList("Node", "DependsOn")).rows(diagramRows).build());
 
         Concept importedConcept = ruleSet.getConceptBucket().getById("test:ImportedConcept");
         List<Map<String, Object>> importedConceptRows = new ArrayList<>();
         Map<String, Object> importedConceptRow = new HashMap<>();
         importedConceptRow.put("ImportedConceptValue", asList("FooBar"));
         importedConceptRows.add(importedConceptRow);
-        processRule(plugin, importedConcept, Result.<Concept> builder().rule(importedConcept).status(Result.Status.FAILURE).severity(Severity.MINOR)
-                .columnNames(singletonList("ImportedConceptValue")).rows(importedConceptRows).build());
+        processRule(plugin, importedConcept, Result.<Concept>builder().rule(importedConcept).status(Result.Status.FAILURE).severity(Severity.MINOR)
+            .columnNames(singletonList("ImportedConceptValue")).rows(importedConceptRows).build());
 
         plugin.end();
         return componentDiagram;
     }
 
-    private void verifyIndexResults(ReportContext reportContext, Concept componentDiagram, String html) {
+    private void verifyConceptResult(ReportContext reportContext, Concept concept, String html) {
         // test:Concept
         verifyRuleResult(html, "Status: <span class=\"green\">SUCCESS</span>", "Severity: MAJOR (from MINOR)", "<th>Value</th>",
-                "<td>" + LINE_SEPARATOR + "Foo" + LINE_SEPARATOR + "Bar" + LINE_SEPARATOR + "</td>");
+            "<td> Foo Bar </td>");
         // test:ComponentDiagram
         assertThat(html, containsString("Severity: INFO (from MINOR)"));
+
+        //Toggle for rule content (i.e. Cypher source)
+        assertThat(html, containsString("<input type=\"checkbox\" class=\"rule-toggle\" title=\"Show rule details\">"));
+        assertThat(html, containsString("<div class=\"content\" id=\"rule-listing0\">"));
+        assertThat(html, containsString("<style>#rule-listing0{display:none;}input.rule-toggle:checked + #rule-listing0{display:block;}"));
+
+        // PlantUML diagram
         File plantumlReportDirectory = reportContext.getReportDirectory("plantuml");
         assertThat(new File(plantumlReportDirectory, "test_ComponentDiagram.svg").exists(), equalTo(true));
         assertThat(new File(plantumlReportDirectory, "test_ComponentDiagram.plantuml").exists(), equalTo(true));
-        List<ReportContext.Report<?>> componentDiagrams = reportContext.getReports(componentDiagram);
+        List<ReportContext.Report<?>> componentDiagrams = reportContext.getReports(concept);
         assertThat(componentDiagrams.size(), equalTo(1));
         String expectedDiagramUrl = "../plantuml/test_ComponentDiagram.svg";
-        assertThat(html, containsString("<a href=\"" + expectedDiagramUrl + "\"><img src=\"" + expectedDiagramUrl + "\"/></a>"));
+        String expectedImageLink = "<a href=\"" + expectedDiagramUrl + "\"><img src=\"" + expectedDiagramUrl + "\"></a>";
+        assertThat(html, containsString(expectedImageLink));
     }
 
     private void verifyRuleResult(String html, String... expectedValues) {
@@ -198,7 +205,7 @@ public class AsciidocReportPluginTest {
     }
 
     private void verifyColumns(Element row, String expectedId, String expectedDescription, String expectedSeverity, String expectedStatus,
-            String expectedColor) {
+                               String expectedColor) {
         Elements columns = row.getElementsByTag("td");
         Element id = columns.get(0).getElementsByTag("a").first();
         assertThat(id, notNullValue());
@@ -252,7 +259,7 @@ public class AsciidocReportPluginTest {
         AsciidocRuleParserPlugin ruleParserPlugin = new AsciidocRuleParserPlugin();
         ruleParserPlugin.initialize();
         ruleParserPlugin.configure(RuleConfiguration.DEFAULT);
-        RuleParser ruleParser = new RuleParser(Arrays.<RuleParserPlugin> asList(ruleParserPlugin));
+        RuleParser ruleParser = new RuleParser(Arrays.<RuleParserPlugin>asList(ruleParserPlugin));
         List<RuleSource> ruleSources = new ArrayList<>();
         for (String adocFile : adocFiles) {
             ruleSources.add(new FileRuleSource(new File(ruleDirectory, adocFile)));
