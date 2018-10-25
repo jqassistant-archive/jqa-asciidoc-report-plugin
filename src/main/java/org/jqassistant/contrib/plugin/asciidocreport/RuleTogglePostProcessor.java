@@ -10,7 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * {@link Postprocessor} that hides listing blocks of concepts and constraints by default and adds a toggle to show them.
+ * {@link Postprocessor} that hides listing blocks of concepts and constraints
+ * by default and adds a toggle to show them.
  */
 public class RuleTogglePostProcessor extends Postprocessor {
 
@@ -28,7 +29,7 @@ public class RuleTogglePostProcessor extends Postprocessor {
                     content.first().before("<input type=\"checkbox\" class=\"rule-toggle\" title=\"Show rule details\"/>");
                     content.attr("id", contentId);
                     Elements title = listingblock.getElementsByClass("title");
-                    title.first().attr("style", "display:inline-block;");
+                    title.first().attr("style", "display:inline;");
                 }
             }
             StringBuilder styles = new StringBuilder();
@@ -38,7 +39,7 @@ public class RuleTogglePostProcessor extends Postprocessor {
                 styles.append("display:none;"); // disable source content blocks by default
                 styles.append("}");
                 styles.append("input.rule-toggle:checked + #").append(contentId).append("{");
-                styles.append("display:block;");  // activate them if the checkbox element is checked
+                styles.append("display:block;"); // activate them if the checkbox element is checked
                 styles.append("}");
             }
             styles.append("</style>");

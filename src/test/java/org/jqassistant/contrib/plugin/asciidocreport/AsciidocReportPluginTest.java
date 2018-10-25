@@ -42,8 +42,6 @@ import static org.mockito.Mockito.when;
 
 public class AsciidocReportPluginTest {
 
-    private static final String LINE_SEPARATOR = "\n";
-
     private Map<String, ReportPlugin> reportPlugins;
 
     private File ruleDirectory;
