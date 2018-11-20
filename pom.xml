@@ -4,12 +4,12 @@
     <parent>
         <groupId>org.jqassistant.contrib.common</groupId>
         <artifactId>parent</artifactId>
-        <version>1.5.0-SNAPSHOT</version>
+        <version>1.5.0</version>
     </parent>
 
     <groupId>org.jqassistant.contrib.plugin</groupId>
     <artifactId>jqassistant-asciidoc-report-plugin</artifactId>
-    <version>1.2.0-SNAPSHOT</version>
+    <version>1.5.0-SNAPSHOT</version>
 
     <name>jQAssistant Asciidoc Report Plugin</name>
     <description>The jQAssistant plugin for creating reports from Asciidoc files.</description>
@@ -54,7 +54,7 @@
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
-                <version>1.18.2</version>
+                <version>1.18.4</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
@@ -62,27 +62,6 @@
                 <artifactId>commons-lang3</artifactId>
                 <version>3.5</version>
                 <scope>provided</scope>
-            </dependency>
-            <!-- fix a problem with rendering un-numbered list in Asciidoctor 1.5.6 -->
-            <dependency>
-                <groupId>org.asciidoctor</groupId>
-                <artifactId>asciidoctorj</artifactId>
-                <version>1.5.7</version>
-            </dependency>
-            <dependency>
-                <groupId>org.asciidoctor</groupId>
-                <artifactId>asciidoctorj-diagram</artifactId>
-                <version>1.5.9</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jruby</groupId>
-                <artifactId>jruby-core</artifactId>
-                <version>9.1.17.0</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jruby</groupId>
-                <artifactId>jruby-stdlib</artifactId>
-                <version>9.1.17.0</version>
             </dependency>
             <!-- unit tests -->
             <dependency>
