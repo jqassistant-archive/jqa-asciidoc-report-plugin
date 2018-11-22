@@ -7,16 +7,14 @@ http://www.methods.co.nz/asciidoc/[Asciidoc] documents containing rules and embe
 == How It Works
 
 The plugin records the results of executed rules (i.e. concepts and constraints).
-At the end of the analysis phase http://www.asciidoctor[Asciidoctor] is used for rendering the input documents providing the rules
-to HTML documents. The listings containing rules are identified and their status and results appended.
-
+At the end of the analysis phase http://www.asciidoctor[Asciidoctor] is used for rendering the input documents providing the rules to HTML documents. The listings containing rules are identified and their status and results appended.
 Furthermore include directives are provided for embedding a summary about executed and imported rules.
 
 == Prerequisites
 
 * Java 7 or higher
 * Maven 3.2.5 or higher
-* jQAssistant 1.4.0 (see below)
+* jQAssistant 1.5.0 (see below)
 
 == Setup
 
@@ -30,7 +28,7 @@ The plugin can be enabled in a Maven based project by adding it as a dependency 
         <plugin>
             <groupId>com.buschmais.jqassistant</groupId>
             <artifactId>jqassistant-maven-plugin</artifactId>
-            <version>1.4.0</version>
+            <version>1.5.0</version>
             <executions>
                 <execution>
                     <id>default-cli</id>
@@ -39,18 +37,12 @@ The plugin can be enabled in a Maven based project by adding it as a dependency 
                         <goal>analyze</goal>
                     </goals>
                     <configuration>
-                        <failOnSeverity>MAJOR</failOnSeverity>
-                        <warnOnSeverity>MINOR</warnOnSeverity>
-                        <useExecutionRootAsProjectRoot>true</useExecutionRootAsProjectRoot>
-                        <scanIncludes>
-                            <scanInclude>
-                                <path>${project.basedir}/.git</path>
-                            </scanInclude>
-                        </scanIncludes>
+                        <!--
                         <reportProperties>
                             <asciidoc.report.rule.directory>${session.topLevelProject.basedir}/jqassistant</asciidoc.report.rule.directory> <!--1-->
                             <asciidoc.report.file.include>index.adoc</asciidoc.report.file.include>                                         <!--2-->
                         </reportProperties>
+                        -->
                     </configuration>
                 </execution>
             </executions>
@@ -58,25 +50,28 @@ The plugin can be enabled in a Maven based project by adding it as a dependency 
                 <dependency>                                                                                                                <!--3-->
                     <groupId>org.jqassistant.contrib.plugin</groupId>
                     <artifactId>jqassistant-asciidoc-report-plugin</artifactId>
-                    <version>1.1.0</version>
+                    <version>1.2.0</version>
                 </dependency>
             </dependencies>
         </plugin>
     </plugins>
 </build>
 ----
-<1> Defines the directory where the source Asciidoc files are located.
+<1> Defines the directory where the source Asciidoc files are located (optional).
 <2> The filter specifying the source file which should be rendered (optional).
 <3> Declares the plugin as dependency for jQAssistant
+
+NOTE: By default all rule files with the name `index.adoc` will be selected for rendering.
+The report properties `asciidoc.report.rule.directory` and `asciidoc.report.file.include` may be used to explicitly select files.
 
 == Includes
 
 The report may be enhanced by `jQA` include directives:
 
 `jQA:Summary[]`::
-  Summary table containing all executed rules and their state
+  Embeds a summary table containing all executed rules, their description and status.
 `jQA:ImportedRules[]`::
-  Descriptions for all rules which have been executed but which are not part of the document itself (i.e. provided by plugins)
+  Renders descriptions for all rules which have been executed but which are not part of the document itself (i.e. provided by plugins).
 
 .jqassistant/index.adoc
 ....
@@ -108,7 +103,7 @@ The plugin provides supports generating component diagrams from rule results.
 NOTE: This feature is based on http://plantuml.com/[PlantUML] which itself relies on http://www.graphviz.org[Graphviz].
 The latter needs to be installed and the `dot` executable must be present on the system path.
 
-To activate diagram rendering a report property `render=component-diagram` must be set.
+To activate diagram rendering the report type must be set to `plantuml-component-diagram`.
 The result of the rule simply needs to return all required nodes and their relationships:
 
 .jqassistant/index.adoc
@@ -168,9 +163,9 @@ The Asciidoc Report plugin accepts several options that might be passed as repor
 |===
 | Property                                   | Description                                                      | Default
 | asciidoc.report.directory      | Specifies the directory where the HTML files will be written                 | jqassistant/report/asciidoc
-| asciidoc.report.rule.directory | Specifies the directory where the Asciidoc files are located                 | jqassistant/rules
+| asciidoc.report.rule.directory | Specifies the directory where the Asciidoc files are located (optional)      |
 | asciidoc.report.file.include   | A comma separated list of filter of Asciidoc files to be included (optional) |
-| asciidoc.report.file.exclude   | A comma separated list of filter of Asciidoc files to be included (optional) |
+| asciidoc.report.file.exclude   | A comma separated list of filter of Asciidoc files to be excluded (optional) |
 |===
 
 [[feedback]]
@@ -186,5 +181,4 @@ The plugin could not provide its functionality without the support of the follow
 * https://plantuml.com/[PlantUML]
 * https://neo4j.org[Neo4j]
 * https://jqassistant.org[jQAssistant]
-
 

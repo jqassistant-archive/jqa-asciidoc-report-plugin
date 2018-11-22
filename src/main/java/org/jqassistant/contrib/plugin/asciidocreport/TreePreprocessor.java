@@ -23,6 +23,8 @@ import org.asciidoctor.extension.Treeprocessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static com.buschmais.jqassistant.core.report.api.ReportContext.*;
+
 public class TreePreprocessor extends Treeprocessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TreePreprocessor.class);
@@ -88,6 +90,7 @@ public class TreePreprocessor extends Treeprocessor {
                         content.add(renderImage(getReportUrl(report)));
                         break;
                     case LINK:
+                        content.add("Report: ");
                         content.add(renderLink(getReportUrl(report), report.getLabel()));
                         break;
                     }
@@ -102,6 +105,15 @@ public class TreePreprocessor extends Treeprocessor {
         return content;
     }
 
+    /**
+     * Returns a String representation of the URL of a {@link Report}.
+     * <p>
+     * If the URL references a file the URL is relative.
+     *
+     * @param report
+     *            the {@link Report}.
+     * @return The URL as {@link String} representation.
+     */
     private String getReportUrl(ReportContext.Report<?> report) {
         URL url = report.getUrl();
         String protocol = url.getProtocol();
@@ -111,6 +123,13 @@ public class TreePreprocessor extends Treeprocessor {
         return url.toExternalForm();
     }
 
+    /**
+     * Determines a URL relative to the {@link #reportDirectoy}.
+     *
+     * @param url
+     *            The {@link URL}.
+     * @return The relative URL as {@link String} representation.
+     */
     private String getRelativeReportUrl(URL url) {
         Path path;
         try {
