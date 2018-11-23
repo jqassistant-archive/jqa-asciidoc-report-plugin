@@ -9,7 +9,7 @@
 
     <groupId>org.jqassistant.contrib.plugin</groupId>
     <artifactId>jqassistant-asciidoc-report-plugin</artifactId>
-    <version>1.5.1-SNAPSHOT</version>
+    <version>1.5.1</version>
 
     <name>jQAssistant Asciidoc Report Plugin</name>
     <description>The jQAssistant plugin for creating reports from Asciidoc files.</description>
@@ -28,7 +28,7 @@
         <developerConnection>scm:git:git@github.com:jqassistant-contrib/jqassistant-asciidoc-report-plugin.git
         </developerConnection>
         <url>https://github.com/jqassistant-contrib/jqassistant-asciidoc-report-plugin</url>
-        <tag>HEAD</tag>
+        <tag>1.5.1</tag>
     </scm>
 
     <properties>
