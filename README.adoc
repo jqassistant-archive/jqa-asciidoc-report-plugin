@@ -10,7 +10,7 @@ The plugin records the results of executed rules (i.e. concepts and constraints)
 At the end of the analysis phase http://www.asciidoctor[Asciidoctor] is used for rendering the input documents providing the rules to HTML documents. The listings containing rules are identified and their status and results appended.
 Furthermore include directives are provided for embedding a summary about executed and imported rules.
 
-TIP: You can find an example setup and rules in the http://github.com/buschmais/spring-petclinic/[Spring PetClinic] demo. 
+TIP: You can find an example setup and rules in the http://github.com/buschmais/spring-petclinic/[Spring PetClinic] demo. After cloning the repository and building using `mvn install` the rendered report is available in the directory `target/jqassistant/report/asciidoc`.
 
 == Prerequisites
 
@@ -52,7 +52,7 @@ The plugin can be enabled in a Maven based project by adding it as a dependency 
                 <dependency>                                                                                                                <!--3-->
                     <groupId>org.jqassistant.contrib.plugin</groupId>
                     <artifactId>jqassistant-asciidoc-report-plugin</artifactId>
-                    <version>1.2.0</version>
+                    <version>1.5.1</version>
                 </dependency>
             </dependencies>
         </plugin>
