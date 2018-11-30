@@ -10,6 +10,8 @@ The plugin records the results of executed rules (i.e. concepts and constraints)
 At the end of the analysis phase http://www.asciidoctor[Asciidoctor] is used for rendering the input documents providing the rules to HTML documents. The listings containing rules are identified and their status and results appended.
 Furthermore include directives are provided for embedding a summary about executed and imported rules.
 
+TIP: You can find an example setup and rules in the http://github.com/buschmais/spring-petclinic/[Spring PetClinic] demo. 
+
 == Prerequisites
 
 * Java 7 or higher
