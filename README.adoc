@@ -63,8 +63,11 @@ The plugin can be enabled in a Maven based project by adding it as a dependency 
 <2> The filter specifying the source file which should be rendered (optional).
 <3> Declares the plugin as dependency for jQAssistant
 
+For using the plugin with the command line distribution download the JAR file from https://search.maven.org/search?q=a:jqassistant-asciidoc-report-plugin[Maven Central] and copy it to the `plugins/` folder.
+
 NOTE: By default all rule files with the name `index.adoc` will be selected for rendering.
 The report properties `asciidoc.report.rule.directory` and `asciidoc.report.file.include` may be used to explicitly select files.
+
 
 == Includes
 
