@@ -65,7 +65,7 @@ public class AsciidocReportPluginTest {
 
     @Test
     public void defaultIndexDocument() throws RuleException, IOException {
-        verify(Collections.<String, Object>emptyMap(), new File(outputDirectory, "report/asciidoc"));
+        verify(Collections.<String, Object> emptyMap(), new File(outputDirectory, "report/asciidoc"));
     }
 
     @Test
@@ -94,7 +94,7 @@ public class AsciidocReportPluginTest {
         File indexHtml = new File(expectedDirectory, "index.html");
         assertThat(indexHtml.exists(), equalTo(true));
 
-        String html = FileUtils.readFileToString(indexHtml);
+        String html = FileUtils.readFileToString(indexHtml, "UTF-8");
 
         Document document = Jsoup.parse(html);
         Elements summaryTables = document.getElementsByClass("summary");
@@ -103,8 +103,7 @@ public class AsciidocReportPluginTest {
         verifyConceptsSummary(summaryTables.get(1));
         verifyConceptResult(reportContext, componentDiagram, html);
         // test:ImportedConcept
-        verifyRuleResult(html, "Status: <span class=\"red\">FAILURE</span>", "Severity: MINOR", "<th>ImportedConceptValue</th>",
-            "<td> FooBar </td>");
+        verifyRuleResult(html, "Status: <span class=\"red\">FAILURE</span>", "Severity: MINOR", "<th>ImportedConceptValue</th>", "<td> FooBar </td>");
     }
 
     private ReportContext getReportContext(Map<String, Object> properties) throws ReportException {
@@ -115,7 +114,7 @@ public class AsciidocReportPluginTest {
         return reportContext;
     }
 
-    private Concept execute() throws ReportException, NoConceptException {
+    private Concept execute() throws ReportException, NoConceptException, NoConstraintException {
         ReportPlugin plugin = new CompositeReportPlugin(reportPlugins);
         plugin.begin();
 
@@ -142,16 +141,21 @@ public class AsciidocReportPluginTest {
         diagramRow2.put("DependsOn", null);
         diagramRows.add(diagramRow2);
 
-        processRule(plugin, componentDiagram, Result.<Concept>builder().rule(componentDiagram).status(Result.Status.SUCCESS).severity(Severity.INFO)
-            .columnNames(asList("Node", "DependsOn")).rows(diagramRows).build());
+        processRule(plugin, componentDiagram, Result.<Concept> builder().rule(componentDiagram).status(Result.Status.SUCCESS).severity(Severity.INFO)
+                .columnNames(asList("Node", "DependsOn")).rows(diagramRows).build());
 
         Concept importedConcept = ruleSet.getConceptBucket().getById("test:ImportedConcept");
         List<Map<String, Object>> importedConceptRows = new ArrayList<>();
         Map<String, Object> importedConceptRow = new HashMap<>();
         importedConceptRow.put("ImportedConceptValue", asList("FooBar"));
         importedConceptRows.add(importedConceptRow);
-        processRule(plugin, importedConcept, Result.<Concept>builder().rule(importedConcept).status(Result.Status.FAILURE).severity(Severity.MINOR)
-            .columnNames(singletonList("ImportedConceptValue")).rows(importedConceptRows).build());
+        processRule(plugin, importedConcept, Result.<Concept> builder().rule(importedConcept).status(Result.Status.FAILURE).severity(Severity.MINOR)
+                .columnNames(singletonList("ImportedConceptValue")).rows(importedConceptRows).build());
+
+        Constraint importedConstraintWithoutDescription = ruleSet.getConstraintBucket().getById("test:ImportedConstraintWithoutDescription");
+        processRule(plugin, importedConstraintWithoutDescription,
+                Result.<Constraint> builder().rule(importedConstraintWithoutDescription).status(Result.Status.SUCCESS).severity(Severity.MAJOR)
+                        .columnNames(Collections.<String> emptyList()).rows(Collections.<Map<String, Object>> emptyList()).build());
 
         plugin.end();
         return componentDiagram;
@@ -159,12 +163,11 @@ public class AsciidocReportPluginTest {
 
     private void verifyConceptResult(ReportContext reportContext, Concept concept, String html) {
         // test:Concept
-        verifyRuleResult(html, "Status: <span class=\"green\">SUCCESS</span>", "Severity: MAJOR (from MINOR)", "<th>Value</th>",
-            "<td> Foo Bar </td>");
+        verifyRuleResult(html, "Status: <span class=\"green\">SUCCESS</span>", "Severity: MAJOR (from MINOR)", "<th>Value</th>", "<td> Foo Bar </td>");
         // test:ComponentDiagram
         assertThat(html, containsString("Severity: INFO (from MINOR)"));
 
-        //Toggle for rule content (i.e. Cypher source)
+        // Toggle for rule content (i.e. Cypher source)
         assertThat(html, containsString("<input type=\"checkbox\" class=\"rule-toggle\" title=\"Show rule details\">"));
         assertThat(html, containsString("<div class=\"content\" id=\"rule-listing0\">"));
         assertThat(html, containsString("<style>#rule-listing0{display:none;}input.rule-toggle:checked + #rule-listing0{display:block;}"));
@@ -188,7 +191,10 @@ public class AsciidocReportPluginTest {
 
     private void verifyConstraintsSummary(Element constraintSummaryTable) {
         assertThat(constraintSummaryTable.getElementsByTag("caption").first().text(), containsString("Constraints"));
-        assertThat(constraintSummaryTable.getElementsByTag("tbody").size(), equalTo(0));
+        Element constraintSummaryTableBody = constraintSummaryTable.getElementsByTag("tbody").first();
+        Elements rows = constraintSummaryTableBody.getElementsByTag("tr");
+        assertThat(rows.size(), equalTo(1));
+        verifyColumns(rows.get(0), "test:ImportedConstraintWithoutDescription", "", "MAJOR", "SUCCESS", "green");
     }
 
     private void verifyConceptsSummary(Element conceptSummaryTable) {
@@ -203,7 +209,7 @@ public class AsciidocReportPluginTest {
     }
 
     private void verifyColumns(Element row, String expectedId, String expectedDescription, String expectedSeverity, String expectedStatus,
-                               String expectedColor) {
+            String expectedColor) {
         Elements columns = row.getElementsByTag("td");
         Element id = columns.get(0).getElementsByTag("a").first();
         assertThat(id, notNullValue());
@@ -257,7 +263,7 @@ public class AsciidocReportPluginTest {
         AsciidocRuleParserPlugin ruleParserPlugin = new AsciidocRuleParserPlugin();
         ruleParserPlugin.initialize();
         ruleParserPlugin.configure(RuleConfiguration.DEFAULT);
-        RuleParser ruleParser = new RuleParser(Arrays.<RuleParserPlugin>asList(ruleParserPlugin));
+        RuleParser ruleParser = new RuleParser(Arrays.<RuleParserPlugin> asList(ruleParserPlugin));
         List<RuleSource> ruleSources = new ArrayList<>();
         for (String adocFile : adocFiles) {
             ruleSources.add(new FileRuleSource(new File(ruleDirectory, adocFile)));
@@ -269,5 +275,11 @@ public class AsciidocReportPluginTest {
         plugin.beginConcept(rule);
         plugin.setResult(result);
         plugin.endConcept();
+    }
+
+    private void processRule(ReportPlugin plugin, Constraint rule, Result<Constraint> result) throws ReportException {
+        plugin.beginConstraint(rule);
+        plugin.setResult(result);
+        plugin.endConstraint();
     }
 }
