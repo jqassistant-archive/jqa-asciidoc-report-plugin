@@ -1,7 +1,5 @@
 package org.jqassistant.contrib.plugin.asciidocreport;
 
-import static com.buschmais.jqassistant.core.rule.impl.reader.AsciidocRuleParserPlugin.CONCEPT;
-import static com.buschmais.jqassistant.core.rule.impl.reader.AsciidocRuleParserPlugin.CONSTRAINT;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.unmodifiableMap;
 
@@ -31,9 +29,9 @@ public class DocumentParser {
                 String role = block.getRole();
                 if (role != null) {
                     String id = (String) block.getAttr(ID);
-                    if (CONCEPT.equalsIgnoreCase(role)) {
+                    if ("concept".equalsIgnoreCase(role)) {
                         conceptBlocks.put(id, block);
-                    } else if (CONSTRAINT.equalsIgnoreCase(role)) {
+                    } else if ("constraint".equalsIgnoreCase(role)) {
                         constraintBlocks.put(id, block);
                     }
                 }
