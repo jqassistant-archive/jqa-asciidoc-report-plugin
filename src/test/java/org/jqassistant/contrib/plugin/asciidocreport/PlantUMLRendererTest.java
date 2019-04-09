@@ -11,6 +11,7 @@ import com.buschmais.jqassistant.core.report.api.graph.model.Node;
 import com.buschmais.jqassistant.core.report.api.graph.model.Relationship;
 import com.buschmais.jqassistant.core.report.api.graph.model.SubGraph;
 
+import net.sourceforge.plantuml.FileFormat;
 import org.jqassistant.contrib.plugin.asciidocreport.plantuml.PlantUMLRenderer;
 import org.junit.Test;
 
@@ -63,19 +64,50 @@ public class PlantUMLRendererTest {
     }
 
     @Test
-    public void renderDiagram() {
+    public void renderDiagramAsSvg() {
+        File file = renderDiagram("svg", "svg");
+
+        assertThat(file.exists(), equalTo(true));
+    }
+
+    @Test
+    public void renderDiagramAsPng() {
+        File file = renderDiagram("png", "png");
+
+        assertThat(file.exists(), equalTo(true));
+    }
+
+    @Test
+    public void renderDiagramNoFormat() {
+        File file = renderDiagram(null, "svg");
+
+        assertThat(file.exists(), equalTo(true));
+    }
+
+    @Test
+    public void renderDiagramEmptyFormat() {
+        File file = renderDiagram("", "svg");
+
+        assertThat(file.exists(), equalTo(true));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void renderDiagramUnknownFormat() {
+        renderDiagram("notExisting", "");
+    }
+
+    private File renderDiagram(String format, String expectedFormat) {
         Concept concept = Concept.builder().id("test:plantuml").build();
         File directory = new File("target");
         directory.mkdirs();
-        File file = new File(directory,"test_plantuml.svg");
+        File file = new File(directory, "test_plantuml." + expectedFormat);
         if (file.exists()) {
             assertThat(file.delete(), equalTo(true));
         }
         String componentDiagram = plantUMLRenderer.createComponentDiagram(getSubGraph());
 
-        plantUMLRenderer.renderDiagram(componentDiagram, concept, directory);
-
-        assertThat(file.exists(), equalTo(true));
+        plantUMLRenderer.renderDiagram(componentDiagram, concept, directory, format);
+        return file;
     }
 
     private SubGraph getSubGraph() {

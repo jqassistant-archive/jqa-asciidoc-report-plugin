@@ -14,12 +14,15 @@ import com.buschmais.jqassistant.core.report.api.graph.SubGraphFactory;
 import com.buschmais.jqassistant.core.report.api.graph.model.SubGraph;
 
 public class ComponentDiagramReportPlugin implements ReportPlugin {
+    private static final String PROPERTY_FILE_FORMAT = "asciidoc.report.plantuml.format";
 
     private PlantUMLRenderer plantUMLRenderer;
 
     private ReportContext reportContext;
 
     private File directory;
+
+    private String fileFormat;
 
     @Override
     public void initialize() {
@@ -30,6 +33,7 @@ public class ComponentDiagramReportPlugin implements ReportPlugin {
     public void configure(ReportContext reportContext, Map<String, Object> properties) {
         this.reportContext = reportContext;
         directory = reportContext.getReportDirectory("plantuml");
+        fileFormat = (String) properties.get(PROPERTY_FILE_FORMAT);
     }
 
     @Override
@@ -37,7 +41,7 @@ public class ComponentDiagramReportPlugin implements ReportPlugin {
         SubGraphFactory subGraphFactory = new SubGraphFactory();
         SubGraph subGraph = subGraphFactory.createSubGraph(result);
         String componentDiagram = plantUMLRenderer.createComponentDiagram(subGraph);
-        File file = plantUMLRenderer.renderDiagram(componentDiagram, result.getRule(), directory);
+        File file = plantUMLRenderer.renderDiagram(componentDiagram, result.getRule(), directory, fileFormat);
         URL url;
         try {
             url = file.toURI().toURL();
