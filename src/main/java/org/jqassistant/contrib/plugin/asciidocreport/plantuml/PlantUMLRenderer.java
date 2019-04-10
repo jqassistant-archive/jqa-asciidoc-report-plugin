@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  */
 public class PlantUMLRenderer {
 
-    public static final FileFormat PLANTUML_FILE_FORMAT = FileFormat.SVG;
+    public static final FileFormat DEFAULT_PLANTUML_FILE_FORMAT = FileFormat.SVG;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PlantUMLRenderer.class);
 
@@ -54,7 +54,7 @@ public class PlantUMLRenderer {
         return plantumlBuilder.toString();
     }
 
-    public File renderDiagram(String plantUML, ExecutableRule rule, File directory) {
+    public File renderDiagram(String plantUML, ExecutableRule rule, File directory, String format) {
         String diagramFileNamePrefix = rule.getId().replaceAll("\\:", "_");
         File plantUMLFile = new File(directory, diagramFileNamePrefix + ".plantuml");
         try {
@@ -62,9 +62,11 @@ public class PlantUMLRenderer {
         } catch (IOException e) {
             throw new IllegalStateException("Cannot write PlantUML diagram to " + plantUMLFile.getPath(), e);
         }
-        String diagramFileName = diagramFileNamePrefix + PLANTUML_FILE_FORMAT.getFileSuffix();
+
+        FileFormat fileFormat = toFileFormat(format);
+        String diagramFileName = diagramFileNamePrefix + fileFormat.getFileSuffix();
         File file = new File(directory, diagramFileName);
-        renderDiagram(plantUML, file);
+        renderDiagram(plantUML, file, fileFormat);
         return file;
     }
 
@@ -222,15 +224,17 @@ public class PlantUMLRenderer {
      *
      * @param plantUML
      *            The diagram.
+     * @param format
+     *            The target format.
      * @param file
      *            The {@link File}.
      */
-    private void renderDiagram(String plantUML, File file) {
+    private void renderDiagram(String plantUML, File file, FileFormat format) {
         SourceStringReader reader = new SourceStringReader(plantUML);
         try {
             LOGGER.info("Rendering diagram '{}' ", file.getPath());
             try (FileOutputStream os = new FileOutputStream(file)) {
-                reader.outputImage(os, new FileFormatOption(PLANTUML_FILE_FORMAT));
+                reader.outputImage(os, new FileFormatOption(format));
             }
 
         } catch (IOException e) {
@@ -238,4 +242,25 @@ public class PlantUMLRenderer {
         }
     }
 
+    /**
+     * Trys to parse a given String to a PlantUML-FileFormat
+     *
+     * @param format
+     *            The {@link FileFormat} as string.
+     * @return The matching {@link FileFormat} or DEFAULT_PLANTUML_FILE_FORMAT if format is null or empty.
+     * @throws IllegalArgumentException if format is not valid.
+     */
+    private FileFormat toFileFormat(String format) {
+        if(StringUtils.isEmpty(format)){
+            return DEFAULT_PLANTUML_FILE_FORMAT;
+        }
+
+        for (FileFormat fileFormat : FileFormat.values()) {
+            if(fileFormat.name().equalsIgnoreCase(format)){
+                return fileFormat;
+            }
+        }
+
+        throw new IllegalArgumentException(format + " is not a valid FileFormat");
+    }
 }
