@@ -162,11 +162,12 @@ The Asciidoc Report plugin accepts several options that might be passed as repor
 
 [options="header"]
 |===
-| Property                                   | Description                                                      | Default
-| asciidoc.report.directory      | Specifies the directory where the HTML files will be written                 | jqassistant/report/asciidoc
-| asciidoc.report.rule.directory | Specifies the directory where the Asciidoc files are located (optional)      |
-| asciidoc.report.file.include   | A comma separated list of filter of Asciidoc files to be included (optional) |
-| asciidoc.report.file.exclude   | A comma separated list of filter of Asciidoc files to be excluded (optional) |
+| Property                        | Description                                                                    | Default
+| asciidoc.report.directory       | Specifies the directory where the HTML files will be written                   | jqassistant/report/asciidoc
+| asciidoc.report.rule.directory  | Specifies the directory where the Asciidoc files are located (optional)        |
+| asciidoc.report.file.include    | A comma separated list of filter of Asciidoc files to be included (optional)   |
+| asciidoc.report.file.exclude    | A comma separated list of filter of Asciidoc files to be excluded (optional)   |
+| asciidoc.report.plantuml.format | Specifies the output file format of the generated PlantUML-Diagrams (optional) | SVG
 |===
 
 [[feedback]]
