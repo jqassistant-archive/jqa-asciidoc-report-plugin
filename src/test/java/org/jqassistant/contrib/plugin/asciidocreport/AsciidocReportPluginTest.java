@@ -54,7 +54,7 @@ public class AsciidocReportPluginTest {
     public void setUp() throws RuleException {
         File classesDirectory = ClasspathResource.getFile(AsciidocReportPluginTest.class, "/");
         ruleDirectory = new File(classesDirectory, "jqassistant");
-        ruleSet = getRuleSet(ruleDirectory, "index.adoc", "other.adoc");
+        ruleSet = getRuleSet(ruleDirectory, "index.adoc", "additional-rules/other.adoc");
         reportPlugins = new HashMap<>();
         reportPlugins.put("asciidoc", new AsciidocReportPlugin());
         reportPlugins.put("plantuml-component-diagram", new ComponentDiagramReportPlugin());
