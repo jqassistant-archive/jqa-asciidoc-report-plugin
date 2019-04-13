@@ -80,7 +80,7 @@ public class AsciidocReportPlugin implements ReportPlugin {
 
     @Override
     public void end() throws ReportException {
-        Map<File, List<File>> files = sourceFileMatcher.getFilesByBaseDir(ruleSources);
+        Map<File, List<File>> files = sourceFileMatcher.match(ruleSources);
         if (!files.isEmpty()) {
             LOGGER.info("Calling for the Asciidoctor...");
             Asciidoctor asciidoctor = AsciidoctorFactory.getAsciidoctor();

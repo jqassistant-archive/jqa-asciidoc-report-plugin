@@ -38,7 +38,7 @@ public class SourceFileMatcher {
      * @return A {@link Map} containing {@link File}s to be rendered as values grouped by their base directories.
      * @throws ReportException
      */
-    public Map<File, List<File>> getFilesByBaseDir(Set<RuleSource> ruleSources) throws ReportException {
+    public Map<File, List<File>> match(Set<RuleSource> ruleSources) throws ReportException {
         Map<File, List<File>> files = new HashMap<>();
         if (ruleDirectory != null) {
             // Use explicitly configured rule directory and inclusion filter
