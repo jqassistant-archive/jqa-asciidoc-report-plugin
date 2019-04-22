@@ -26,9 +26,6 @@ import org.slf4j.LoggerFactory;
  * A renderer for PlantUML diagrams.
  */
 public class PlantUMLRenderer {
-
-    public static final FileFormat DEFAULT_PLANTUML_FILE_FORMAT = FileFormat.SVG;
-
     private static final Logger LOGGER = LoggerFactory.getLogger(PlantUMLRenderer.class);
 
     /**
@@ -251,14 +248,10 @@ public class PlantUMLRenderer {
      *
      * @param format
      *            The {@link FileFormat} as string.
-     * @return The matching {@link FileFormat} or DEFAULT_PLANTUML_FILE_FORMAT if format is null or empty.
+     * @return The matching {@link FileFormat}
      * @throws IllegalArgumentException if format is not valid.
      */
     private FileFormat toFileFormat(String format) {
-        if(StringUtils.isEmpty(format)){
-            return DEFAULT_PLANTUML_FILE_FORMAT;
-        }
-
         for (FileFormat fileFormat : FileFormat.values()) {
             if(fileFormat.name().equalsIgnoreCase(format)){
                 return fileFormat;

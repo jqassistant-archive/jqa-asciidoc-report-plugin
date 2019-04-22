@@ -100,18 +100,14 @@ public class PlantUMLRendererTest {
         assertThat(file.exists(), equalTo(true));
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void renderDiagramNoFormat() {
-        File file = renderDiagram(null, "svg");
-
-        assertThat(file.exists(), equalTo(true));
+        renderDiagram(null, "");
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void renderDiagramEmptyFormat() {
-        File file = renderDiagram("", "svg");
-
-        assertThat(file.exists(), equalTo(true));
+        renderDiagram("", "");
     }
 
     @Test(expected = IllegalArgumentException.class)
