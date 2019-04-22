@@ -41,12 +41,16 @@ public class PlantUMLRenderer {
      *
      * @param subGraph
      *            The {@link SubGraph}.
+     * @param renderMode
+     *            The {@link RenderMode}
      * @return The {@link String} representation of the PlantUML diagram.
      */
-    public String createComponentDiagram(SubGraph subGraph) {
+    public String createComponentDiagram(SubGraph subGraph, String renderMode) {
+        RenderMode renderer = RenderMode.fromString(renderMode);
         StringBuilder plantumlBuilder = new StringBuilder();
         plantumlBuilder.append("@startuml").append('\n');
         plantumlBuilder.append("skinparam componentStyle uml2").append('\n');
+        plantumlBuilder.append(renderer.getPragma());
         Map<Long, Node> nodes = render(subGraph, plantumlBuilder, 0);
         plantumlBuilder.append('\n');
         renderRelationships(subGraph, plantumlBuilder, nodes);
