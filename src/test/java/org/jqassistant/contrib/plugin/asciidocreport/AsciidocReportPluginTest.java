@@ -86,6 +86,15 @@ public class AsciidocReportPluginTest {
         verify(properties, customReportDirectory);
     }
 
+    @Test
+    public void jdotPlantUmlRenderer() throws RuleException, IOException {
+        HashMap<String, Object> properties = new HashMap<>();
+        properties.put("asciidoc.report.rule.directory", ruleDirectory.getAbsolutePath());
+        properties.put("asciidoc.report.file.include", "index.adoc");
+        properties.put("asciidoc.report.plantuml.rendermode", "jdot");
+        verify(properties, new File(outputDirectory, "report/asciidoc"));
+    }
+
     private void verify(Map<String, Object> properties, File expectedDirectory) throws RuleException, IOException {
         ReportContext reportContext = getReportContext(properties);
 

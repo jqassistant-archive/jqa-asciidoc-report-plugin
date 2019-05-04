@@ -26,9 +26,6 @@ import org.slf4j.LoggerFactory;
  * A renderer for PlantUML diagrams.
  */
 public class PlantUMLRenderer {
-
-    public static final FileFormat DEFAULT_PLANTUML_FILE_FORMAT = FileFormat.SVG;
-
     private static final Logger LOGGER = LoggerFactory.getLogger(PlantUMLRenderer.class);
 
     /**
@@ -41,12 +38,16 @@ public class PlantUMLRenderer {
      *
      * @param subGraph
      *            The {@link SubGraph}.
+     * @param renderMode
+     *            The {@link RenderMode}
      * @return The {@link String} representation of the PlantUML diagram.
      */
-    public String createComponentDiagram(SubGraph subGraph) {
+    public String createComponentDiagram(SubGraph subGraph, String renderMode) {
+        RenderMode renderer = RenderMode.fromString(renderMode);
         StringBuilder plantumlBuilder = new StringBuilder();
         plantumlBuilder.append("@startuml").append('\n');
         plantumlBuilder.append("skinparam componentStyle uml2").append('\n');
+        plantumlBuilder.append(renderer.getPragma());
         Map<Long, Node> nodes = render(subGraph, plantumlBuilder, 0);
         plantumlBuilder.append('\n');
         renderRelationships(subGraph, plantumlBuilder, nodes);
@@ -247,14 +248,10 @@ public class PlantUMLRenderer {
      *
      * @param format
      *            The {@link FileFormat} as string.
-     * @return The matching {@link FileFormat} or DEFAULT_PLANTUML_FILE_FORMAT if format is null or empty.
+     * @return The matching {@link FileFormat}
      * @throws IllegalArgumentException if format is not valid.
      */
     private FileFormat toFileFormat(String format) {
-        if(StringUtils.isEmpty(format)){
-            return DEFAULT_PLANTUML_FILE_FORMAT;
-        }
-
         for (FileFormat fileFormat : FileFormat.values()) {
             if(fileFormat.name().equalsIgnoreCase(format)){
                 return fileFormat;
