@@ -14,4 +14,10 @@ MATCH (n) RETURN n as ImportedConceptValue
 MATCH (n) RETURN n as ImportedConstraintValue
 ----
 
+[[test:ImportedConstraintWithoutDescription]]
+[source,cypher,role=constraint]
+----
+MATCH (n) RETURN n as ImportedConstraintValue
+----
+
 

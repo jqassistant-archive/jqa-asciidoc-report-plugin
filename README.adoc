@@ -10,11 +10,13 @@ The plugin records the results of executed rules (i.e. concepts and constraints)
 At the end of the analysis phase http://www.asciidoctor[Asciidoctor] is used for rendering the input documents providing the rules to HTML documents. The listings containing rules are identified and their status and results appended.
 Furthermore include directives are provided for embedding a summary about executed and imported rules.
 
+TIP: You can find an example setup and rules in the http://github.com/buschmais/spring-petclinic/[Spring PetClinic] demo. After cloning the repository and building using `mvn install` the rendered report is available in the directory `target/jqassistant/report/asciidoc`.
+
 == Prerequisites
 
-* Java 7 or higher
+* Java 8 or higher
 * Maven 3.2.5 or higher
-* jQAssistant 1.5.0 (see below)
+* jQAssistant 1.6.0
 
 == Setup
 
@@ -28,7 +30,7 @@ The plugin can be enabled in a Maven based project by adding it as a dependency 
         <plugin>
             <groupId>com.buschmais.jqassistant</groupId>
             <artifactId>jqassistant-maven-plugin</artifactId>
-            <version>1.5.0</version>
+            <version>1.6.0</version>
             <executions>
                 <execution>
                     <id>default-cli</id>
@@ -50,7 +52,7 @@ The plugin can be enabled in a Maven based project by adding it as a dependency 
                 <dependency>                                                                                                                <!--3-->
                     <groupId>org.jqassistant.contrib.plugin</groupId>
                     <artifactId>jqassistant-asciidoc-report-plugin</artifactId>
-                    <version>1.2.0</version>
+                    <version>1.6.0</version>
                 </dependency>
             </dependencies>
         </plugin>
@@ -61,8 +63,11 @@ The plugin can be enabled in a Maven based project by adding it as a dependency 
 <2> The filter specifying the source file which should be rendered (optional).
 <3> Declares the plugin as dependency for jQAssistant
 
+For using the plugin with the command line distribution download the JAR file from https://search.maven.org/search?q=a:jqassistant-asciidoc-report-plugin[Maven Central] and copy it to the `plugins/` folder.
+
 NOTE: By default all rule files with the name `index.adoc` will be selected for rendering.
 The report properties `asciidoc.report.rule.directory` and `asciidoc.report.file.include` may be used to explicitly select files.
+
 
 == Includes
 
@@ -113,9 +118,7 @@ The result of the rule simply needs to return all required nodes and their relat
 .Creates a diagram about dependencies between packages containing Java types (test artifacts are excluded).
 ----
 MATCH
-  (artifact:Artifact)-[:CONTAINS]->(package:Package)-[:CONTAINS]->(:Type)
-WHERE
-  artifact.type <> "test-jar"
+  (artifact:Main:Artifact)-[:CONTAINS]->(package:Package)-[:CONTAINS]->(:Type)
 OPTIONAL MATCH
   (package)-[dependsOn:DEPENDS_ON]->(:Package)
 RETURN
@@ -135,9 +138,7 @@ The following example therefore uses a modified return clause:
 .Creates a diagram about dependencies between packages containing Java types (per artifact, test artifacts are excluded).
 ----
 MATCH
-  (artifact:Artifact)-[:CONTAINS]->(package:Package)-[:CONTAINS]->(:Type)
-WHERE
-  artifact.type <> "test-jar"
+  (artifact:Main:Artifact)-[:CONTAINS]->(package:Package)-[:CONTAINS]->(:Type)
 OPTIONAL MATCH
   (package)-[dependsOn:DEPENDS_ON]->(:Package)
 RETURN
@@ -161,11 +162,13 @@ The Asciidoc Report plugin accepts several options that might be passed as repor
 
 [options="header"]
 |===
-| Property                                   | Description                                                      | Default
-| asciidoc.report.directory      | Specifies the directory where the HTML files will be written                 | jqassistant/report/asciidoc
-| asciidoc.report.rule.directory | Specifies the directory where the Asciidoc files are located (optional)      |
-| asciidoc.report.file.include   | A comma separated list of filter of Asciidoc files to be included (optional) |
-| asciidoc.report.file.exclude   | A comma separated list of filter of Asciidoc files to be excluded (optional) |
+| Property                            | Description                                                                                                        | Default
+| asciidoc.report.directory           | Specifies the directory where the HTML files will be written                                                       | jqassistant/report/asciidoc
+| asciidoc.report.rule.directory      | Specifies the directory where the Asciidoc files are located (optional)                                            |
+| asciidoc.report.file.include        | A comma separated list of filter of Asciidoc files to be included (optional)                                       |
+| asciidoc.report.file.exclude        | A comma separated list of filter of Asciidoc files to be excluded (optional)                                       |
+| asciidoc.report.plantuml.format     | Specifies the output file format of the generated PlantUML-Diagrams (optional)                                     | SVG
+| asciidoc.report.plantuml.rendermode | Specifies the renderer used for the generated PlantUML-Diagrams, currently supporting GraphViz and Jdot (optional) | GRAPHVIZ
 |===
 
 [[feedback]]

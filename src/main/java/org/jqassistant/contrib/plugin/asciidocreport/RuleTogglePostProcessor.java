@@ -29,7 +29,10 @@ public class RuleTogglePostProcessor extends Postprocessor {
                     content.first().before("<input type=\"checkbox\" class=\"rule-toggle\" title=\"Show rule details\"/>");
                     content.attr("id", contentId);
                     Elements title = listingblock.getElementsByClass("title");
-                    title.first().attr("style", "display:inline;");
+                    Element first = title.first();
+                    if (first != null) {
+                        first.attr("style", "display:inline;");
+                    }
                 }
             }
             StringBuilder styles = new StringBuilder();
