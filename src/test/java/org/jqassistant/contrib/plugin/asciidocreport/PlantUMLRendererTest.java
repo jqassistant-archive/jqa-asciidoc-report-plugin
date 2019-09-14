@@ -2,7 +2,8 @@ package org.jqassistant.contrib.plugin.asciidocreport;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
 
@@ -13,7 +14,7 @@ import com.buschmais.jqassistant.core.report.api.graph.model.SubGraph;
 
 import org.jqassistant.contrib.plugin.asciidocreport.plantuml.PlantUMLRenderer;
 import org.jqassistant.contrib.plugin.asciidocreport.plantuml.RenderMode;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests for the {@link PlantUMLRenderer}.
@@ -45,18 +46,20 @@ public class PlantUMLRendererTest {
         assertThat(componentDiagram, containsString(RenderMode.JDOT.getPragma()));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void unknownRenderer() {
-        SubGraph subGraph = getSubGraph();
-
-        plantUMLRenderer.createComponentDiagram(subGraph, "myAmazingRenderer");
+        assertThrows(IllegalArgumentException.class, () -> {
+            SubGraph subGraph = getSubGraph();
+            plantUMLRenderer.createComponentDiagram(subGraph, "myAmazingRenderer");
+        });
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void nullRenderer() {
-        SubGraph subGraph = getSubGraph();
-
-        plantUMLRenderer.createComponentDiagram(subGraph, null);
+        assertThrows(IllegalArgumentException.class, () -> {
+            SubGraph subGraph = getSubGraph();
+            plantUMLRenderer.createComponentDiagram(subGraph, null);
+        });
     }
 
     @Test
@@ -100,19 +103,19 @@ public class PlantUMLRendererTest {
         assertThat(file.exists(), equalTo(true));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void renderDiagramNoFormat() {
-        renderDiagram(null, "");
+        assertThrows(IllegalArgumentException.class, () -> renderDiagram(null, ""));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void renderDiagramEmptyFormat() {
-        renderDiagram("", "");
+        assertThrows(IllegalArgumentException.class, () -> renderDiagram("", ""));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void renderDiagramUnknownFormat() {
-        renderDiagram("notExisting", "");
+        assertThrows(IllegalArgumentException.class, () -> renderDiagram("notExisting", ""));
     }
 
     private File renderDiagram(String format, String expectedFormat) {

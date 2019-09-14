@@ -1,5 +1,15 @@
 package org.jqassistant.contrib.plugin.asciidocreport;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+
 import com.buschmais.jqassistant.core.analysis.api.Result;
 import com.buschmais.jqassistant.core.analysis.api.rule.*;
 import com.buschmais.jqassistant.core.report.api.ReportContext;
@@ -20,25 +30,15 @@ import com.buschmais.xo.neo4j.api.model.Neo4jLabel;
 import com.buschmais.xo.neo4j.api.model.Neo4jNode;
 import com.buschmais.xo.neo4j.api.model.Neo4jRelationship;
 import com.buschmais.xo.neo4j.api.model.Neo4jRelationshipType;
+
 import org.apache.commons.io.FileUtils;
 import org.jqassistant.contrib.plugin.asciidocreport.plantuml.ComponentDiagramReportPlugin;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
-
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class AsciidocReportPluginTest {
 
@@ -50,7 +50,7 @@ public class AsciidocReportPluginTest {
 
     private RuleSet ruleSet;
 
-    @Before
+    @BeforeEach
     public void setUp() throws RuleException {
         File classesDirectory = ClasspathResource.getFile(AsciidocReportPluginTest.class, "/");
         ruleDirectory = new File(classesDirectory, "jqassistant");
@@ -101,13 +101,13 @@ public class AsciidocReportPluginTest {
         Concept componentDiagram = execute();
 
         File indexHtml = new File(expectedDirectory, "index.html");
-        assertThat(indexHtml.exists(), equalTo(true));
+        assertThat(indexHtml.exists()).isTrue();
 
         String html = FileUtils.readFileToString(indexHtml, "UTF-8");
 
         Document document = Jsoup.parse(html);
         Elements summaryTables = document.getElementsByClass("summary");
-        assertThat(summaryTables.size(), equalTo(2));
+        assertThat(summaryTables.size()).isEqualTo(2);
         verifyConstraintsSummary(summaryTables.get(0));
         verifyConceptsSummary(summaryTables.get(1));
         verifyConceptResult(reportContext, componentDiagram, html);
@@ -174,44 +174,44 @@ public class AsciidocReportPluginTest {
         // test:Concept
         verifyRuleResult(html, "Status: <span class=\"green\">SUCCESS</span>", "Severity: MAJOR (from MINOR)", "<th>Value</th>", "<td> Foo Bar </td>");
         // test:ComponentDiagram
-        assertThat(html, containsString("Severity: INFO (from MINOR)"));
+        assertThat(html).contains("Severity: INFO (from MINOR)");
 
         // Toggle for rule content (i.e. Cypher source)
-        assertThat(html, containsString("<input type=\"checkbox\" class=\"rule-toggle\" title=\"Show rule details\">"));
-        assertThat(html, containsString("<div class=\"content\" id=\"rule-listing0\">"));
-        assertThat(html, containsString("<style>#rule-listing0{display:none;}input.rule-toggle:checked + #rule-listing0{display:block;}"));
+        assertThat(html).contains("<input type=\"checkbox\" class=\"rule-toggle\" title=\"Show rule details\">");
+        assertThat(html).contains("<div class=\"content\" id=\"rule-listing0\">");
+        assertThat(html).contains("<style>#rule-listing0{display:none;}input.rule-toggle:checked + #rule-listing0{display:block;}");
 
         // PlantUML diagram
         File plantumlReportDirectory = reportContext.getReportDirectory("plantuml");
-        assertThat(new File(plantumlReportDirectory, "test_ComponentDiagram.svg").exists(), equalTo(true));
-        assertThat(new File(plantumlReportDirectory, "test_ComponentDiagram.plantuml").exists(), equalTo(true));
+        assertThat(new File(plantumlReportDirectory, "test_ComponentDiagram.svg").exists()).isTrue();
+        assertThat(new File(plantumlReportDirectory, "test_ComponentDiagram.plantuml").exists()).isTrue();
         List<ReportContext.Report<?>> componentDiagrams = reportContext.getReports(concept);
-        assertThat(componentDiagrams.size(), equalTo(1));
+        assertThat(componentDiagrams.size()).isEqualTo(1);
         String expectedDiagramUrl = "../plantuml/test_ComponentDiagram.svg";
         String expectedImageLink = "<a href=\"" + expectedDiagramUrl + "\"><img src=\"" + expectedDiagramUrl + "\"></a>";
-        assertThat(html, containsString(expectedImageLink));
+        assertThat(html).contains(expectedImageLink);
     }
 
     private void verifyRuleResult(String html, String... expectedValues) {
         for (String expectedValue : expectedValues) {
-            assertThat(html, containsString(expectedValue));
+            assertThat(html).contains(expectedValue);
         }
     }
 
     private void verifyConstraintsSummary(Element constraintSummaryTable) {
-        assertThat(constraintSummaryTable.getElementsByTag("caption").first().text(), containsString("Constraints"));
+        assertThat(constraintSummaryTable.getElementsByTag("caption").first().text()).contains("Constraints");
         Element constraintSummaryTableBody = constraintSummaryTable.getElementsByTag("tbody").first();
         Elements rows = constraintSummaryTableBody.getElementsByTag("tr");
-        assertThat(rows.size(), equalTo(1));
+        assertThat(rows.size()).isEqualTo(1);
         verifyColumns(rows.get(0), "test:ImportedConstraintWithoutDescription", "", "MAJOR", "SUCCESS", "green");
     }
 
     private void verifyConceptsSummary(Element conceptSummaryTable) {
-        assertThat(conceptSummaryTable.getElementsByTag("caption").first().text(), containsString("Concepts"));
+        assertThat(conceptSummaryTable.getElementsByTag("caption").first().text()).contains("Concepts");
         Element conceptSummaryTableBody = conceptSummaryTable.getElementsByTag("tbody").first();
-        assertThat(conceptSummaryTable, notNullValue());
+        assertThat(conceptSummaryTable).isNotNull();
         Elements rows = conceptSummaryTableBody.getElementsByTag("tr");
-        assertThat(rows.size(), equalTo(3));
+        assertThat(rows.size()).isEqualTo(3);
         verifyColumns(rows.get(0), "test:ImportedConcept", "Imported Concept", "MINOR", "FAILURE", "red");
         verifyColumns(rows.get(1), "test:Concept", "Concept Description", "MAJOR (from MINOR)", "SUCCESS", "green");
         verifyColumns(rows.get(2), "test:ComponentDiagram", "Component Diagram Description", "INFO (from MINOR)", "SUCCESS", "green");
@@ -221,22 +221,22 @@ public class AsciidocReportPluginTest {
             String expectedColor) {
         Elements columns = row.getElementsByTag("td");
         Element id = columns.get(0).getElementsByTag("a").first();
-        assertThat(id, notNullValue());
-        assertThat(id.text(), equalTo(expectedId));
-        assertThat(id.attr("href"), equalTo("#" + expectedId));
+        assertThat(id).isNotNull();
+        assertThat(id.text()).isEqualTo(expectedId);
+        assertThat(id.attr("href")).isEqualTo("#" + expectedId);
 
         Elements description = columns.get(1).getElementsByTag("p");
-        assertThat(description, notNullValue());
-        assertThat(description.text(), equalTo(expectedDescription));
+        assertThat(description).isNotNull();
+        assertThat(description.text()).isEqualTo(expectedDescription);
 
         Elements severity = columns.get(2).getElementsByTag("p");
-        assertThat(severity, notNullValue());
-        assertThat(severity.text(), equalTo(expectedSeverity));
+        assertThat(severity).isNotNull();
+        assertThat(severity.text()).isEqualTo(expectedSeverity);
 
         Elements status = columns.get(3).getElementsByTag("span");
-        assertThat(status, notNullValue());
-        assertThat(status.text(), equalTo(expectedStatus));
-        assertThat(status.hasClass(expectedColor), equalTo(true));
+        assertThat(status).isNotNull();
+        assertThat(status.text()).isEqualTo(expectedStatus);
+        assertThat(status.hasClass(expectedColor)).isTrue();
     }
 
     private ArtifactFileDescriptor createNode(long id, String name) {

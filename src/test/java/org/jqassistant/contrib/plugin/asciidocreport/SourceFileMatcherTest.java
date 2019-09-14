@@ -1,7 +1,7 @@
 package org.jqassistant.contrib.plugin.asciidocreport;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.File;
 import java.util.Collections;
@@ -15,14 +15,14 @@ import com.buschmais.jqassistant.core.rule.api.source.FileRuleSource;
 import com.buschmais.jqassistant.core.rule.api.source.RuleSource;
 import com.buschmais.jqassistant.core.shared.io.ClasspathResource;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class SourceFileMatcherTest {
 
     private File ruleDirectory;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         File classesDirectory = ClasspathResource.getFile(AsciidocReportPluginTest.class, "/");
         ruleDirectory = new File(classesDirectory, "jqassistant");
