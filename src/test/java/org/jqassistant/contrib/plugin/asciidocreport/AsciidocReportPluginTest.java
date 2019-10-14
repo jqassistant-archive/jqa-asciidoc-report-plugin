@@ -32,7 +32,7 @@ import com.buschmais.xo.neo4j.api.model.Neo4jRelationship;
 import com.buschmais.xo.neo4j.api.model.Neo4jRelationshipType;
 
 import org.apache.commons.io.FileUtils;
-import org.jqassistant.contrib.plugin.asciidocreport.plantuml.ComponentDiagramReportPlugin;
+import org.jqassistant.contrib.plugin.asciidocreport.plantuml.component.ComponentDiagramReportPlugin;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;

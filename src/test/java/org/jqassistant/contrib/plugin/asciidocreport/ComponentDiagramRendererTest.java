@@ -1,33 +1,32 @@
 package org.jqassistant.contrib.plugin.asciidocreport;
 
 import static java.util.Arrays.asList;
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.io.File;
-
-import com.buschmais.jqassistant.core.analysis.api.rule.Concept;
 import com.buschmais.jqassistant.core.report.api.graph.model.Node;
 import com.buschmais.jqassistant.core.report.api.graph.model.Relationship;
 import com.buschmais.jqassistant.core.report.api.graph.model.SubGraph;
 
-import org.jqassistant.contrib.plugin.asciidocreport.plantuml.PlantUMLRenderer;
+import org.jqassistant.contrib.plugin.asciidocreport.plantuml.component.ComponentDiagramRenderer;
+import org.jqassistant.contrib.plugin.asciidocreport.plantuml.ImageRenderer;
 import org.jqassistant.contrib.plugin.asciidocreport.plantuml.RenderMode;
 import org.junit.jupiter.api.Test;
 
 /**
- * Tests for the {@link PlantUMLRenderer}.
+ * Tests for the {@link ImageRenderer}.
  */
-public class PlantUMLRendererTest {
+public class ComponentDiagramRendererTest {
 
-    private PlantUMLRenderer plantUMLRenderer = new PlantUMLRenderer();
+    private ComponentDiagramRenderer componentDiagramRenderer = new ComponentDiagramRenderer();
 
     @Test
     public void componentDiagram() {
         SubGraph subGraph = getSubGraph();
 
-        String componentDiagram = plantUMLRenderer.createComponentDiagram(subGraph, "graphviz");
+        String componentDiagram = componentDiagramRenderer.createComponentDiagram(subGraph, "graphviz");
 
         assertThat(componentDiagram, containsString("[a1] <<Artifact File>> as n1"));
         assertThat(componentDiagram, containsString("[a2] <<Artifact File>> as n2"));
@@ -41,7 +40,7 @@ public class PlantUMLRendererTest {
     public void jdotDiagram() {
         SubGraph subGraph = getSubGraph();
 
-        String componentDiagram = plantUMLRenderer.createComponentDiagram(subGraph, "jdot");
+        String componentDiagram = componentDiagramRenderer.createComponentDiagram(subGraph, "jdot");
 
         assertThat(componentDiagram, containsString(RenderMode.JDOT.getPragma()));
     }
@@ -50,7 +49,7 @@ public class PlantUMLRendererTest {
     public void unknownRenderer() {
         assertThrows(IllegalArgumentException.class, () -> {
             SubGraph subGraph = getSubGraph();
-            plantUMLRenderer.createComponentDiagram(subGraph, "myAmazingRenderer");
+            componentDiagramRenderer.createComponentDiagram(subGraph, "myAmazingRenderer");
         });
     }
 
@@ -58,7 +57,7 @@ public class PlantUMLRendererTest {
     public void nullRenderer() {
         assertThrows(IllegalArgumentException.class, () -> {
             SubGraph subGraph = getSubGraph();
-            plantUMLRenderer.createComponentDiagram(subGraph, null);
+            componentDiagramRenderer.createComponentDiagram(subGraph, null);
         });
     }
 
@@ -82,54 +81,11 @@ public class PlantUMLRendererTest {
         nestedGraph.getRelationships().put(a2DependsOnA1.getId(), a2DependsOnA1);
         rootGraph.getSubGraphs().put(nestedGraph.getId(), nestedGraph);
 
-        String componentDiagram = plantUMLRenderer.createComponentDiagram(rootGraph, "GRAPHVIZ");
+        String componentDiagram = componentDiagramRenderer.createComponentDiagram(rootGraph, "GRAPHVIZ");
 
         assertThat(componentDiagram, containsString("folder \"a0\" {\n" + "    [a1] <<Artifact File>> as n1\n" + "    folder \"a2\" {\n"
                 + "        [a3] <<Artifact File>> as n3\n" + "    }\n" + "}"));
         assertThat(componentDiagram, containsString("n3 --> n1 : DEPENDS_ON"));
-    }
-
-    @Test
-    public void renderDiagramAsSvg() {
-        File file = renderDiagram("svg", "svg");
-
-        assertThat(file.exists(), equalTo(true));
-    }
-
-    @Test
-    public void renderDiagramAsPng() {
-        File file = renderDiagram("png", "png");
-
-        assertThat(file.exists(), equalTo(true));
-    }
-
-    @Test
-    public void renderDiagramNoFormat() {
-        assertThrows(IllegalArgumentException.class, () -> renderDiagram(null, ""));
-    }
-
-    @Test
-    public void renderDiagramEmptyFormat() {
-        assertThrows(IllegalArgumentException.class, () -> renderDiagram("", ""));
-    }
-
-    @Test
-    public void renderDiagramUnknownFormat() {
-        assertThrows(IllegalArgumentException.class, () -> renderDiagram("notExisting", ""));
-    }
-
-    private File renderDiagram(String format, String expectedFormat) {
-        Concept concept = Concept.builder().id("test:plantuml").build();
-        File directory = new File("target");
-        directory.mkdirs();
-        File file = new File(directory, "test_plantuml." + expectedFormat);
-        if (file.exists()) {
-            assertThat(file.delete(), equalTo(true));
-        }
-        String componentDiagram = plantUMLRenderer.createComponentDiagram(getSubGraph(), "GRAPHVIZ");
-
-        plantUMLRenderer.renderDiagram(componentDiagram, concept, directory, format);
-        return file;
     }
 
     private SubGraph getSubGraph() {
@@ -164,5 +120,4 @@ public class PlantUMLRendererTest {
         node.getLabels().addAll(asList(labels));
         return node;
     }
-
 }
