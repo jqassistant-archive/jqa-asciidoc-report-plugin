@@ -10,8 +10,6 @@ import com.buschmais.jqassistant.core.analysis.api.rule.ExecutableRule;
 import com.buschmais.jqassistant.core.report.api.ReportContext;
 import com.buschmais.jqassistant.core.report.api.ReportException;
 import com.buschmais.jqassistant.core.report.api.ReportPlugin;
-import com.buschmais.jqassistant.core.report.api.graph.SubGraphFactory;
-import com.buschmais.jqassistant.core.report.api.graph.model.SubGraph;
 
 import net.sourceforge.plantuml.FileFormat;
 
@@ -31,7 +29,7 @@ public abstract class AbstractPlantUMLReportPlugin implements ReportPlugin {
 
     private String fileFormat;
 
-    private String renderMode;
+    private RenderMode renderMode;
 
     @Override
     public void initialize() {
@@ -39,11 +37,12 @@ public abstract class AbstractPlantUMLReportPlugin implements ReportPlugin {
     }
 
     @Override
-    public void configure(ReportContext reportContext, Map<String, Object> properties) {
+    public void configure(ReportContext reportContext, Map<String, Object> properties) throws ReportException {
         this.reportContext = reportContext;
         directory = reportContext.getReportDirectory("plantuml");
         fileFormat = (String) properties.getOrDefault(PROPERTY_FILE_FORMAT, DEFAULT_FILE_FORMAT);
-        renderMode = (String) properties.getOrDefault(PROPERTY_RENDER_MODE, DEFAULT_RENDER_MODE);
+        String renderModeValue = (String) properties.getOrDefault(PROPERTY_RENDER_MODE, DEFAULT_RENDER_MODE);
+        renderMode = RenderMode.fromString(renderModeValue);
     }
 
     @Override

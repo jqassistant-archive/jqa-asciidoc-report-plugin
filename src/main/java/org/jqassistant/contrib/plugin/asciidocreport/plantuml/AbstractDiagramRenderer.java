@@ -25,12 +25,11 @@ public abstract class AbstractDiagramRenderer {
      *
      * @param result
      *            The {@link SubGraph}.
-     * @param renderMode
+     * @param renderer
      *            The {@link RenderMode}
      * @return The {@link String} representation of the PlantUML diagram.
      */
-    public String renderDiagram(Result<? extends ExecutableRule> result, String renderMode) throws ReportException {
-        RenderMode renderer = RenderMode.fromString(renderMode);
+    public String renderDiagram(Result<? extends ExecutableRule> result, RenderMode renderer) throws ReportException {
         StringBuilder plantumlBuilder = new StringBuilder();
         plantumlBuilder.append("@startuml").append('\n');
         plantumlBuilder.append("skinparam componentStyle uml2").append('\n');

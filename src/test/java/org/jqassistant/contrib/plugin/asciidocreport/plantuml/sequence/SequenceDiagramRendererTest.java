@@ -4,7 +4,6 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
@@ -46,7 +45,7 @@ public class SequenceDiagramRendererTest extends AbstractDiagramRendererTest {
 
     @Test
     public void sequenceDiagram() throws ReportException {
-        String componentDiagram = sequenceDiagramRenderer.renderDiagram(getResult(), "graphviz");
+        String componentDiagram = sequenceDiagramRenderer.renderDiagram(getResult(), RenderMode.GRAPHVIZ);
 
         assertThat(componentDiagram, containsString("participant \"p1\" as n1 <<Method>>"));
         assertThat(componentDiagram, containsString("participant \"p2\" as n2 <<Method>>"));
@@ -57,23 +56,9 @@ public class SequenceDiagramRendererTest extends AbstractDiagramRendererTest {
 
     @Test
     public void jdotDiagram() throws ReportException {
-        String diagram = sequenceDiagramRenderer.renderDiagram(getResult(), "jdot");
+        String diagram = sequenceDiagramRenderer.renderDiagram(getResult(), RenderMode.JDOT);
 
         assertThat(diagram, containsString(RenderMode.JDOT.getPragma()));
-    }
-
-    @Test
-    public void unknownRenderer() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            sequenceDiagramRenderer.renderDiagram(Result.builder().build(), "myAmazingRenderer");
-        });
-    }
-
-    @Test
-    public void nullRenderer() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            sequenceDiagramRenderer.renderDiagram(Result.builder().build(), null);
-        });
     }
 
     private Result<? extends ExecutableRule> getResult() throws ReportException {

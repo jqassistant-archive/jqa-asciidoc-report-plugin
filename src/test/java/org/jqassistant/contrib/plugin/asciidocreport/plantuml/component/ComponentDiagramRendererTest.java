@@ -3,7 +3,6 @@ package org.jqassistant.contrib.plugin.asciidocreport.plantuml.component;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
 
 import com.buschmais.jqassistant.core.analysis.api.Result;
@@ -45,7 +44,7 @@ public class ComponentDiagramRendererTest extends AbstractDiagramRendererTest {
     public void componentDiagram() throws ReportException {
         doReturn(getSubGraph()).when(subGraphFactory).createSubGraph(result);
 
-        String componentDiagram = componentDiagramRenderer.renderDiagram(result, "graphviz");
+        String componentDiagram = componentDiagramRenderer.renderDiagram(result, RenderMode.GRAPHVIZ);
 
         assertThat(componentDiagram, containsString("[a1] <<Artifact File>> as n1"));
         assertThat(componentDiagram, containsString("[a2] <<Artifact File>> as n2"));
@@ -59,23 +58,9 @@ public class ComponentDiagramRendererTest extends AbstractDiagramRendererTest {
     public void jdotDiagram() throws ReportException {
         doReturn(getSubGraph()).when(subGraphFactory).createSubGraph(result);
 
-        String componentDiagram = componentDiagramRenderer.renderDiagram(result, "jdot");
+        String componentDiagram = componentDiagramRenderer.renderDiagram(result, RenderMode.JDOT);
 
         assertThat(componentDiagram, containsString(RenderMode.JDOT.getPragma()));
-    }
-
-    @Test
-    public void unknownRenderer() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            componentDiagramRenderer.renderDiagram(result, "myAmazingRenderer");
-        });
-    }
-
-    @Test
-    public void nullRenderer() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            componentDiagramRenderer.renderDiagram(result, null);
-        });
     }
 
     @Test
@@ -100,7 +85,7 @@ public class ComponentDiagramRendererTest extends AbstractDiagramRendererTest {
 
         doReturn(rootGraph).when(subGraphFactory).createSubGraph(result);
 
-        String componentDiagram = componentDiagramRenderer.renderDiagram(result, "GRAPHVIZ");
+        String componentDiagram = componentDiagramRenderer.renderDiagram(result, RenderMode.GRAPHVIZ);
 
         assertThat(componentDiagram, containsString("folder \"a0\" {\n" + "    [a1] <<Artifact File>> as n1\n" + "    folder \"a2\" {\n"
                 + "        [a3] <<Artifact File>> as n3\n" + "    }\n" + "}"));
