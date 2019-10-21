@@ -5,11 +5,42 @@ import static java.util.Arrays.fill;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.buschmais.jqassistant.core.analysis.api.Result;
+import com.buschmais.jqassistant.core.analysis.api.rule.ExecutableRule;
+import com.buschmais.jqassistant.core.report.api.ReportException;
 import com.buschmais.jqassistant.core.report.api.graph.model.Node;
 import com.buschmais.jqassistant.core.report.api.graph.model.Relationship;
 import com.buschmais.jqassistant.core.report.api.graph.model.SubGraph;
 
 public abstract class AbstractDiagramRenderer {
+
+    /**
+     * Render a diagram from the given {@link SubGraph}.
+     *
+     * <p>
+     * The {@link SubGraph} may contain {@link Node}s, {@link Relationship}s and
+     * {@link SubGraph}s. The latter are diagram specific and will be rendered as
+     * folders.
+     * </p>
+     *
+     * @param result
+     *            The {@link SubGraph}.
+     * @param renderMode
+     *            The {@link RenderMode}
+     * @return The {@link String} representation of the PlantUML diagram.
+     */
+    public String renderDiagram(Result<? extends ExecutableRule> result, String renderMode) throws ReportException {
+        RenderMode renderer = RenderMode.fromString(renderMode);
+        StringBuilder plantumlBuilder = new StringBuilder();
+        plantumlBuilder.append("@startuml").append('\n');
+        plantumlBuilder.append("skinparam componentStyle uml2").append('\n');
+        plantumlBuilder.append(renderer.getPragma());
+        render(result, plantumlBuilder);
+        plantumlBuilder.append("@enduml").append('\n');
+        return plantumlBuilder.toString();
+    }
+
+    protected abstract void render(Result<? extends ExecutableRule> result, StringBuilder builder) throws ReportException;
 
     /**
      * Creates a white-space based indent from the given folder level.

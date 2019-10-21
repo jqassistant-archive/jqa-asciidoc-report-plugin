@@ -48,9 +48,7 @@ public abstract class AbstractPlantUMLReportPlugin implements ReportPlugin {
 
     @Override
     public void setResult(Result<? extends ExecutableRule> result) throws ReportException {
-        SubGraphFactory subGraphFactory = new SubGraphFactory();
-        SubGraph subGraph = subGraphFactory.createSubGraph(result);
-        String diagram = renderDiagram(subGraph, renderMode);
+        String diagram = getRenderer().renderDiagram(result, renderMode);
         File file = imageRenderer.renderDiagram(diagram, result.getRule(), directory, fileFormat);
         URL url;
         try {
@@ -61,7 +59,7 @@ public abstract class AbstractPlantUMLReportPlugin implements ReportPlugin {
         reportContext.addReport(getReportLabel(), result.getRule(), ReportContext.ReportType.IMAGE, url);
     }
 
-    protected abstract String renderDiagram(SubGraph subGraph, String renderMode);
+    protected abstract AbstractDiagramRenderer getRenderer();
 
     protected abstract String getReportLabel();
 

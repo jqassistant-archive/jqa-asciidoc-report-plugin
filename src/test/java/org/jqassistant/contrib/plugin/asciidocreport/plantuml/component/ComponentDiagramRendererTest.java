@@ -1,32 +1,51 @@
-package org.jqassistant.contrib.plugin.asciidocreport;
+package org.jqassistant.contrib.plugin.asciidocreport.plantuml.component;
 
-import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doReturn;
 
+import com.buschmais.jqassistant.core.analysis.api.Result;
+import com.buschmais.jqassistant.core.report.api.ReportException;
+import com.buschmais.jqassistant.core.report.api.graph.SubGraphFactory;
 import com.buschmais.jqassistant.core.report.api.graph.model.Node;
 import com.buschmais.jqassistant.core.report.api.graph.model.Relationship;
 import com.buschmais.jqassistant.core.report.api.graph.model.SubGraph;
 
-import org.jqassistant.contrib.plugin.asciidocreport.plantuml.component.ComponentDiagramRenderer;
+import org.jqassistant.contrib.plugin.asciidocreport.AbstractDiagramRendererTest;
 import org.jqassistant.contrib.plugin.asciidocreport.plantuml.ImageRenderer;
 import org.jqassistant.contrib.plugin.asciidocreport.plantuml.RenderMode;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
  * Tests for the {@link ImageRenderer}.
  */
-public class ComponentDiagramRendererTest {
+@ExtendWith(MockitoExtension.class)
+public class ComponentDiagramRendererTest extends AbstractDiagramRendererTest {
 
-    private ComponentDiagramRenderer componentDiagramRenderer = new ComponentDiagramRenderer();
+    @Mock
+    private Result<?> result;
+
+    @Mock
+    private SubGraphFactory subGraphFactory;
+
+    private ComponentDiagramRenderer componentDiagramRenderer;
+
+    @BeforeEach
+    public void setUp() {
+        componentDiagramRenderer = new ComponentDiagramRenderer(subGraphFactory);
+    }
 
     @Test
-    public void componentDiagram() {
-        SubGraph subGraph = getSubGraph();
+    public void componentDiagram() throws ReportException {
+        doReturn(getSubGraph()).when(subGraphFactory).createSubGraph(result);
 
-        String componentDiagram = componentDiagramRenderer.createComponentDiagram(subGraph, "graphviz");
+        String componentDiagram = componentDiagramRenderer.renderDiagram(result, "graphviz");
 
         assertThat(componentDiagram, containsString("[a1] <<Artifact File>> as n1"));
         assertThat(componentDiagram, containsString("[a2] <<Artifact File>> as n2"));
@@ -37,10 +56,10 @@ public class ComponentDiagramRendererTest {
     }
 
     @Test
-    public void jdotDiagram() {
-        SubGraph subGraph = getSubGraph();
+    public void jdotDiagram() throws ReportException {
+        doReturn(getSubGraph()).when(subGraphFactory).createSubGraph(result);
 
-        String componentDiagram = componentDiagramRenderer.createComponentDiagram(subGraph, "jdot");
+        String componentDiagram = componentDiagramRenderer.renderDiagram(result, "jdot");
 
         assertThat(componentDiagram, containsString(RenderMode.JDOT.getPragma()));
     }
@@ -48,21 +67,19 @@ public class ComponentDiagramRendererTest {
     @Test
     public void unknownRenderer() {
         assertThrows(IllegalArgumentException.class, () -> {
-            SubGraph subGraph = getSubGraph();
-            componentDiagramRenderer.createComponentDiagram(subGraph, "myAmazingRenderer");
+            componentDiagramRenderer.renderDiagram(result, "myAmazingRenderer");
         });
     }
 
     @Test
     public void nullRenderer() {
         assertThrows(IllegalArgumentException.class, () -> {
-            SubGraph subGraph = getSubGraph();
-            componentDiagramRenderer.createComponentDiagram(subGraph, null);
+            componentDiagramRenderer.renderDiagram(result, null);
         });
     }
 
     @Test
-    public void componentDiagramInFolder() {
+    public void componentDiagramInFolder() throws ReportException {
         Node rootFolder = getNode(-1, "a0", "Artifact", "File", "Container");
         Node a1 = getNode(1, "a1", "Artifact", "File");
         SubGraph rootGraph = new SubGraph();
@@ -81,7 +98,9 @@ public class ComponentDiagramRendererTest {
         nestedGraph.getRelationships().put(a2DependsOnA1.getId(), a2DependsOnA1);
         rootGraph.getSubGraphs().put(nestedGraph.getId(), nestedGraph);
 
-        String componentDiagram = componentDiagramRenderer.createComponentDiagram(rootGraph, "GRAPHVIZ");
+        doReturn(rootGraph).when(subGraphFactory).createSubGraph(result);
+
+        String componentDiagram = componentDiagramRenderer.renderDiagram(result, "GRAPHVIZ");
 
         assertThat(componentDiagram, containsString("folder \"a0\" {\n" + "    [a1] <<Artifact File>> as n1\n" + "    folder \"a2\" {\n"
                 + "        [a3] <<Artifact File>> as n3\n" + "    }\n" + "}"));
@@ -102,22 +121,5 @@ public class ComponentDiagramRendererTest {
         subGraph.getRelationships().put(a1DependsOnA2.getId(), a1DependsOnA2);
         subGraph.getRelationships().put(a1DependsOnA4.getId(), a1DependsOnA4);
         return subGraph;
-    }
-
-    private Relationship getRelationship(long id, Node start, String type, Node end) {
-        Relationship relationship = new Relationship();
-        relationship.setId(id);
-        relationship.setStartNode(start);
-        relationship.setEndNode(end);
-        relationship.setType(type);
-        return relationship;
-    }
-
-    private Node getNode(long id, String label, String... labels) {
-        Node node = new Node();
-        node.setId(id);
-        node.setLabel(label);
-        node.getLabels().addAll(asList(labels));
-        return node;
     }
 }

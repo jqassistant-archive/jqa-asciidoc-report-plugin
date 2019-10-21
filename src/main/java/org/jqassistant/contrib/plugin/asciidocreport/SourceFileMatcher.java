@@ -35,8 +35,9 @@ public class SourceFileMatcher {
     /**
      * Determine the files to be rendered grouped by their base directory.
      *
-     * @return A {@link Map} containing {@link File}s to be rendered as values grouped by their base directories.
-     * @throws ReportException
+     * @return A {@link Map} containing {@link File}s to be rendered as values
+     *         grouped by their base directories.
+     * @throws ReportException If execution fails.
      */
     public Map<File, List<File>> match(Set<RuleSource> ruleSources) throws ReportException {
         Map<File, List<File>> files = new HashMap<>();
