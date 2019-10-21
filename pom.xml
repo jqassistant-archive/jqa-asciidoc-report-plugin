@@ -4,12 +4,12 @@
     <parent>
         <groupId>org.jqassistant.contrib.common</groupId>
         <artifactId>parent</artifactId>
-        <version>1.7.0-MS3</version>
+        <version>1.8.0-SNAPSHOT</version>
     </parent>
 
     <groupId>org.jqassistant.contrib.plugin</groupId>
     <artifactId>jqassistant-asciidoc-report-plugin</artifactId>
-    <version>1.7.0-SNAPSHOT</version>
+    <version>1.8.0-SNAPSHOT</version>
 
     <name>jQAssistant Asciidoc Report Plugin</name>
     <description>The jQAssistant plugin for creating reports from Asciidoc files.</description>
@@ -41,7 +41,7 @@
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
-                <version>1.18.4</version>
+                <version>1.18.10</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
@@ -51,18 +51,6 @@
                 <scope>provided</scope>
             </dependency>
             <!-- unit tests -->
-            <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>4.12</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-core</artifactId>
-                <version>1.10.19</version>
-                <scope>test</scope>
-            </dependency>
             <dependency>
                 <groupId>org.jsoup</groupId>
                 <artifactId>jsoup</artifactId>
@@ -112,8 +100,20 @@
             <artifactId>xo.api</artifactId>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>java-hamcrest</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>

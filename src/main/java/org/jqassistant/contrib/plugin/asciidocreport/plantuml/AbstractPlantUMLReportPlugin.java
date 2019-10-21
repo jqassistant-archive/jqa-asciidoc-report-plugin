@@ -10,19 +10,18 @@ import com.buschmais.jqassistant.core.analysis.api.rule.ExecutableRule;
 import com.buschmais.jqassistant.core.report.api.ReportContext;
 import com.buschmais.jqassistant.core.report.api.ReportException;
 import com.buschmais.jqassistant.core.report.api.ReportPlugin;
-import com.buschmais.jqassistant.core.report.api.graph.SubGraphFactory;
-import com.buschmais.jqassistant.core.report.api.graph.model.SubGraph;
-import net.sourceforge.plantuml.FileFormat;
-import smetana.core.Z;
 
-public class ComponentDiagramReportPlugin implements ReportPlugin {
+import net.sourceforge.plantuml.FileFormat;
+
+public abstract class AbstractPlantUMLReportPlugin implements ReportPlugin {
+
     private static final String PROPERTY_FILE_FORMAT = "asciidoc.report.plantuml.format";
     private static final String PROPERTY_RENDER_MODE = "asciidoc.report.plantuml.rendermode";
 
     private static final String DEFAULT_RENDER_MODE = RenderMode.GRAPHVIZ.name();
     private static final String DEFAULT_FILE_FORMAT = FileFormat.SVG.name();
 
-    private PlantUMLRenderer plantUMLRenderer;
+    private ImageRenderer imageRenderer;
 
     private ReportContext reportContext;
 
@@ -30,33 +29,37 @@ public class ComponentDiagramReportPlugin implements ReportPlugin {
 
     private String fileFormat;
 
-    private String renderMode;
+    private RenderMode renderMode;
 
     @Override
     public void initialize() {
-        plantUMLRenderer = new PlantUMLRenderer();
+        imageRenderer = new ImageRenderer();
     }
 
     @Override
-    public void configure(ReportContext reportContext, Map<String, Object> properties) {
+    public void configure(ReportContext reportContext, Map<String, Object> properties) throws ReportException {
         this.reportContext = reportContext;
         directory = reportContext.getReportDirectory("plantuml");
         fileFormat = (String) properties.getOrDefault(PROPERTY_FILE_FORMAT, DEFAULT_FILE_FORMAT);
-        renderMode = (String) properties.getOrDefault(PROPERTY_RENDER_MODE, DEFAULT_RENDER_MODE);
+        String renderModeValue = (String) properties.getOrDefault(PROPERTY_RENDER_MODE, DEFAULT_RENDER_MODE);
+        renderMode = RenderMode.fromString(renderModeValue);
     }
 
     @Override
     public void setResult(Result<? extends ExecutableRule> result) throws ReportException {
-        SubGraphFactory subGraphFactory = new SubGraphFactory();
-        SubGraph subGraph = subGraphFactory.createSubGraph(result);
-        String componentDiagram = plantUMLRenderer.createComponentDiagram(subGraph, renderMode);
-        File file = plantUMLRenderer.renderDiagram(componentDiagram, result.getRule(), directory, fileFormat);
+        String diagram = getRenderer().renderDiagram(result, renderMode);
+        File file = imageRenderer.renderDiagram(diagram, result.getRule(), directory, fileFormat);
         URL url;
         try {
             url = file.toURI().toURL();
         } catch (MalformedURLException e) {
             throw new ReportException("Cannot convert file '" + file.getAbsolutePath() + "' to URL");
         }
-        reportContext.addReport("Component Diagram", result.getRule(), ReportContext.ReportType.IMAGE, url);
+        reportContext.addReport(getReportLabel(), result.getRule(), ReportContext.ReportType.IMAGE, url);
     }
+
+    protected abstract AbstractDiagramRenderer getRenderer();
+
+    protected abstract String getReportLabel();
+
 }

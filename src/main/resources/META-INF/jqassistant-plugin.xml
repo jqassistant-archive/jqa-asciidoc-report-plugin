@@ -3,6 +3,7 @@
     <description>Asciidoc Report</description>
     <report>
         <class id="asciidoc">org.jqassistant.contrib.plugin.asciidocreport.AsciidocReportPlugin</class>
-        <class id="plantuml-component-diagram">org.jqassistant.contrib.plugin.asciidocreport.plantuml.ComponentDiagramReportPlugin</class>
+        <class id="plantuml-component-diagram">org.jqassistant.contrib.plugin.asciidocreport.plantuml.component.ComponentDiagramReportPlugin</class>
+        <class id="plantuml-sequence-diagram">org.jqassistant.contrib.plugin.asciidocreport.plantuml.sequence.SequenceDiagramReportPlugin</class>
     </report>
 </jqa-plugin:jqassistant-plugin>
