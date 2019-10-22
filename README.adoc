@@ -101,19 +101,25 @@ project specific rules
 \include::jQA:ImportedRules[]
 ....
 
-== Component Diagrams
+== PlantUML Diagrams
 
-The plugin provides supports generating component diagrams from rule results.
+The plugin provides supports generating embedded diagrams from rule results:
+
+* <<ComponentDiagrams>>
+* <<SequenceDiagrams>>
 
 NOTE: This feature is based on http://plantuml.com/[PlantUML] which itself relies on http://www.graphviz.org[Graphviz].
 The latter needs to be installed and the `dot` executable must be present on the system path.
 
-To activate diagram rendering the report type must be set to `plantuml-component-diagram`.
+[[ComponentDiagrams]]
+=== Component Diagrams
+
+To activate component diagram rendering the report type must be set to `plantuml-component-diagram`.
 The result of the rule simply needs to return all required nodes and their relationships:
 
 .jqassistant/index.adoc
 ....
-[[package:DependencyDiagram]]
+[[DependencyDiagram]]
 [source,cypher,role=concept,requiresConcepts="dependency:Package",reportType="plantuml-component-diagram"] // (1)
 .Creates a diagram about dependencies between packages containing Java types (test artifacts are excluded).
 ----
@@ -133,7 +139,7 @@ The following example therefore uses a modified return clause:
 
 .jqassistant/index.adoc
 ....
-[[package:DependencyPerArtifactDiagram]]
+[[DependencyPerArtifactDiagram]]
 [source,cypher,role=concept,requiresConcepts="dependency:Package",reportType="plantuml-component-diagram"]
 .Creates a diagram about dependencies between packages containing Java types (per artifact, test artifacts are excluded).
 ----
@@ -156,6 +162,52 @@ RETURN
 <4> `nodes` are the nodes to be included in the folder
 <5> `relationships` are the relationships between the nodes, they may reference nodes of other parents/folders
 
+[[SequenceDiagrams]]
+=== Sequence Diagrams
+
+NOTE: This feature is currently only available in the latest 1.8.0 snapshot versions.
+
+To activate sequence diagram rendering the report type must be set to `plantuml-sequence-diagram`.
+The result of the rule must return a column `sequence` containing a path-structure:
+
+.jqassistant/index.adoc
+....
+[[SequenceDiagram]]
+[source,cypher,role=concept,reportType="plantuml-sequence-diagram"]
+.Creates sequence diagram.
+----
+MATCH
+  (type:Type{name:"MyService"})-[:DECLARES]->(root:Method{signature:"void doSomething()"}),
+  sequence=(root)-[:INVOKES*]->(target:Method)
+RETURN
+  sequence // <1>
+----
+....
+<1> The sequence to convert to a diagram
+
+NOTE: The sequence diagram is sensitive to the order of participants and messages.
+The diagram rendering algorithm therefore relies on a depth-first result structure as provided by the `path` function.
+All elements are rendered in the order of their first occurrence.
+
+If a path cannot be returned directly the result may provide the columns `participants` (nodes) and `messages` (relationships):
+
+.jqassistant/index.adoc
+....
+[[SequenceDiagram]]
+[source,cypher,role=concept,reportType="plantuml-sequence-diagram"]
+.Creates sequence diagram.
+----
+MATCH
+  (type:Type{name:"MyService"})-[:DECLARES]->(root:Method{signature:"void doSomething()"}),
+  sequence=(root)-[:INVOKES*]->(target:Method)
+RETURN
+  nodes(sequence) as participants      // <1>
+  relationships(sequence) as messages  // <2>
+----
+....
+<1> The list of participants
+<2> The list of messages exchanged between the participants
+
 == Configuration
 
 The Asciidoc Report plugin accepts several options that might be passed as report properties to jQAssistant:
@@ -170,6 +222,7 @@ The Asciidoc Report plugin accepts several options that might be passed as repor
 | asciidoc.report.plantuml.format     | Specifies the output file format of the generated PlantUML-Diagrams (optional)                                     | SVG
 | asciidoc.report.plantuml.rendermode | Specifies the renderer used for the generated PlantUML-Diagrams, currently supporting GraphViz and Jdot (optional) | GRAPHVIZ
 |===
+
 
 [[feedback]]
 == Feedback

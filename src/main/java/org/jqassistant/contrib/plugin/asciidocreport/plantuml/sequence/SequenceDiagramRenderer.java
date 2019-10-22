@@ -13,13 +13,17 @@ import com.buschmais.jqassistant.core.report.api.graph.model.Node;
 import com.buschmais.jqassistant.core.report.api.graph.model.Relationship;
 import com.buschmais.jqassistant.core.report.api.graph.model.SubGraph;
 
-import org.apache.commons.lang3.StringUtils;
 import org.jqassistant.contrib.plugin.asciidocreport.plantuml.AbstractDiagramRenderer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SequenceDiagramRenderer extends AbstractDiagramRenderer {
 
+    public static final String COLUMN_SEQUENCE = "sequence";
     public static final String COLUMN_PARTICIPANTS = "participants";
     public static final String COLUMN_MESSAGES = "messages";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SequenceDiagramRenderer.class);
 
     private final SubGraphFactory subGraphFactory;
 
@@ -32,15 +36,34 @@ public class SequenceDiagramRenderer extends AbstractDiagramRenderer {
         List<Map<String, Object>> rows = result.getRows();
         Set<Node> participants = new LinkedHashSet<>();
         Set<Relationship> messages = new LinkedHashSet<>();
-        for (Map<String, Object> row : rows) {
-            List<?> nodes = (List<?>) row.getOrDefault(COLUMN_PARTICIPANTS, emptyList());
-            participants.addAll(convert(nodes, subGraphFactory));
-            List<?> relationships = (List<?>) row.getOrDefault(COLUMN_MESSAGES, emptyList());
-            messages.addAll(convert(relationships, subGraphFactory));
-        }
+        convertResult(rows, participants, messages);
+        LOGGER.info("Rendering sequence diagram with {} participants and {} messages.", participants.size(), messages.size());
         renderParticipants(participants, builder);
         builder.append('\n');
         renderRelationships(messages, builder);
+    }
+
+    private void convertResult(List<Map<String, Object>> rows, Set<Node> participants, Set<Relationship> messages) throws ReportException {
+        for (Map<String, Object> row : rows) {
+            List<?> nodes;
+            List<?> relationships;
+            List<?> sequence = (List<?>) row.getOrDefault(COLUMN_SEQUENCE, emptyList());
+            if (!sequence.isEmpty()) {
+                for (Object value : sequence) {
+                    Identifiable identifiable = subGraphFactory.convert(value);
+                    if (identifiable instanceof Node) {
+                        participants.add((Node) identifiable);
+                    } else if (identifiable instanceof Relationship) {
+                        messages.add((Relationship) identifiable);
+                    }
+                }
+            } else {
+                nodes = (List<?>) row.getOrDefault(COLUMN_PARTICIPANTS, emptyList());
+                participants.addAll(convert(nodes, subGraphFactory));
+                relationships = (List<?>) row.getOrDefault(COLUMN_MESSAGES, emptyList());
+                messages.addAll(convert(relationships, subGraphFactory));
+            }
+        }
     }
 
     private <T extends Identifiable> List<T> convert(List<?> elements, SubGraphFactory subGraphFactory) throws ReportException {
@@ -64,9 +87,9 @@ public class SequenceDiagramRenderer extends AbstractDiagramRenderer {
         for (Node participant : participants) {
             builder.append("participant ").append('"').append(participant.getLabel()).append('"').append(" as ").append(getNodeId(participant));
             Set<String> labels = participant.getLabels();
-            if (!labels.isEmpty()) {
+            for (String label : labels) {
                 builder.append(" <<");
-                builder.append(StringUtils.join(labels, " "));
+                builder.append(label);
                 builder.append(">>");
             }
             builder.append('\n');
