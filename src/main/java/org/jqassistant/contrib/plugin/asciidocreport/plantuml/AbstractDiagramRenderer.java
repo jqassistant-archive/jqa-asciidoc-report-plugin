@@ -28,6 +28,8 @@ public abstract class AbstractDiagramRenderer {
      * @param renderer
      *            The {@link RenderMode}
      * @return The {@link String} representation of the PlantUML diagram.
+     * @throws ReportException
+     *             If the renderer fails.
      */
     public String renderDiagram(Result<? extends ExecutableRule> result, RenderMode renderer) throws ReportException {
         StringBuilder plantumlBuilder = new StringBuilder();

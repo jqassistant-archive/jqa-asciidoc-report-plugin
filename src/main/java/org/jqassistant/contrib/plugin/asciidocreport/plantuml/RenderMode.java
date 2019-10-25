@@ -5,6 +5,7 @@ import static java.util.Arrays.asList;
 import com.buschmais.jqassistant.core.report.api.ReportException;
 
 public enum RenderMode {
+
     GRAPHVIZ(""), JDOT("!pragma graphviz_dot jdot\n");
 
     RenderMode(String pragma) {
@@ -20,19 +21,18 @@ public enum RenderMode {
     /**
      * Returns the {@link RenderMode} for the given string
      *
-     * @param rendermode
+     * @param renderMode
      *            The {@link RenderMode} as string.
      * @return The matching {@link RenderMode}
-     * @throws IllegalArgumentException
-     *             if rendermode is not valid.
+     * @throws ReportException
+     *             If renderMode is not valid.
      */
-    public static RenderMode fromString(String rendermode) throws ReportException {
+    public static RenderMode fromString(String renderMode) throws ReportException {
         for (RenderMode mode : RenderMode.values()) {
-            if (mode.name().equalsIgnoreCase(rendermode)) {
+            if (mode.name().equalsIgnoreCase(renderMode)) {
                 return mode;
             }
         }
-
-        throw new ReportException(rendermode + " is not a valid, supported modes are " + asList(RenderMode.values()));
+        throw new ReportException(renderMode + " is not a valid, supported modes are " + asList(RenderMode.values()));
     }
 }
