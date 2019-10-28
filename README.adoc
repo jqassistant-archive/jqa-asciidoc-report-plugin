@@ -16,7 +16,7 @@ TIP: You can find an example setup and rules in the http://github.com/buschmais/
 
 * Java 8 or higher
 * Maven 3.2.5 or higher
-* jQAssistant 1.6.0
+* jQAssistant 1.7.0
 
 == Setup
 
@@ -30,7 +30,7 @@ The plugin can be enabled in a Maven based project by adding it as a dependency 
         <plugin>
             <groupId>com.buschmais.jqassistant</groupId>
             <artifactId>jqassistant-maven-plugin</artifactId>
-            <version>1.6.0</version>
+            <version>1.7.0</version>
             <executions>
                 <execution>
                     <id>default-cli</id>
@@ -52,7 +52,7 @@ The plugin can be enabled in a Maven based project by adding it as a dependency 
                 <dependency>                                                                                                                <!--3-->
                     <groupId>org.jqassistant.contrib.plugin</groupId>
                     <artifactId>jqassistant-asciidoc-report-plugin</artifactId>
-                    <version>1.6.0</version>
+                    <version>1.7.0</version>
                 </dependency>
             </dependencies>
         </plugin>
@@ -178,7 +178,7 @@ The result of the rule must return a column `sequence` containing a path-structu
 ----
 MATCH
   (type:Type{name:"MyService"})-[:DECLARES]->(root:Method{signature:"void doSomething()"}),
-  sequence=(root)-[:INVOKES*]->(target:Method)
+  sequence=(root)-[:INVOKES*]->(:Method)
 RETURN
   sequence // <1>
 ----
@@ -199,7 +199,7 @@ If a path cannot be returned directly the result may provide the columns `partic
 ----
 MATCH
   (type:Type{name:"MyService"})-[:DECLARES]->(root:Method{signature:"void doSomething()"}),
-  sequence=(root)-[:INVOKES*]->(target:Method)
+  sequence=(root)-[:INVOKES*]->(:Method)
 RETURN
   nodes(sequence) as participants      // <1>
   relationships(sequence) as messages  // <2>
