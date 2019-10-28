@@ -31,66 +31,79 @@ public class ClassDiagramRenderer extends AbstractDiagramRenderer {
     @Override
     protected void render(Result<? extends ExecutableRule> result, StringBuilder builder) throws ReportException {
         ClassDiagramResult classDiagramResult = classDiagramResultConverter.convert(result);
-        // Render
-        Set<FieldDescriptor> fieldAssociations = renderTypes(classDiagramResult.getTypes(), classDiagramResult.getMembersPerType(), builder);
-        renderAssociations(classDiagramResult.getTypes(), fieldAssociations, builder);
-        HashSet<Node> typeNodes = new HashSet<>(classDiagramResult.getTypes().values());
-        renderRelations(typeNodes, classDiagramResult.getRelations(), "EXTENDS", " <|--", builder);
-        renderRelations(typeNodes, classDiagramResult.getRelations(), "IMPLEMENTS", " <|..", builder);
+        // Render starting root package members, i.e. those without parent.
+        Set<PackageMemberDescriptor> rootMembers = classDiagramResult.getPackageMemberTree().getOrDefault(null, emptySet());
+        Set<FieldDescriptor> fieldAssociations = renderPackageMembers(classDiagramResult, rootMembers, builder);
+        // Render collected field associations
+        renderAssociations(classDiagramResult.getPackageMembers(), fieldAssociations, builder);
+        // Render custom relations
+        HashSet<Node> packageMemberNodes = new HashSet<>(classDiagramResult.getPackageMembers().values());
+        renderRelations(packageMemberNodes, classDiagramResult.getRelations(), "EXTENDS", " <|--", builder);
+        renderRelations(packageMemberNodes, classDiagramResult.getRelations(), "IMPLEMENTS", " <|..", builder);
     }
 
-    private Set<FieldDescriptor> renderTypes(Map<TypeDescriptor, Node> types, Map<TypeDescriptor, Set<MemberDescriptor>> membersPerType,
+    private Set<FieldDescriptor> renderPackageMembers(ClassDiagramResult classDiagramResult, Set<PackageMemberDescriptor> currentPackageMembers,
             StringBuilder builder) {
         Set<FieldDescriptor> fieldAssociations = new LinkedHashSet<>();
-        for (Map.Entry<TypeDescriptor, Set<MemberDescriptor>> entry : membersPerType.entrySet()) {
-            TypeDescriptor type = entry.getKey();
-            Set<MemberDescriptor> members = entry.getValue();
-            if (isAbstract(type) && !(type instanceof EnumTypeDescriptor)) {
-                builder.append("abstract").append(" ");
-            }
-            builder.append(getType(type)).append(" ");
-            builder.append(getNodeId(types.get(type))).append(" ");
-            builder.append("as ").append('"').append(type.getFullQualifiedName()).append('"');
-            if (!(type instanceof AnnotationTypeDescriptor)) {
-                builder.append("{\n");
-                for (MemberDescriptor member : members) {
-                    builder.append("  ");
-                    if (member instanceof FieldDescriptor) {
-                        FieldDescriptor field = (FieldDescriptor) member;
-                        if (!isStatic(field) && types.containsKey(field.getType())) {
-                            fieldAssociations.add(field);
-                        } else {
+        for (PackageMemberDescriptor current : currentPackageMembers) {
+            Node node = classDiagramResult.getPackageMembers().get(current);
+            if (current instanceof PackageDescriptor) {
+                builder.append("package").append(' ').append(getNodeId(node)).append(" as ").append('"').append(current.getFullQualifiedName()).append('"')
+                        .append("{\n");
+                Set<PackageMemberDescriptor> children = classDiagramResult.getPackageMemberTree().get(current);
+                fieldAssociations.addAll(renderPackageMembers(classDiagramResult, children, builder));
+                builder.append("}\n");
+            } else if (current instanceof TypeDescriptor) {
+                TypeDescriptor type = (TypeDescriptor) current;
+                Set<MemberDescriptor> members = classDiagramResult.getMembersPerType().get(type);
+                if (isAbstract(type) && !(type instanceof EnumTypeDescriptor)) {
+                    builder.append("abstract").append(" ");
+                }
+                builder.append(getType(type)).append(" ");
+                builder.append(getNodeId(node)).append(" ");
+                builder.append("as ").append('"').append(type.getFullQualifiedName()).append('"');
+                if (!(type instanceof AnnotationTypeDescriptor)) {
+                    builder.append("{\n");
+                    for (MemberDescriptor member : members) {
+                        builder.append("  ");
+                        if (member instanceof FieldDescriptor) {
+                            FieldDescriptor field = (FieldDescriptor) member;
+                            if (!isStatic(field) && classDiagramResult.getPackageMembers().containsKey(field.getType())) {
+                                fieldAssociations.add(field);
+                            } else {
+                                renderMemberSignature(member, builder);
+                            }
+                        } else if (member instanceof MethodDescriptor) {
                             renderMemberSignature(member, builder);
                         }
-                    } else if (member instanceof MethodDescriptor) {
-                        renderMemberSignature(member, builder);
                     }
+                    builder.append('}');
                 }
-                builder.append('}');
+                builder.append("\n");
             }
-            builder.append("\n");
         }
         builder.append("\n");
         return fieldAssociations;
     }
 
-    private void renderAssociations(Map<TypeDescriptor, Node> types, Set<FieldDescriptor> fieldAssociations, StringBuilder builder) {
+    private void renderAssociations(Map<PackageMemberDescriptor, Node> packageMembers, Set<FieldDescriptor> fieldAssociations, StringBuilder builder) {
         for (FieldDescriptor fieldAssociation : fieldAssociations) {
             TypeDescriptor declaringType = fieldAssociation.getDeclaringType();
             TypeDescriptor fieldType = fieldAssociation.getType();
-            builder.append(getNodeId(types.get(declaringType)));
+            builder.append(getNodeId(packageMembers.get(declaringType)));
             builder.append(" -> ");
-            builder.append(getNodeId(types.get(fieldType)));
+            builder.append(getNodeId(packageMembers.get(fieldType)));
             builder.append(" : ").append(fieldAssociation.getName());
             builder.append("\n");
         }
     }
 
-    private void renderRelations(Set<Node> typeNodes, Map<String, Set<Relationship>> relations, String relationType, String renderType, StringBuilder builder) {
+    private void renderRelations(Set<Node> packageMemberNodes, Map<String, Set<Relationship>> relations, String relationType, String renderType,
+            StringBuilder builder) {
         for (Relationship relation : relations.getOrDefault(relationType, emptySet())) {
             Node startNode = relation.getStartNode();
             Node endNode = relation.getEndNode();
-            if (typeNodes.contains(startNode) && typeNodes.contains(endNode)) {
+            if (packageMemberNodes.contains(startNode) && packageMemberNodes.contains(endNode)) {
                 builder.append(getNodeId(endNode)).append(renderType).append(getNodeId(startNode)).append("\n");
             }
         }
