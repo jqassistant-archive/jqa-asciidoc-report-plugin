@@ -2,10 +2,7 @@ package org.jqassistant.contrib.plugin.asciidocreport.plantuml.clazz;
 
 import static java.util.Collections.emptySet;
 
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import com.buschmais.jqassistant.core.analysis.api.Result;
 import com.buschmais.jqassistant.core.analysis.api.rule.ExecutableRule;
@@ -15,17 +12,20 @@ import com.buschmais.jqassistant.core.report.api.graph.model.Relationship;
 import com.buschmais.jqassistant.plugin.java.api.model.*;
 
 import org.jqassistant.contrib.plugin.asciidocreport.plantuml.AbstractDiagramRenderer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ClassDiagramRenderer extends AbstractDiagramRenderer {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClassDiagramRenderer.class);
+    private static final String DEFAULT_RELATION_TYPE = "-->";
 
     private ClassDiagramResultConverter classDiagramResultConverter;
 
+    private Map<String, String> relationTypes;
+
     public ClassDiagramRenderer(ClassDiagramResultConverter classDiagramResultConverter) {
         this.classDiagramResultConverter = classDiagramResultConverter;
+        this.relationTypes = new HashMap<>();
+        relationTypes.put("EXTENDS", "--|>");
+        relationTypes.put("IMPLEMENTS", "..|>");
     }
 
     @Override
@@ -33,56 +33,60 @@ public class ClassDiagramRenderer extends AbstractDiagramRenderer {
         ClassDiagramResult classDiagramResult = classDiagramResultConverter.convert(result);
         // Render starting root package members, i.e. those without parent.
         Set<PackageMemberDescriptor> rootMembers = classDiagramResult.getPackageMemberTree().getOrDefault(null, emptySet());
-        Set<FieldDescriptor> fieldAssociations = renderPackageMembers(classDiagramResult, rootMembers, builder);
+        Set<FieldDescriptor> fieldAssociations = renderPackageMembers(rootMembers, classDiagramResult, 0, builder);
         // Render collected field associations
         renderAssociations(classDiagramResult.getPackageMembers(), fieldAssociations, builder);
         // Render custom relations
         HashSet<Node> packageMemberNodes = new HashSet<>(classDiagramResult.getPackageMembers().values());
-        renderRelations(packageMemberNodes, classDiagramResult.getRelations(), "EXTENDS", " <|--", builder);
-        renderRelations(packageMemberNodes, classDiagramResult.getRelations(), "IMPLEMENTS", " <|..", builder);
+        renderRelations(packageMemberNodes, classDiagramResult, builder);
     }
 
-    private Set<FieldDescriptor> renderPackageMembers(ClassDiagramResult classDiagramResult, Set<PackageMemberDescriptor> currentPackageMembers,
+    private Set<FieldDescriptor> renderPackageMembers(Set<PackageMemberDescriptor> packageMembers, ClassDiagramResult classDiagramResult, int level,
             StringBuilder builder) {
         Set<FieldDescriptor> fieldAssociations = new LinkedHashSet<>();
-        for (PackageMemberDescriptor current : currentPackageMembers) {
-            Node node = classDiagramResult.getPackageMembers().get(current);
-            if (current instanceof PackageDescriptor) {
-                builder.append("package").append(' ').append(getNodeId(node)).append(" as ").append('"').append(current.getFullQualifiedName()).append('"')
-                        .append("{\n");
-                Set<PackageMemberDescriptor> children = classDiagramResult.getPackageMemberTree().get(current);
-                fieldAssociations.addAll(renderPackageMembers(classDiagramResult, children, builder));
-                builder.append("}\n");
-            } else if (current instanceof TypeDescriptor) {
-                TypeDescriptor type = (TypeDescriptor) current;
-                Set<MemberDescriptor> members = classDiagramResult.getMembersPerType().get(type);
+        for (PackageMemberDescriptor packageMember : packageMembers) {
+            builder.append(indent(level));
+            Node node = classDiagramResult.getPackageMembers().get(packageMember);
+            if (packageMember instanceof PackageDescriptor) {
+                builder.append("package").append(' ').append(getNodeId(node)).append(" as ").append('"').append(packageMember.getFullQualifiedName())
+                        .append('"');
+                builder.append("{\n");
+                Set<PackageMemberDescriptor> children = classDiagramResult.getPackageMemberTree().get(packageMember);
+                fieldAssociations.addAll(renderPackageMembers(children, classDiagramResult, level + 1, builder));
+                builder.append("}");
+            } else if (packageMember instanceof TypeDescriptor) {
+                TypeDescriptor type = (TypeDescriptor) packageMember;
                 if (isAbstract(type) && !(type instanceof EnumTypeDescriptor)) {
                     builder.append("abstract").append(" ");
                 }
-                builder.append(getType(type)).append(" ");
-                builder.append(getNodeId(node)).append(" ");
-                builder.append("as ").append('"').append(type.getFullQualifiedName()).append('"');
+                builder.append(getType(type)).append(" ").append(getNodeId(node)).append(" as ").append('"').append(packageMember.getFullQualifiedName())
+                        .append('"');
                 if (!(type instanceof AnnotationTypeDescriptor)) {
                     builder.append("{\n");
-                    for (MemberDescriptor member : members) {
-                        builder.append("  ");
-                        if (member instanceof FieldDescriptor) {
-                            FieldDescriptor field = (FieldDescriptor) member;
-                            if (!isStatic(field) && classDiagramResult.getPackageMembers().containsKey(field.getType())) {
-                                fieldAssociations.add(field);
-                            } else {
-                                renderMemberSignature(member, builder);
-                            }
-                        } else if (member instanceof MethodDescriptor) {
-                            renderMemberSignature(member, builder);
-                        }
-                    }
-                    builder.append('}');
+                    Set<MemberDescriptor> typeMembers = classDiagramResult.getMembersPerType().get(type);
+                    fieldAssociations.addAll(renderTypeMembers(typeMembers, classDiagramResult, level + 1, builder));
+                    builder.append(indent(level)).append('}');
                 }
-                builder.append("\n");
+            }
+            builder.append("\n");
+        }
+        return fieldAssociations;
+    }
+
+    private Set<FieldDescriptor> renderTypeMembers(Set<MemberDescriptor> typeMembers, ClassDiagramResult classDiagramResult, int level, StringBuilder builder) {
+        Set<FieldDescriptor> fieldAssociations = new LinkedHashSet<>();
+        for (MemberDescriptor member : typeMembers) {
+            if (member instanceof FieldDescriptor) {
+                FieldDescriptor field = (FieldDescriptor) member;
+                if (!isStatic(field) && classDiagramResult.getPackageMembers().containsKey(field.getType())) {
+                    fieldAssociations.add(field);
+                } else {
+                    renderMemberSignature(member, level, builder);
+                }
+            } else if (member instanceof MethodDescriptor) {
+                renderMemberSignature(member, level, builder);
             }
         }
-        builder.append("\n");
         return fieldAssociations;
     }
 
@@ -98,13 +102,16 @@ public class ClassDiagramRenderer extends AbstractDiagramRenderer {
         }
     }
 
-    private void renderRelations(Set<Node> packageMemberNodes, Map<String, Set<Relationship>> relations, String relationType, String renderType,
-            StringBuilder builder) {
-        for (Relationship relation : relations.getOrDefault(relationType, emptySet())) {
-            Node startNode = relation.getStartNode();
-            Node endNode = relation.getEndNode();
-            if (packageMemberNodes.contains(startNode) && packageMemberNodes.contains(endNode)) {
-                builder.append(getNodeId(endNode)).append(renderType).append(getNodeId(startNode)).append("\n");
+    private void renderRelations(Set<Node> packageMemberNodes, ClassDiagramResult classDiagramResult, StringBuilder builder) {
+        for (Map.Entry<String, Set<Relationship>> entry : classDiagramResult.getRelations().entrySet()) {
+            String relationType = entry.getKey();
+            String arrowType = relationTypes.getOrDefault(relationType, DEFAULT_RELATION_TYPE);
+            for (Relationship relationship : entry.getValue()) {
+                Node startNode = relationship.getStartNode();
+                Node endNode = relationship.getEndNode();
+                if (packageMemberNodes.contains(startNode) && packageMemberNodes.contains(endNode)) {
+                    builder.append(getNodeId(startNode)).append(arrowType).append(getNodeId(endNode)).append("\n");
+                }
             }
         }
     }
@@ -121,7 +128,8 @@ public class ClassDiagramRenderer extends AbstractDiagramRenderer {
         }
     }
 
-    private void renderMemberSignature(MemberDescriptor member, StringBuilder builder) {
+    private void renderMemberSignature(MemberDescriptor member, int level, StringBuilder builder) {
+        builder.append(indent(level));
         if (isStatic(member)) {
             builder.append("{static}").append(" ");
         }
