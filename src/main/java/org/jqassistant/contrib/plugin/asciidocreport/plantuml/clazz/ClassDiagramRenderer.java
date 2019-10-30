@@ -56,6 +56,9 @@ public class ClassDiagramRenderer extends AbstractDiagramRenderer {
                 builder.append("}");
             } else if (packageMember instanceof TypeDescriptor) {
                 TypeDescriptor type = (TypeDescriptor) packageMember;
+                if (type instanceof AccessModifierDescriptor) {
+                    builder.append(getVisibility((AccessModifierDescriptor) type));
+                }
                 if (isAbstract(type) && !(type instanceof EnumTypeDescriptor)) {
                     builder.append("abstract").append(" ");
                 }
@@ -63,7 +66,7 @@ public class ClassDiagramRenderer extends AbstractDiagramRenderer {
                         .append('"');
                 if (!(type instanceof AnnotationTypeDescriptor)) {
                     builder.append("{\n");
-                    Set<MemberDescriptor> typeMembers = classDiagramResult.getMembersPerType().get(type);
+                    Set<MemberDescriptor> typeMembers = classDiagramResult.getMembersPerType().getOrDefault(type, emptySet());
                     fieldAssociations.addAll(renderTypeMembers(typeMembers, classDiagramResult, level + 1, builder));
                     builder.append(indent(level)).append('}');
                 }
@@ -152,9 +155,9 @@ public class ClassDiagramRenderer extends AbstractDiagramRenderer {
         return false;
     }
 
-    private String getVisibility(MemberDescriptor member) {
-        if (member.getVisibility() != null) {
-            switch (member.getVisibility()) {
+    private String getVisibility(AccessModifierDescriptor accessModifierDescriptor) {
+        if (accessModifierDescriptor.getVisibility() != null) {
+            switch (accessModifierDescriptor.getVisibility()) {
             case "public":
                 return "+";
             case "private":

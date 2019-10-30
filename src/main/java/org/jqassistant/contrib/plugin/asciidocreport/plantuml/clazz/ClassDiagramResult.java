@@ -22,8 +22,6 @@ public class ClassDiagramResult {
 
     private Map<PackageMemberDescriptor, Set<PackageMemberDescriptor>> packageMemberTree;
 
-    private Map<MemberDescriptor, Node> typeMembers;
-
     private Map<TypeDescriptor, Set<MemberDescriptor>> membersPerType;
 
     private Map<String, Set<Relationship>> relations;

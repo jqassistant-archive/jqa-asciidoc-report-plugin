@@ -56,8 +56,8 @@ class ClassDiagramResultConverter {
 
         Map<PackageMemberDescriptor, Set<PackageMemberDescriptor>> children = getPackageMemberTree(packageMembers);
         Map<TypeDescriptor, Set<MemberDescriptor>> membersPerType = aggregateMembersPerType(packageMembers.keySet(), typeMembers.keySet());
-        return ClassDiagramResult.builder().packageMembers(packageMembers).packageMemberTree(children).typeMembers(typeMembers).membersPerType(membersPerType)
-                .relations(relations).build();
+        return ClassDiagramResult.builder().packageMembers(packageMembers).packageMemberTree(children).membersPerType(membersPerType).relations(relations)
+                .build();
     }
 
     private Map<PackageMemberDescriptor, Set<PackageMemberDescriptor>> getPackageMemberTree(Map<PackageMemberDescriptor, Node> packageMembers) {
