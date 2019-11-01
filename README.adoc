@@ -169,12 +169,12 @@ RETURN
 NOTE: This feature is currently only available in the latest 1.8.0 snapshot versions.
 
 To activate class diagram rendering the report type must be set to `plantuml-class-diagram`.
-The plugin will render the following elements if contained in the result:
+The result may contain any of the following elements:
 
 * Packages (`:Java:Package`)
 * Types (`:Java:Type`)
 * Members (`:Java:Member`, `:Java:Field`, `:Java:Method`)
-* Inheritance relations between types (`:EXTENDS`, `IMPLEMENTS`)
+* Inheritance relations between types (`:EXTENDS`, `:IMPLEMENTS`)
 * any other type relations (rendered as associations)
 
 .jqassistant/index.adoc
