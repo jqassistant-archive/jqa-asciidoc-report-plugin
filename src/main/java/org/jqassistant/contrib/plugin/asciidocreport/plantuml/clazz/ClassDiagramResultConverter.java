@@ -35,7 +35,7 @@ class ClassDiagramResultConverter {
     public ClassDiagramResult convert(Result<? extends ExecutableRule> result) throws ReportException {
         Map<PackageMemberDescriptor, Node> packageMembers = new LinkedHashMap<>();
         Map<MemberDescriptor, Node> typeMembers = new LinkedHashMap<>();
-        Map<String, Set<Relationship>> relations = new LinkedHashMap<>();
+        Set<Relationship> relations = new LinkedHashSet<>();
         List<Map<String, Object>> rows = result.getRows();
         for (Map<String, Object> row : rows) {
             for (Object value : row.values()) {
@@ -49,7 +49,7 @@ class ClassDiagramResultConverter {
                     }
                 } else if (identifiable instanceof Relationship) {
                     Relationship relationship = (Relationship) identifiable;
-                    relations.computeIfAbsent(relationship.getType(), key -> new HashSet<>()).add(relationship);
+                    relations.add(relationship);
                 }
             }
         }

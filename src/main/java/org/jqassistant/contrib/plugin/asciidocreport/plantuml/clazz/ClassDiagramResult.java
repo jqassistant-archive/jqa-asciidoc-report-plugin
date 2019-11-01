@@ -24,6 +24,6 @@ public class ClassDiagramResult {
 
     private Map<TypeDescriptor, Set<MemberDescriptor>> membersPerType;
 
-    private Map<String, Set<Relationship>> relations;
+    private Set<Relationship> relations;
 
 }

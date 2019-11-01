@@ -1,6 +1,7 @@
 package org.jqassistant.contrib.plugin.asciidocreport.plantuml.clazz;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptySet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -33,21 +34,15 @@ public class ClassDiagramRendererTest extends AbstractDiagramRendererTest {
     @Mock
     private Result<?> result;
 
-    @Mock
-    private ClassTypeDescriptor classType;
-
-    @Mock
-    private InterfaceTypeDescriptor interfaceType;
-
     private ClassDiagramRenderer classDiagramRenderer;
 
-    Map<PackageMemberDescriptor, Node> packageMembers = new HashMap<>();
+    Map<PackageMemberDescriptor, Node> packageMembers;
 
-    Map<PackageMemberDescriptor, Set<PackageMemberDescriptor>> packageMemberTree = new HashMap<>();
+    Map<PackageMemberDescriptor, Set<PackageMemberDescriptor>> packageMemberTree;
 
-    Map<TypeDescriptor, Set<MemberDescriptor>> membersPerType = new HashMap<>();
+    Map<TypeDescriptor, Set<MemberDescriptor>> membersPerType;
 
-    Map<String, Set<Relationship>> relations = new HashMap<>();
+    Set<Relationship> relations;
 
     @BeforeEach
     public void setUp() throws ReportException {
@@ -55,7 +50,7 @@ public class ClassDiagramRendererTest extends AbstractDiagramRendererTest {
         packageMembers = new HashMap<>();
         packageMemberTree = new HashMap<>();
         membersPerType = new HashMap<>();
-        relations = new HashMap<>();
+        relations = new HashSet<>();
         ClassDiagramResult classDiagramResult = ClassDiagramResult.builder().packageMembers(packageMembers).packageMemberTree(packageMemberTree)
                 .membersPerType(membersPerType).relations(relations).build();
         doReturn(classDiagramResult).when(resultConverter).convert(result);
@@ -123,6 +118,50 @@ public class ClassDiagramRendererTest extends AbstractDiagramRendererTest {
         assertThat(diagram).contains("  {abstract} +String abstractMethod");
     }
 
+    @Test
+    public void fieldAssociation() throws ReportException {
+        Set<PackageMemberDescriptor> rootMembers = packageMemberTree.computeIfAbsent(null, key -> new HashSet<>());
+        ClassTypeDescriptor classType = addPackageMember(ClassTypeDescriptor.class, 1, "public", null, "foo.bar.ClassType");
+        ClassTypeDescriptor fieldType = addPackageMember(ClassTypeDescriptor.class, 2, "public", null, "foo.bar.FieldType");
+        rootMembers.add(classType);
+        rootMembers.add(fieldType);
+        membersPerType.put(fieldType, emptySet());
+
+        FieldDescriptor field = mock(FieldDescriptor.class);
+        doReturn(classType).when(field).getDeclaringType();
+        doReturn(fieldType).when(field).getType();
+        membersPerType.computeIfAbsent(classType, key -> new HashSet<>()).add(field);
+        doReturn("public").when(field).getVisibility();
+        doReturn("associatedField").when(field).getName();
+
+        String diagram = classDiagramRenderer.renderDiagram(result, RenderMode.GRAPHVIZ);
+
+        assertThat(diagram).contains("n1 -> n2");
+    }
+
+    @Test
+    public void relations() throws ReportException {
+        Set<PackageMemberDescriptor> rootMembers = packageMemberTree.computeIfAbsent(null, key -> new HashSet<>());
+        ClassTypeDescriptor classType = addPackageMember(ClassTypeDescriptor.class, 1, "public", null, "foo.bar.ClassType");
+        ClassTypeDescriptor superClassType = addPackageMember(ClassTypeDescriptor.class, 2, "public", null, "foo.bar.SuperClassType");
+        InterfaceTypeDescriptor interfaceType = addPackageMember(InterfaceTypeDescriptor.class, 3, "public", null, "foo.bar.InterfaceType");
+        rootMembers.add(classType);
+        rootMembers.add(superClassType);
+        rootMembers.add(interfaceType);
+
+        relations.add(getRelationship(1, packageMembers.get(classType), "EXTENDS", packageMembers.get(superClassType)));
+        relations.add(getRelationship(2, packageMembers.get(classType), "IMPLEMENTS", packageMembers.get(interfaceType)));
+        relations.add(getRelationship(3, packageMembers.get(classType), "DEPENDS_ON", packageMembers.get(superClassType)));
+        relations.add(getRelationship(4, packageMembers.get(classType), "DEPENDS_ON", packageMembers.get(interfaceType)));
+
+        String diagram = classDiagramRenderer.renderDiagram(result, RenderMode.GRAPHVIZ);
+
+        assertThat(diagram).contains("n1--|>n2");
+        assertThat(diagram).contains("n1..|>n3");
+        assertThat(diagram).contains("n1-->n2");
+        assertThat(diagram).contains("n1-->n3");
+    }
+
     private void verifyMembers(Class<? extends MemberDescriptor> memberType, String signatureSuffix) throws ReportException {
         ClassTypeDescriptor typeDescriptor = getClassType();
         Set<MemberDescriptor> members = membersPerType.computeIfAbsent(typeDescriptor, key -> new HashSet<>());
@@ -163,8 +202,8 @@ public class ClassDiagramRendererTest extends AbstractDiagramRendererTest {
         return packageMember;
     }
 
-    private MemberDescriptor addTypeMember(Class<? extends MemberDescriptor> type, String visibility, Boolean isStatic, Boolean isAbstract, String signature) {
-        MemberDescriptor member = mock(type);
+    private <D extends MemberDescriptor> D addTypeMember(Class<D> type, String visibility, Boolean isStatic, Boolean isAbstract, String signature) {
+        D member = mock(type);
         doReturn(visibility).when(member).getVisibility();
         doReturn(isStatic).when(member).isStatic();
         doReturn(signature).when(member).getSignature();

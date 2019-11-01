@@ -106,6 +106,7 @@ project specific rules
 The plugin provides supports generating embedded diagrams from rule results:
 
 * <<ComponentDiagrams>>
+* <<ClassDiagrams>>
 * <<SequenceDiagrams>>
 
 NOTE: This feature is based on http://plantuml.com/[PlantUML] which itself relies on http://www.graphviz.org[Graphviz].
@@ -162,6 +163,42 @@ RETURN
 <4> `nodes` are the nodes to be included in the folder
 <5> `relationships` are the relationships between the nodes, they may reference nodes of other parents/folders
 
+[[ClassDiagrams]]
+=== Class Diagrams
+
+NOTE: This feature is currently only available in the latest 1.8.0 snapshot versions.
+
+To activate class diagram rendering the report type must be set to `plantuml-class-diagram`.
+The plugin will render the following elements if contained in the result:
+
+* Packages (`:Java:Package`)
+* Types (`:Java:Type`)
+* Members (`:Java:Member`, `:Java:Field`, `:Java:Method`)
+* Inheritance relations between types (`:EXTENDS`, `IMPLEMENTS`)
+* any other type relations (rendered as associations)
+
+.jqassistant/index.adoc
+....
+[[ClassDiagram]]
+[source,cypher,role=concept,requiresConcepts="java:InnerType",reportType="plantuml-class-diagram"]
+.Creates a class diagram.
+----
+MATCH
+  (p:Package)-[:CONTAINS]->(t:Type)-[:DECLARES]->(m:Member) // <1>
+WHERE NOT
+  t:Inner
+OPTIONAL MATCH
+  (t)-[e:EXTENDS|IMPLEMENTS]->(:Type)                       // <2>
+OPTIONAL MATCH
+  (t)-[d:DEPENDS_ON]->(:Type)                               // <3>
+RETURN
+  *
+----
+....
+<1> Matches Java packages, types and their declared members
+<2> Optionally include super classes and implemented interfaces
+<3> Optionally include any dependencies, rendered as associations
+
 [[SequenceDiagrams]]
 === Sequence Diagrams
 
@@ -174,7 +211,7 @@ The result of the rule must return a column `sequence` containing a path-structu
 ....
 [[SequenceDiagram]]
 [source,cypher,role=concept,reportType="plantuml-sequence-diagram"]
-.Creates sequence diagram.
+.Creates a sequence diagram.
 ----
 MATCH
   (type:Type{name:"MyService"})-[:DECLARES]->(root:Method{signature:"void doSomething()"}),
@@ -195,7 +232,7 @@ If a path cannot be returned directly the result may provide the columns `partic
 ....
 [[SequenceDiagram]]
 [source,cypher,role=concept,reportType="plantuml-sequence-diagram"]
-.Creates sequence diagram.
+.Creates a sequence diagram.
 ----
 MATCH
   (type:Type{name:"MyService"})-[:DECLARES]->(root:Method{signature:"void doSomething()"}),

@@ -100,21 +100,18 @@ public class ClassDiagramRenderer extends AbstractDiagramRenderer {
             builder.append(getNodeId(packageMembers.get(declaringType)));
             builder.append(" -> ");
             builder.append(getNodeId(packageMembers.get(fieldType)));
-            builder.append(" : ").append(fieldAssociation.getName());
+            builder.append(" : ").append(getVisibility(fieldAssociation)).append(fieldAssociation.getName());
             builder.append("\n");
         }
     }
 
     private void renderRelations(Set<Node> packageMemberNodes, ClassDiagramResult classDiagramResult, StringBuilder builder) {
-        for (Map.Entry<String, Set<Relationship>> entry : classDiagramResult.getRelations().entrySet()) {
-            String relationType = entry.getKey();
-            String arrowType = relationTypes.getOrDefault(relationType, DEFAULT_RELATION_TYPE);
-            for (Relationship relationship : entry.getValue()) {
-                Node startNode = relationship.getStartNode();
-                Node endNode = relationship.getEndNode();
-                if (packageMemberNodes.contains(startNode) && packageMemberNodes.contains(endNode)) {
-                    builder.append(getNodeId(startNode)).append(arrowType).append(getNodeId(endNode)).append("\n");
-                }
+        for (Relationship relationship : classDiagramResult.getRelations()) {
+            String arrowType = relationTypes.getOrDefault(relationship.getType(), DEFAULT_RELATION_TYPE);
+            Node startNode = relationship.getStartNode();
+            Node endNode = relationship.getEndNode();
+            if (packageMemberNodes.contains(startNode) && packageMemberNodes.contains(endNode)) {
+                builder.append(getNodeId(startNode)).append(arrowType).append(getNodeId(endNode)).append("\n");
             }
         }
     }
