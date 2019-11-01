@@ -65,6 +65,7 @@ public class ClassDiagramRenderer extends AbstractDiagramRenderer {
                 builder.append(getType(type)).append(" ").append(getNodeId(node)).append(" as ").append('"').append(packageMember.getFullQualifiedName())
                         .append('"');
                 if (!(type instanceof AnnotationTypeDescriptor)) {
+                    // members only supported for classes, interfaces and enums (not: annotations)
                     builder.append("{\n");
                     Set<MemberDescriptor> typeMembers = classDiagramResult.getMembersPerType().getOrDefault(type, emptySet());
                     fieldAssociations.addAll(renderTypeMembers(typeMembers, classDiagramResult, level + 1, builder));
