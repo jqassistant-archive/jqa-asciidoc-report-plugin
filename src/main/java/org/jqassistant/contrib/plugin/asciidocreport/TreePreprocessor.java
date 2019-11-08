@@ -58,7 +58,7 @@ public class TreePreprocessor extends Treeprocessor {
             AbstractNode parent = block.getParent();
             List<AbstractBlock> siblings = ((AbstractBlock) parent).getBlocks();
             int i = siblings.indexOf(block);
-            siblings.add(i + 1, createBlock((AbstractBlock) parent, "paragraph", content, new HashMap<String, Object>(), new HashMap<>()));
+            siblings.add(i + 1, createBlock((AbstractBlock) parent, "paragraph", content, new HashMap<>(), new HashMap<>()));
         }
     }
 

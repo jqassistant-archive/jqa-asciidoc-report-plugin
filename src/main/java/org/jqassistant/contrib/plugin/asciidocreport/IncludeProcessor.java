@@ -1,5 +1,6 @@
 package org.jqassistant.contrib.plugin.asciidocreport;
 
+import static java.util.Arrays.asList;
 import static org.jqassistant.contrib.plugin.asciidocreport.InlineMacroProcessor.CONCEPT_REF;
 import static org.jqassistant.contrib.plugin.asciidocreport.InlineMacroProcessor.CONSTRAINT_REF;
 
@@ -8,6 +9,7 @@ import java.util.*;
 import com.buschmais.jqassistant.core.analysis.api.Result;
 import com.buschmais.jqassistant.core.analysis.api.rule.*;
 
+import org.apache.commons.io.FilenameUtils;
 import org.asciidoctor.ast.AbstractBlock;
 import org.asciidoctor.ast.Document;
 import org.asciidoctor.ast.DocumentRuby;
@@ -17,14 +19,22 @@ public class IncludeProcessor extends org.asciidoctor.extension.IncludeProcessor
 
     public static final String PREFIX = "jQA:";
 
-    private final Document document;
+    public static final String INCLUDE_IMPORTED_RULES = "ImportedRules";
+    public static final String INCLUDE_RULES = "Rules";
+    public static final String INCLUDE_SUMMARY = "Summary";
+
     private final Map<String, RuleResult> conceptResults;
     private final Map<String, RuleResult> constraintResults;
+    private final Map<String, AbstractBlock> ruleBlocks = new TreeMap<>();
+    private final Set<ExecutableRule<?>> includedRules = new HashSet<>();
 
     public IncludeProcessor(Document document, Map<String, RuleResult> conceptResults, Map<String, RuleResult> constraintResults) {
-        this.document = document;
         this.conceptResults = conceptResults;
         this.constraintResults = constraintResults;
+        DocumentParser documentParser = DocumentParser.parse(document);
+        ruleBlocks.putAll(documentParser.getConceptBlocks());
+        ruleBlocks.putAll(documentParser.getConstraintBlocks());
+
     }
 
     @Override
@@ -35,38 +45,109 @@ public class IncludeProcessor extends org.asciidoctor.extension.IncludeProcessor
     @Override
     public void process(DocumentRuby document, PreprocessorReader reader, String target, Map<String, Object> attributes) {
         String include = target.substring(PREFIX.length());
-        StringBuilder content = new StringBuilder();
-        if ("ImportedRules".equalsIgnoreCase(include)) {
-            includeImportedRules(content);
-        } else if ("Summary".equalsIgnoreCase(include)) {
-            includeSummaryTable("Constraints", CONSTRAINT_REF, constraintResults, content);
-            includeSummaryTable("Concepts", CONCEPT_REF, conceptResults, content);
+        StringBuilder builder = new StringBuilder();
+        if (INCLUDE_SUMMARY.equalsIgnoreCase(include)) {
+            includeSummaryTable("Constraints", CONSTRAINT_REF, constraintResults, builder);
+            includeSummaryTable("Concepts", CONCEPT_REF, conceptResults, builder);
+        } else if (INCLUDE_RULES.equalsIgnoreCase(include)) {
+            includeRules(attributes, "concepts", conceptResults, builder);
+            includeRules(attributes, "constraints", constraintResults, builder);
+        } else if (INCLUDE_IMPORTED_RULES.equalsIgnoreCase(include)) {
+            includeImportedRules(builder);
         } else {
             throw new IllegalArgumentException("jQA include not supported: " + target);
         }
-        reader.push_include(content.toString(), target, include, 1, attributes);
+        reader.push_include(builder.toString(), target, include, 1, attributes);
     }
 
+    private void includeSummaryTable(String title, String referenceMacro, Map<String, RuleResult> results, StringBuilder builder) {
+        builder.append('.').append(title).append('\n');
+        builder.append("[options=header,role=summary]").append('\n');
+        builder.append("|===").append('\n');
+        builder.append("| Id | Description | Severity | Status").append('\n');
+        Set<RuleResult> entries = new TreeSet<>(StatusHelper.getRuleResultComparator());
+        entries.addAll(results.values());
+        for (RuleResult result : entries) {
+            ExecutableRule rule = result.getRule();
+            builder.append("| ").append("jQA:").append(referenceMacro).append('[').append(rule.getId()).append(']');
+            builder.append("| ").append(escape(rule.getDescription()));
+            builder.append("| ").append(rule.getSeverity().getInfo(result.getEffectiveSeverity()));
+            Result.Status status = result.getStatus();
+            String statusColor = StatusHelper.getStatusColor(status);
+            builder.append("| ").append("[").append(statusColor).append("]#").append(status.toString()).append('#').append('\n');
+        }
+        builder.append("|===").append('\n');
+    }
+
+    /**
+     * Include the rules that are specified by an filter attribute.
+     *
+     * @param attributes
+     *            The include attributes.
+     * @param filterAttribute
+     *            The name of the filter attribute.
+     * @param results
+     *            The {@link RuleResult}s.
+     * @param builder
+     *            The builder to use.s
+     */
+    private void includeRules(Map<String, Object> attributes, String filterAttribute, Map<String, RuleResult> results, StringBuilder builder) {
+        String filterValue = (String) attributes.get(filterAttribute);
+        for (RuleResult ruleResult : match(filterValue, results)) {
+            includeRuleResult(ruleResult, builder);
+        }
+    }
+
+    /**
+     * Match {@link RuleResult}s by the given filter.
+     *
+     * @param filter
+     *            The filter.
+     * @param results
+     *            The {@link RuleResult}s to match.
+     * @return The matching {@link RuleResult}s.
+     */
+    private List<RuleResult> match(String filter, Map<String, RuleResult> results) {
+        List<RuleResult> matchingResults = new LinkedList<>();
+        if (filter != null) {
+            List<String> rulePatterns = asList(filter.split("\\s*,\\s*"));
+            for (Map.Entry<String, RuleResult> entry : results.entrySet()) {
+                for (String rulePattern : rulePatterns) {
+                    if (FilenameUtils.wildcardMatch(entry.getKey(), rulePattern)) {
+                        matchingResults.add(entry.getValue());
+                    }
+                }
+            }
+        }
+        return matchingResults;
+    }
+
+    /**
+     * Includes all rules that are not part of the document and not yet included.
+     *
+     * @param content
+     *            The builder.
+     */
     private void includeImportedRules(StringBuilder content) {
-        DocumentParser documentParser = DocumentParser.parse(document);
-        Map<String, AbstractBlock> ruleBlocks = new TreeMap<>();
-        ruleBlocks.putAll(documentParser.getConceptBlocks());
-        ruleBlocks.putAll(documentParser.getConstraintBlocks());
         Map<String, RuleResult> results = new HashMap<>();
         results.putAll(conceptResults);
         results.putAll(constraintResults);
-        renderImportedRules(ruleBlocks, results, content);
+        TreeMap<String, RuleResult> importedRules = new TreeMap(results);
+        importedRules.keySet().removeAll(ruleBlocks.keySet());
+        for (RuleResult ruleResult : importedRules.values()) {
+            includeRuleResult(ruleResult, content);
+        }
     }
 
-    private StringBuilder renderImportedRules(Map<String, AbstractBlock> conceptBlocks, Map<String, RuleResult> results, StringBuilder content) {
-        TreeMap<String, RuleResult> importedRules = new TreeMap(results);
-        importedRules.keySet().removeAll(conceptBlocks.keySet());
-        for (RuleResult result : importedRules.values()) {
-            ExecutableRule rule = result.getRule();
+    private void includeRuleResult(RuleResult ruleResult, StringBuilder content) {
+        ExecutableRule<?> rule = ruleResult.getRule();
+        // Include a rule only if it is not declared in the rendered document or already
+        // included before
+        if (!ruleBlocks.containsKey(rule.getId()) && includedRules.add(rule)) {
             content.append("[[").append(rule.getId()).append("]]").append('\n');
             String language = null;
             String source = null;
-            Executable executable = rule.getExecutable();
+            Executable<?> executable = rule.getExecutable();
             if (executable instanceof CypherExecutable) {
                 language = "cypher";
                 source = ((CypherExecutable) executable).getSource();
@@ -92,26 +173,6 @@ public class IncludeProcessor extends org.asciidoctor.extension.IncludeProcessor
             content.append("----").append('\n');
             content.append('\n');
         }
-        return content;
-    }
-
-    private void includeSummaryTable(String title, String referenceMacro, Map<String, RuleResult> results, StringBuilder content) {
-        content.append('.').append(title).append('\n');
-        content.append("[options=header,role=summary]").append('\n');
-        content.append("|===").append('\n');
-        content.append("| Id | Description | Severity | Status").append('\n');
-        Set<RuleResult> entries = new TreeSet<>(StatusHelper.getRuleResultComparator());
-        entries.addAll(results.values());
-        for (RuleResult result : entries) {
-            ExecutableRule rule = result.getRule();
-            content.append("| ").append("jQA:").append(referenceMacro).append('[').append(rule.getId()).append(']');
-            content.append("| ").append(escape(rule.getDescription()));
-            content.append("| ").append(rule.getSeverity().getInfo(result.getEffectiveSeverity()));
-            Result.Status status = result.getStatus();
-            String statusColor = StatusHelper.getStatusColor(status);
-            content.append("| ").append("[").append(statusColor).append("]#").append(status.toString()).append('#').append('\n');
-        }
-        content.append("|===").append('\n');
     }
 
     private String escape(String content) {

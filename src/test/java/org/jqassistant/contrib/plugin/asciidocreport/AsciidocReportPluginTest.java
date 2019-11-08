@@ -149,7 +149,6 @@ public class AsciidocReportPluginTest {
         diagramRow2.put("Node", node2);
         diagramRow2.put("DependsOn", null);
         diagramRows.add(diagramRow2);
-
         processRule(plugin, componentDiagram, Result.<Concept> builder().rule(componentDiagram).status(Result.Status.SUCCESS).severity(Severity.INFO)
                 .columnNames(asList("Node", "DependsOn")).rows(diagramRows).build());
 

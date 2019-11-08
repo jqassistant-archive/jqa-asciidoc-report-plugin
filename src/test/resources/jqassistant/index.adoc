@@ -5,7 +5,7 @@
 
 include::jQA:Summary[]
 
-== Rules
+== Embedded Rules
 
 [[test:Concept]]
 [source,cypher,role=concept,requiresConcepts="test:ImportedConcept"]
@@ -20,6 +20,10 @@ MATCH (n) RETURN n as Value
 ----
 MATCH (n) RETURN n as Value
 ----
+
+== Included Rules
+
+include::jQA:Rules[concepts="included*",constraints="included*"]
 
 == Reports
 
