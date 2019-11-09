@@ -20,16 +20,3 @@ MATCH (n) RETURN n as ImportedConstraintValue
 MATCH (n) RETURN n as ImportedConstraintValue
 ----
 
-[[test:IncludedConcept]]
-[source,cypher,role=concept]
-.Included Concept
-----
-MATCH (n) RETURN n as IncludedConceptValue
-----
-
-[[test:IncludedConstraint]]
-[source,cypher,role=constraint]
-.Included Constraint
-----
-MATCH (n) RETURN n as IncludedConstraintValue
-----

@@ -1,6 +1,5 @@
 package org.jqassistant.contrib.plugin.asciidocreport;
 
-import static java.util.Arrays.asList;
 import static org.jqassistant.contrib.plugin.asciidocreport.InlineMacroProcessor.CONCEPT_REF;
 import static org.jqassistant.contrib.plugin.asciidocreport.InlineMacroProcessor.CONSTRAINT_REF;
 
@@ -9,7 +8,6 @@ import java.util.*;
 import com.buschmais.jqassistant.core.analysis.api.Result;
 import com.buschmais.jqassistant.core.analysis.api.rule.*;
 
-import org.apache.commons.io.FilenameUtils;
 import org.asciidoctor.ast.AbstractBlock;
 import org.asciidoctor.ast.Document;
 import org.asciidoctor.ast.DocumentRuby;
@@ -23,13 +21,16 @@ public class IncludeProcessor extends org.asciidoctor.extension.IncludeProcessor
     public static final String INCLUDE_RULES = "Rules";
     public static final String INCLUDE_SUMMARY = "Summary";
 
+    private final RuleFilter<RuleResult> ruleFilter;
     private final Map<String, RuleResult> conceptResults;
     private final Map<String, RuleResult> constraintResults;
+
     private final Map<String, AbstractBlock> ruleBlocks = new TreeMap<>();
     private final Set<ExecutableRule<?>> includedRules = new HashSet<>();
 
-    public IncludeProcessor(DocumentParser documentParser, Document document, Map<String, RuleResult> conceptResults,
+    public IncludeProcessor(DocumentParser documentParser, Document document, RuleFilter<RuleResult> ruleFilter, Map<String, RuleResult> conceptResults,
             Map<String, RuleResult> constraintResults) {
+        this.ruleFilter = ruleFilter;
         this.conceptResults = conceptResults;
         this.constraintResults = constraintResults;
         DocumentParser.Result result = documentParser.parse(document);
@@ -94,33 +95,9 @@ public class IncludeProcessor extends org.asciidoctor.extension.IncludeProcessor
      */
     private void includeRules(Map<String, Object> attributes, String filterAttribute, Map<String, RuleResult> results, StringBuilder builder) {
         String filterValue = (String) attributes.get(filterAttribute);
-        for (RuleResult ruleResult : match(filterValue, results)) {
+        for (RuleResult ruleResult : ruleFilter.match(filterValue, results)) {
             includeRuleResult(ruleResult, builder);
         }
-    }
-
-    /**
-     * Match {@link RuleResult}s by the given filter.
-     *
-     * @param filter
-     *            The filter.
-     * @param results
-     *            The {@link RuleResult}s to match.
-     * @return The matching {@link RuleResult}s.
-     */
-    private List<RuleResult> match(String filter, Map<String, RuleResult> results) {
-        List<RuleResult> matchingResults = new LinkedList<>();
-        if (filter != null) {
-            List<String> rulePatterns = asList(filter.split("\\s*,\\s*"));
-            for (Map.Entry<String, RuleResult> entry : results.entrySet()) {
-                for (String rulePattern : rulePatterns) {
-                    if (FilenameUtils.wildcardMatch(entry.getKey(), rulePattern)) {
-                        matchingResults.add(entry.getValue());
-                    }
-                }
-            }
-        }
-        return matchingResults;
     }
 
     /**
