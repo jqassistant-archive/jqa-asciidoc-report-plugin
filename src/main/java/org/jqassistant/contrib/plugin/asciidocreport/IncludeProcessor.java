@@ -28,12 +28,13 @@ public class IncludeProcessor extends org.asciidoctor.extension.IncludeProcessor
     private final Map<String, AbstractBlock> ruleBlocks = new TreeMap<>();
     private final Set<ExecutableRule<?>> includedRules = new HashSet<>();
 
-    public IncludeProcessor(Document document, Map<String, RuleResult> conceptResults, Map<String, RuleResult> constraintResults) {
+    public IncludeProcessor(DocumentParser documentParser, Document document, Map<String, RuleResult> conceptResults,
+            Map<String, RuleResult> constraintResults) {
         this.conceptResults = conceptResults;
         this.constraintResults = constraintResults;
-        DocumentParser documentParser = DocumentParser.parse(document);
-        ruleBlocks.putAll(documentParser.getConceptBlocks());
-        ruleBlocks.putAll(documentParser.getConstraintBlocks());
+        DocumentParser.Result result = documentParser.parse(document);
+        ruleBlocks.putAll(result.getConceptBlocks());
+        ruleBlocks.putAll(result.getConstraintBlocks());
 
     }
 

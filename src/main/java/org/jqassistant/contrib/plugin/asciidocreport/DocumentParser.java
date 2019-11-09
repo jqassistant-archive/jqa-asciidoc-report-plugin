@@ -7,6 +7,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import lombok.Builder;
+import lombok.Getter;
+import lombok.ToString;
 import org.asciidoctor.ast.AbstractBlock;
 import org.asciidoctor.ast.Document;
 import org.asciidoctor.ast.DocumentRuby;
@@ -15,14 +18,33 @@ public class DocumentParser {
 
     private static final String ID = "id";
 
-    private Map<String, AbstractBlock> conceptBlocks = new HashMap<>();
+    @Builder
+    @Getter
+    @ToString
+    public static class Result {
 
-    private Map<String, AbstractBlock> constraintBlocks = new HashMap<>();
+        private Map<String, AbstractBlock> conceptBlocks;
 
-    private DocumentParser() {
+        private Map<String, AbstractBlock> constraintBlocks;
+
     }
 
-    private void parse(Collection<?> blocks) {
+    public Result parse(Document document) {
+        return parse(singletonList(document));
+    }
+
+    public Result parse(DocumentRuby document) {
+        return parse(singletonList(document));
+    }
+
+    private Result parse(Collection<?> blocks) {
+        Map<String, AbstractBlock> conceptBlocks = new HashMap<>();
+        Map<String, AbstractBlock> constraintBlocks = new HashMap<>();
+        parse(blocks, conceptBlocks, constraintBlocks);
+        return Result.builder().conceptBlocks(unmodifiableMap(conceptBlocks)).constraintBlocks(unmodifiableMap(constraintBlocks)).build();
+    }
+
+    private void parse(Collection<?> blocks, Map<String, AbstractBlock> conceptBlocks, Map<String, AbstractBlock> constraintBlocks) {
         for (Object element : blocks) {
             if (element instanceof AbstractBlock) {
                 AbstractBlock block = (AbstractBlock) element;
@@ -35,30 +57,10 @@ public class DocumentParser {
                         constraintBlocks.put(id, block);
                     }
                 }
-                parse(block.getBlocks());
+                parse(block.getBlocks(), conceptBlocks, constraintBlocks);
             } else if (element instanceof Collection<?>) {
                 parse((Collection<?>) element);
             }
         }
-    }
-
-    public Map<String, AbstractBlock> getConceptBlocks() {
-        return unmodifiableMap(conceptBlocks);
-    }
-
-    public Map<String, AbstractBlock> getConstraintBlocks() {
-        return unmodifiableMap(constraintBlocks);
-    }
-
-    public static DocumentParser parse(Document document) {
-        DocumentParser documentParser = new DocumentParser();
-        documentParser.parse(singletonList(document));
-        return documentParser;
-    }
-
-    public static DocumentParser parse(DocumentRuby document) {
-        DocumentParser documentParser = new DocumentParser();
-        documentParser.parse(singletonList(document));
-        return documentParser;
     }
 }

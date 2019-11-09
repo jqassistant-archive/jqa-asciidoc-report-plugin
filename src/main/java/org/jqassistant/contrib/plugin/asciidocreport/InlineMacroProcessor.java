@@ -10,18 +10,21 @@ public class InlineMacroProcessor extends org.asciidoctor.extension.InlineMacroP
     public static final String CONCEPT_REF = "conceptRef";
     public static final String CONSTRAINT_REF = "constraintRef";
 
-    public InlineMacroProcessor() {
+    private final DocumentParser documentParser;
+
+    public InlineMacroProcessor(DocumentParser documentParser) {
         super("jQA");
+        this.documentParser = documentParser;
     }
 
     @Override
     public Object process(AbstractBlock parent, String target, Map<String, Object> attributes) {
         if (CONCEPT_REF.equals(target)) {
-            DocumentParser documentParser = DocumentParser.parse(parent.getDocument());
-            return processRef(parent, attributes, documentParser.getConceptBlocks());
+            DocumentParser.Result result = documentParser.parse(parent.getDocument());
+            return processRef(parent, attributes, result.getConceptBlocks());
         } else if (CONSTRAINT_REF.equals(target)) {
-            DocumentParser documentParser = DocumentParser.parse(parent.getDocument());
-            return processRef(parent, attributes, documentParser.getConstraintBlocks());
+            DocumentParser.Result result = documentParser.parse(parent.getDocument());
+            return processRef(parent, attributes, result.getConstraintBlocks());
         }
         throw new IllegalArgumentException("Unknown jQAssistant macro '" + target + "'");
     }

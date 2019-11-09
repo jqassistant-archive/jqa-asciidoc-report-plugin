@@ -3,6 +3,7 @@ package org.jqassistant.contrib.plugin.asciidocreport.plantuml;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 import com.buschmais.jqassistant.core.analysis.api.rule.ExecutableRule;
 
@@ -24,7 +25,7 @@ public class ImageRenderer {
         String diagramFileNamePrefix = rule.getId().replaceAll("\\:", "_");
         File plantUMLFile = new File(directory, diagramFileNamePrefix + ".plantuml");
         try {
-            FileUtils.writeStringToFile(plantUMLFile, plantUML);
+            FileUtils.writeStringToFile(plantUMLFile, plantUML, Charset.defaultCharset());
         } catch (IOException e) {
             throw new IllegalStateException("Cannot write PlantUML diagram to " + plantUMLFile.getPath(), e);
         }

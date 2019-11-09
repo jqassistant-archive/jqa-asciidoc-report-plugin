@@ -27,13 +27,15 @@ public class TreePreprocessor extends Treeprocessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TreePreprocessor.class);
 
+    private final DocumentParser documentParser;
     private final Map<String, RuleResult> conceptResults;
     private final Map<String, RuleResult> constraintResults;
     private final File reportDirectoy;
     private final ReportContext reportContext;
 
-    public TreePreprocessor(Map<String, RuleResult> conceptResults, Map<String, RuleResult> constraintResults, File reportDirectory,
-            ReportContext reportContext) {
+    public TreePreprocessor(DocumentParser documentParser, Map<String, RuleResult> conceptResults, Map<String, RuleResult> constraintResults,
+            File reportDirectory, ReportContext reportContext) {
+        this.documentParser = documentParser;
         this.conceptResults = conceptResults;
         this.constraintResults = constraintResults;
         this.reportDirectoy = reportDirectory;
@@ -41,9 +43,9 @@ public class TreePreprocessor extends Treeprocessor {
     }
 
     public Document process(Document document) {
-        DocumentParser documentParser = DocumentParser.parse(document);
-        enrichResults(documentParser.getConceptBlocks(), conceptResults);
-        enrichResults(documentParser.getConstraintBlocks(), constraintResults);
+        DocumentParser.Result result = documentParser.parse(document);
+        enrichResults(result.getConceptBlocks(), conceptResults);
+        enrichResults(result.getConstraintBlocks(), constraintResults);
         return document;
     }
 
