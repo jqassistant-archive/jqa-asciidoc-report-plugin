@@ -1,6 +1,5 @@
 package org.jqassistant.contrib.plugin.asciidocreport;
 
-import static java.util.Collections.singletonList;
 import static org.asciidoctor.AttributesBuilder.attributes;
 import static org.asciidoctor.OptionsBuilder.options;
 
@@ -88,7 +87,7 @@ public class AsciidocReportPlugin implements ReportPlugin {
             for (Map.Entry<File, List<File>> entry : files.entrySet()) {
                 File baseDir = entry.getKey();
                 OptionsBuilder optionsBuilder = options().mkDirs(true).baseDir(baseDir).toDir(reportDirectory).backend(BACKEND_HTML5).safe(SafeMode.UNSAFE)
-                        .attributes(attributes().experimental(true).sourceHighlighter(CODERAY));
+                        .attributes(attributes().experimental(true).sourceHighlighter(CODERAY).icons("font"));
                 for (File file : entry.getValue()) {
                     LOGGER.info("-> {}", file.getPath());
                     Document document = asciidoctor.loadFile(file, optionsBuilder.asMap());
@@ -97,7 +96,7 @@ public class AsciidocReportPlugin implements ReportPlugin {
                     extensionRegistry.includeProcessor(includeProcessor);
                     extensionRegistry.inlineMacro(new InlineMacroProcessor());
                     extensionRegistry.treeprocessor(new TreePreprocessor(conceptResults, constraintResults, reportDirectory, reportContext));
-                    extensionRegistry.postprocessor(new RuleTogglePostProcessor());
+                    extensionRegistry.postprocessor(new RulePostProcessor(conceptResults, constraintResults));
                     asciidoctor.convertFile(file, optionsBuilder);
                     asciidoctor.unregisterAllExtensions();
                 }
@@ -139,8 +138,7 @@ public class AsciidocReportPlugin implements ReportPlugin {
     private RuleResult getRuleResult(Result<? extends ExecutableRule> result) {
         RuleResult.RuleResultBuilder ruleResultBuilder = RuleResult.builder();
         List<String> columnNames = result.getColumnNames();
-        ruleResultBuilder.rule(result.getRule()).effectiveSeverity(result.getSeverity()).status(result.getStatus())
-                .columnNames(columnNames != null ? columnNames : singletonList("Empty Result"));
+        ruleResultBuilder.rule(result.getRule()).effectiveSeverity(result.getSeverity()).status(result.getStatus()).columnNames(columnNames);
         for (Map<String, Object> row : result.getRows()) {
             Map<String, List<String>> resultRow = new LinkedHashMap<>();
             for (Map.Entry<String, Object> rowEntry : row.entrySet()) {

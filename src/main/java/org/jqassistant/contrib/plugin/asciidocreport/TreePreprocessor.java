@@ -1,5 +1,7 @@
 package org.jqassistant.contrib.plugin.asciidocreport;
 
+import static com.buschmais.jqassistant.core.report.api.ReportContext.Report;
+
 import java.io.File;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -10,9 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.buschmais.jqassistant.core.analysis.api.Result;
 import com.buschmais.jqassistant.core.analysis.api.rule.ExecutableRule;
-import com.buschmais.jqassistant.core.analysis.api.rule.Severity;
 import com.buschmais.jqassistant.core.report.api.ReportContext;
 
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -22,8 +22,6 @@ import org.asciidoctor.ast.Document;
 import org.asciidoctor.extension.Treeprocessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static com.buschmais.jqassistant.core.report.api.ReportContext.*;
 
 public class TreePreprocessor extends Treeprocessor {
 
@@ -73,16 +71,8 @@ public class TreePreprocessor extends Treeprocessor {
         List<String> content = new ArrayList<>();
         if (result != null) {
             ExecutableRule<?> rule = result.getRule();
-            content.add("<div id=\"result(" + rule.getId() + ")\">");
-            Result.Status status = result.getStatus();
-            content.add("<div class=\"paragraph\">");
-            content.add("<p>");
-            content.add(renderStatusContent(status));
-            Severity severity = rule.getSeverity();
-            content.add("Severity: " + severity.getInfo(result.getEffectiveSeverity()));
-            content.add("</p>");
-            content.add("</div>");
             List<ReportContext.Report<?>> reports = reportContext.getReports(rule);
+            content.add("<div id=\"result(" + rule.getId() + ")\">");
             if (!reports.isEmpty()) {
                 for (ReportContext.Report<?> report : reports) {
                     switch (report.getReportType()) {
@@ -95,12 +85,10 @@ public class TreePreprocessor extends Treeprocessor {
                         break;
                     }
                 }
-            } else {
+            } else if (!result.getRows().isEmpty()) {
                 content.add(renderResultTable(result));
             }
             content.add("</div>");
-        } else {
-            content.add("Status: Not Available");
         }
         return content;
     }
@@ -144,18 +132,16 @@ public class TreePreprocessor extends Treeprocessor {
 
     private String renderLink(String url, String label) {
         StringBuilder a = new StringBuilder();
-        a.append("<a href=").append('"').append(url).append('"').append(">");
+        a.append("<a href=").append('"').append(url).append('"').append(" style=\"text-decoration:none; color:initial\">");
+        a.append("<b class=\"button\">");
         a.append(label);
+        a.append("</b>");
         a.append("</a>");
         return a.toString();
     }
 
-    private String renderStatusContent(Result.Status status) {
-        return "Status: " + "<span class=\"" + StatusHelper.getStatusColor(status) + "\">" + status.toString() + "</span>";
-    }
-
     /**
-     * Renders a {@link RuleResult }as table.
+     * Renders a {@link RuleResult} as table.
      *
      * @param result
      *            The {@link RuleResult}.

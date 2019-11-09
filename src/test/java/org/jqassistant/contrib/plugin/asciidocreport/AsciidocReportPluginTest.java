@@ -1,7 +1,12 @@
 package org.jqassistant.contrib.plugin.asciidocreport;
 
+import static com.buschmais.jqassistant.core.analysis.api.Result.Status.FAILURE;
+import static com.buschmais.jqassistant.core.analysis.api.Result.Status.SUCCESS;
+import static java.lang.System.lineSeparator;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -11,6 +16,7 @@ import java.io.IOException;
 import java.util.*;
 
 import com.buschmais.jqassistant.core.analysis.api.Result;
+import com.buschmais.jqassistant.core.analysis.api.Result.Status;
 import com.buschmais.jqassistant.core.analysis.api.rule.*;
 import com.buschmais.jqassistant.core.report.api.ReportContext;
 import com.buschmais.jqassistant.core.report.api.ReportException;
@@ -110,9 +116,52 @@ public class AsciidocReportPluginTest {
         assertThat(summaryTables.size()).isEqualTo(2);
         verifyConstraintsSummary(summaryTables.get(0));
         verifyConceptsSummary(summaryTables.get(1));
-        verifyConceptResult(reportContext, componentDiagram, html);
-        // test:ImportedConcept
-        verifyRuleResult(html, "Status: <span class=\"red\">FAILURE</span>", "Severity: MINOR", "<th>ImportedConceptValue</th>", "<td> FooBar </td>");
+
+        verifyRule(document, "test:Concept", "Concept Description", SUCCESS, "MAJOR (from MINOR)");
+        verifyRuleResult(document, "test:Concept", "Value", "Foo Bar");
+
+        verifyRule(document, "test:ImportedConcept", "Imported Concept", FAILURE, "MINOR");
+        verifyRuleResult(document, "test:ImportedConcept", "ImportedConceptValue", "FooBar");
+
+        verifyToggle(html);
+        verifyDiagram(componentDiagram, reportContext, html);
+    }
+
+    private void verifyRule(Document document, String id, String expectedDescription, Status expectedStatus, String expectedSeverity) {
+        Element rule = document.getElementById(id);
+        Element title = rule.getElementsByClass("title").first();
+        assertThat(title).isNotNull();
+        assertThat(title.text()).isEqualTo(expectedDescription);
+        Element status = title.getElementsByTag("span").first();
+        assertThat(status).isNotNull();
+        assertThat(status.hasClass("fa")).isEqualTo(true);
+        switch (expectedStatus) {
+        case SUCCESS:
+            assertThat(status.hasClass("fa-check")).isEqualTo(true);
+            break;
+        case FAILURE:
+            assertThat(status.hasClass("fa-ban")).isEqualTo(true);
+            break;
+        }
+        assertThat(status.attr("title")).isEqualTo(expectedSeverity);
+        Element ruleToggle = rule.getElementsByClass("rule-toggle").first();
+        assertThat(ruleToggle).isNotNull();
+        Element content = rule.getElementsByClass("content").first();
+        assertThat(content).isNotNull();
+    }
+
+    private void verifyRuleResult(Document document, String id, String expectedColumnName, String... expectedValues) {
+        Element ruleResult = document.getElementById("result(" + id + ")");
+        Element thead = ruleResult.getElementsByTag("thead").first();
+        assertThat(thead).isNotNull();
+        Element th = thead.getElementsByTag("th").first();
+        assertThat(th).isNotNull();
+        assertThat(th.text()).isEqualTo(expectedColumnName);
+        Element tbody = ruleResult.getElementsByTag("tbody").first();
+        assertThat(tbody).isNotNull();
+        Elements tds = tbody.getElementsByTag("td");
+        List<String> values = tds.stream().map(td -> td.text()).collect(toList());
+        assertThat(values).containsExactly(expectedValues);
     }
 
     private ReportContext getReportContext(Map<String, Object> properties) throws ReportException {
@@ -132,7 +181,7 @@ public class AsciidocReportPluginTest {
         Map<String, Object> conceptRow = new HashMap<>();
         conceptRow.put("Value", asList("Foo", "Bar"));
         rows.add(conceptRow);
-        processRule(plugin, concept, new Result<>(concept, Result.Status.SUCCESS, Severity.MAJOR, singletonList("Value"), rows));
+        processRule(plugin, concept, new Result<>(concept, SUCCESS, Severity.MAJOR, singletonList("Value"), rows));
 
         Concept componentDiagram = ruleSet.getConceptBucket().getById("test:ComponentDiagram");
         List<Map<String, Object>> diagramRows = new ArrayList<>();
@@ -149,7 +198,7 @@ public class AsciidocReportPluginTest {
         diagramRow2.put("Node", node2);
         diagramRow2.put("DependsOn", null);
         diagramRows.add(diagramRow2);
-        processRule(plugin, componentDiagram, Result.<Concept> builder().rule(componentDiagram).status(Result.Status.SUCCESS).severity(Severity.INFO)
+        processRule(plugin, componentDiagram, Result.<Concept> builder().rule(componentDiagram).status(SUCCESS).severity(Severity.INFO)
                 .columnNames(asList("Node", "DependsOn")).rows(diagramRows).build());
 
         Concept importedConcept = ruleSet.getConceptBucket().getById("test:ImportedConcept");
@@ -157,29 +206,31 @@ public class AsciidocReportPluginTest {
         Map<String, Object> importedConceptRow = new HashMap<>();
         importedConceptRow.put("ImportedConceptValue", asList("FooBar"));
         importedConceptRows.add(importedConceptRow);
-        processRule(plugin, importedConcept, Result.<Concept> builder().rule(importedConcept).status(Result.Status.FAILURE).severity(Severity.MINOR)
+        processRule(plugin, importedConcept, Result.<Concept> builder().rule(importedConcept).status(Status.FAILURE).severity(Severity.MINOR)
                 .columnNames(singletonList("ImportedConceptValue")).rows(importedConceptRows).build());
 
         Constraint importedConstraintWithoutDescription = ruleSet.getConstraintBucket().getById("test:ImportedConstraintWithoutDescription");
-        processRule(plugin, importedConstraintWithoutDescription,
-                Result.<Constraint> builder().rule(importedConstraintWithoutDescription).status(Result.Status.SUCCESS).severity(Severity.MAJOR)
-                        .columnNames(Collections.<String> emptyList()).rows(Collections.<Map<String, Object>> emptyList()).build());
+        processRule(plugin, importedConstraintWithoutDescription, Result.<Constraint> builder().rule(importedConstraintWithoutDescription).status(SUCCESS)
+                .severity(Severity.MAJOR).columnNames(emptyList()).rows(emptyList()).build());
 
         plugin.end();
         return componentDiagram;
     }
 
-    private void verifyConceptResult(ReportContext reportContext, Concept concept, String html) {
-        // test:Concept
-        verifyRuleResult(html, "Status: <span class=\"green\">SUCCESS</span>", "Severity: MAJOR (from MINOR)", "<th>Value</th>", "<td> Foo Bar </td>");
-        // test:ComponentDiagram
-        assertThat(html).contains("Severity: INFO (from MINOR)");
-
+    private void verifyToggle(String html) {
         // Toggle for rule content (i.e. Cypher source)
-        assertThat(html).contains("<input type=\"checkbox\" class=\"rule-toggle\" title=\"Show rule details\">");
+        assertThat(html).contains("<input type=\"checkbox\" class=\"rule-toggle\" title=\"Rule details\">");
         assertThat(html).contains("<div class=\"content\" id=\"rule-listing0\">");
-        assertThat(html).contains("<style>#rule-listing0{display:none;}input.rule-toggle:checked + #rule-listing0{display:block;}");
+        assertThat(html).contains("<style>" + lineSeparator() + //
+                "#rule-listing0{" + lineSeparator() + //
+                "  display:none;" + lineSeparator() + //
+                "}" + lineSeparator() + //
+                "input.rule-toggle:checked + #rule-listing0{" + lineSeparator() + //
+                "  display:block;" + lineSeparator() + //
+                "}");
+    }
 
+    private void verifyDiagram(Concept concept, ReportContext reportContext, String html) {
         // PlantUML diagram
         File plantumlReportDirectory = reportContext.getReportDirectory("plantuml");
         assertThat(new File(plantumlReportDirectory, "test_ComponentDiagram.svg").exists()).isTrue();
@@ -191,18 +242,12 @@ public class AsciidocReportPluginTest {
         assertThat(html).contains(expectedImageLink);
     }
 
-    private void verifyRuleResult(String html, String... expectedValues) {
-        for (String expectedValue : expectedValues) {
-            assertThat(html).contains(expectedValue);
-        }
-    }
-
     private void verifyConstraintsSummary(Element constraintSummaryTable) {
         assertThat(constraintSummaryTable.getElementsByTag("caption").first().text()).contains("Constraints");
         Element constraintSummaryTableBody = constraintSummaryTable.getElementsByTag("tbody").first();
         Elements rows = constraintSummaryTableBody.getElementsByTag("tr");
         assertThat(rows.size()).isEqualTo(1);
-        verifyColumns(rows.get(0), "test:ImportedConstraintWithoutDescription", "", "MAJOR", "SUCCESS", "green");
+        verifySummaryColumns(rows.get(0), "test:ImportedConstraintWithoutDescription", "", "MAJOR", "SUCCESS", "green");
     }
 
     private void verifyConceptsSummary(Element conceptSummaryTable) {
@@ -211,12 +256,12 @@ public class AsciidocReportPluginTest {
         assertThat(conceptSummaryTable).isNotNull();
         Elements rows = conceptSummaryTableBody.getElementsByTag("tr");
         assertThat(rows.size()).isEqualTo(3);
-        verifyColumns(rows.get(0), "test:ImportedConcept", "Imported Concept", "MINOR", "FAILURE", "red");
-        verifyColumns(rows.get(1), "test:Concept", "Concept Description", "MAJOR (from MINOR)", "SUCCESS", "green");
-        verifyColumns(rows.get(2), "test:ComponentDiagram", "Component Diagram Description", "INFO (from MINOR)", "SUCCESS", "green");
+        verifySummaryColumns(rows.get(0), "test:ImportedConcept", "Imported Concept", "MINOR", "FAILURE", "red");
+        verifySummaryColumns(rows.get(1), "test:Concept", "Concept Description", "MAJOR (from MINOR)", "SUCCESS", "green");
+        verifySummaryColumns(rows.get(2), "test:ComponentDiagram", "Component Diagram Description", "INFO (from MINOR)", "SUCCESS", "green");
     }
 
-    private void verifyColumns(Element row, String expectedId, String expectedDescription, String expectedSeverity, String expectedStatus,
+    private void verifySummaryColumns(Element row, String expectedId, String expectedDescription, String expectedSeverity, String expectedStatus,
             String expectedColor) {
         Elements columns = row.getElementsByTag("td");
         Element id = columns.get(0).getElementsByTag("a").first();
