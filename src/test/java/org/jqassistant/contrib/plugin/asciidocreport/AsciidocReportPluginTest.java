@@ -117,10 +117,10 @@ public class AsciidocReportPluginTest {
         verifyConstraintsSummary(summaryTables.get(0));
         verifyConceptsSummary(summaryTables.get(1));
 
-        verifyRule(document, "test:Concept", "Concept Description", SUCCESS, "MAJOR (from MINOR)");
+        verifyRule(document, "test:Concept", "Concept Description", SUCCESS, "Status: SUCCESS, Severity: MAJOR (from MINOR)");
         verifyRuleResult(document, "test:Concept", "Value", "Foo Bar");
 
-        verifyRule(document, "test:ImportedConcept", "Imported Concept", FAILURE, "MINOR");
+        verifyRule(document, "test:ImportedConcept", "Imported Concept", FAILURE, "Status: FAILURE, Severity: MINOR");
         verifyRuleResult(document, "test:ImportedConcept", "ImportedConceptValue", "FooBar");
 
         verifyToggle(html);

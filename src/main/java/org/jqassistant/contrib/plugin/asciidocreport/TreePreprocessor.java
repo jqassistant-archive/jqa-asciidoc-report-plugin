@@ -80,8 +80,7 @@ public class TreePreprocessor extends Treeprocessor {
                         content.add(renderImage(getReportUrl(report)));
                         break;
                     case LINK:
-                        content.add("Report: ");
-                        content.add(renderLink(getReportUrl(report), report.getLabel()));
+                        content.add(renderDownloadLink(getReportUrl(report), report.getLabel()));
                         break;
                     }
                 }
@@ -130,10 +129,11 @@ public class TreePreprocessor extends Treeprocessor {
         return relativePath.toString().replace('\\', '/');
     }
 
-    private String renderLink(String url, String label) {
+    private String renderDownloadLink(String url, String label) {
         StringBuilder a = new StringBuilder();
+        a.append("<span class=\"fa fa-download\"/>");
         a.append("<a href=").append('"').append(url).append('"').append(" style=\"text-decoration:none; color:initial\">");
-        a.append("<b class=\"button\">");
+        a.append("<b>");
         a.append(label);
         a.append("</b>");
         a.append("</a>");
