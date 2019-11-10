@@ -4,9 +4,7 @@ import static com.buschmais.jqassistant.core.analysis.api.Result.Status.FAILURE;
 import static com.buschmais.jqassistant.core.analysis.api.Result.Status.SUCCESS;
 import static java.lang.System.lineSeparator;
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
-import static java.util.stream.Collectors.toList;
+import static java.util.Collections.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -22,14 +20,6 @@ import com.buschmais.jqassistant.core.report.api.ReportContext;
 import com.buschmais.jqassistant.core.report.api.ReportException;
 import com.buschmais.jqassistant.core.report.api.ReportPlugin;
 import com.buschmais.jqassistant.core.report.impl.CompositeReportPlugin;
-import com.buschmais.jqassistant.core.report.impl.ReportContextImpl;
-import com.buschmais.jqassistant.core.rule.api.reader.RuleConfiguration;
-import com.buschmais.jqassistant.core.rule.api.reader.RuleParserPlugin;
-import com.buschmais.jqassistant.core.rule.api.source.FileRuleSource;
-import com.buschmais.jqassistant.core.rule.api.source.RuleSource;
-import com.buschmais.jqassistant.core.rule.impl.reader.AsciidocRuleParserPlugin;
-import com.buschmais.jqassistant.core.rule.impl.reader.RuleParser;
-import com.buschmais.jqassistant.core.shared.io.ClasspathResource;
 import com.buschmais.jqassistant.plugin.common.api.model.ArtifactFileDescriptor;
 import com.buschmais.jqassistant.plugin.common.api.model.DependsOnDescriptor;
 import com.buschmais.xo.neo4j.api.model.Neo4jLabel;
@@ -38,40 +28,17 @@ import com.buschmais.xo.neo4j.api.model.Neo4jRelationship;
 import com.buschmais.xo.neo4j.api.model.Neo4jRelationshipType;
 
 import org.apache.commons.io.FileUtils;
-import org.jqassistant.contrib.plugin.asciidocreport.plantuml.component.ComponentDiagramReportPlugin;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class AsciidocReportPluginTest {
-
-    private Map<String, ReportPlugin> reportPlugins;
-
-    private File ruleDirectory;
-
-    private File outputDirectory = new File("target/");
-
-    private RuleSet ruleSet;
-
-    @BeforeEach
-    public void setUp() throws RuleException {
-        File classesDirectory = ClasspathResource.getFile(AsciidocReportPluginTest.class, "/");
-        ruleDirectory = new File(classesDirectory, "jqassistant");
-        ruleSet = getRuleSet(ruleDirectory, "index.adoc", "additional-rules/other.adoc");
-        reportPlugins = new HashMap<>();
-        reportPlugins.put("asciidoc", new AsciidocReportPlugin());
-        reportPlugins.put("plantuml-component-diagram", new ComponentDiagramReportPlugin());
-        for (ReportPlugin reportPlugin : reportPlugins.values()) {
-            reportPlugin.initialize();
-        }
-    }
+public class AsciidocReportPluginTest extends AbstractAsciidocReportPluginTest {
 
     @Test
     public void defaultIndexDocument() throws RuleException, IOException {
-        verify(Collections.<String, Object> emptyMap(), new File(outputDirectory, "report/asciidoc"));
+        verify(emptyMap(), new File(outputDirectory, "report/asciidoc"));
     }
 
     @Test
@@ -102,11 +69,12 @@ public class AsciidocReportPluginTest {
     }
 
     private void verify(Map<String, Object> properties, File expectedDirectory) throws RuleException, IOException {
-        ReportContext reportContext = getReportContext(properties);
+        ReportContext reportContext = configureReportContext(properties);
 
         Concept componentDiagram = execute();
 
-        File indexHtml = new File(expectedDirectory, "index.html");
+        String file = "index.html";
+        File indexHtml = new File(expectedDirectory, file);
         assertThat(indexHtml.exists()).isTrue();
 
         String html = FileUtils.readFileToString(indexHtml, "UTF-8");
@@ -124,52 +92,8 @@ public class AsciidocReportPluginTest {
         verifyRuleResult(document, "test:ImportedConcept", "ImportedConceptValue", "FooBar");
 
         verifyToggle(html);
+
         verifyDiagram(componentDiagram, reportContext, html);
-    }
-
-    private void verifyRule(Document document, String id, String expectedDescription, Status expectedStatus, String expectedSeverity) {
-        Element rule = document.getElementById(id);
-        Element title = rule.getElementsByClass("title").first();
-        assertThat(title).isNotNull();
-        assertThat(title.text()).isEqualTo(expectedDescription);
-        Element status = title.getElementsByTag("span").first();
-        assertThat(status).isNotNull();
-        assertThat(status.hasClass("fa")).isEqualTo(true);
-        switch (expectedStatus) {
-        case SUCCESS:
-            assertThat(status.hasClass("fa-check")).isEqualTo(true);
-            break;
-        case FAILURE:
-            assertThat(status.hasClass("fa-ban")).isEqualTo(true);
-            break;
-        }
-        assertThat(status.attr("title")).isEqualTo(expectedSeverity);
-        Element ruleToggle = rule.getElementsByClass("rule-toggle").first();
-        assertThat(ruleToggle).isNotNull();
-        Element content = rule.getElementsByClass("content").first();
-        assertThat(content).isNotNull();
-    }
-
-    private void verifyRuleResult(Document document, String id, String expectedColumnName, String... expectedValues) {
-        Element ruleResult = document.getElementById("result(" + id + ")");
-        Element thead = ruleResult.getElementsByTag("thead").first();
-        assertThat(thead).isNotNull();
-        Element th = thead.getElementsByTag("th").first();
-        assertThat(th).isNotNull();
-        assertThat(th.text()).isEqualTo(expectedColumnName);
-        Element tbody = ruleResult.getElementsByTag("tbody").first();
-        assertThat(tbody).isNotNull();
-        Elements tds = tbody.getElementsByTag("td");
-        List<String> values = tds.stream().map(td -> td.text()).collect(toList());
-        assertThat(values).containsExactly(expectedValues);
-    }
-
-    private ReportContext getReportContext(Map<String, Object> properties) throws ReportException {
-        ReportContext reportContext = new ReportContextImpl(outputDirectory);
-        for (ReportPlugin reportPlugin : reportPlugins.values()) {
-            reportPlugin.configure(reportContext, properties);
-        }
-        return reportContext;
     }
 
     private Concept execute() throws ReportException, NoConceptException, NoConstraintException {
@@ -310,29 +234,5 @@ public class AsciidocReportPluginTest {
         when(dependsOnDescriptor.getDependency()).thenReturn(end);
         when(dependsOnDescriptor.getDelegate()).thenReturn(relationship);
         return dependsOnDescriptor;
-    }
-
-    private RuleSet getRuleSet(File ruleDirectory, String... adocFiles) throws RuleException {
-        AsciidocRuleParserPlugin ruleParserPlugin = new AsciidocRuleParserPlugin();
-        ruleParserPlugin.initialize();
-        ruleParserPlugin.configure(RuleConfiguration.DEFAULT);
-        RuleParser ruleParser = new RuleParser(Arrays.<RuleParserPlugin> asList(ruleParserPlugin));
-        List<RuleSource> ruleSources = new ArrayList<>();
-        for (String adocFile : adocFiles) {
-            ruleSources.add(new FileRuleSource(new File(ruleDirectory, adocFile)));
-        }
-        return ruleParser.parse(ruleSources);
-    }
-
-    private void processRule(ReportPlugin plugin, Concept rule, Result<Concept> result) throws ReportException {
-        plugin.beginConcept(rule);
-        plugin.setResult(result);
-        plugin.endConcept();
-    }
-
-    private void processRule(ReportPlugin plugin, Constraint rule, Result<Constraint> result) throws ReportException {
-        plugin.beginConstraint(rule);
-        plugin.setResult(result);
-        plugin.endConstraint();
     }
 }

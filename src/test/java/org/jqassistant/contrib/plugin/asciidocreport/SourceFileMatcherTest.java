@@ -24,7 +24,7 @@ public class SourceFileMatcherTest {
 
     @BeforeEach
     public void setUp() {
-        File classesDirectory = ClasspathResource.getFile(AsciidocReportPluginTest.class, "/");
+        File classesDirectory = ClasspathResource.getFile(SourceFileMatcherTest.class, "/");
         ruleDirectory = new File(classesDirectory, "jqassistant");
     }
 
@@ -53,7 +53,7 @@ public class SourceFileMatcherTest {
         SourceFileMatcher sourceFileMatcher = new SourceFileMatcher(ruleDirectory, null, null);
         HashSet<RuleSource> ruleSources = new HashSet<>();
         File index = new File(ruleDirectory, "index.adoc");
-        File other = new File(ruleDirectory, "additional-rules/other.adoc");
+        File other = new File(ruleDirectory, "additional-rules/importedRules.adoc");
         ruleSources.add(new FileRuleSource(index));
         ruleSources.add(new FileRuleSource(other));
 
