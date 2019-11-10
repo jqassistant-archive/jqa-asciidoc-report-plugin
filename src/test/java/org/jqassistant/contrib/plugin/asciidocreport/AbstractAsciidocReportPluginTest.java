@@ -30,7 +30,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.junit.jupiter.api.BeforeEach;
 
-public class AbstractAsciidocReportPluginTest {
+public abstract class AbstractAsciidocReportPluginTest {
 
     protected Map<String, ReportPlugin> reportPlugins;
 
@@ -44,7 +44,8 @@ public class AbstractAsciidocReportPluginTest {
     public final void setUp() throws RuleException {
         File classesDirectory = ClasspathResource.getFile(AbstractAsciidocReportPluginTest.class, "/");
         ruleDirectory = new File(classesDirectory, "jqassistant");
-        ruleSet = getRuleSet(ruleDirectory, "index.adoc", "additional-rules/importedRules.adoc", "additional-rules/includedRules.adoc");
+        List<String> asciidocFiles = getAsciidocFiles();
+        ruleSet = getRuleSet(ruleDirectory, asciidocFiles);
         reportPlugins = new HashMap<>();
         reportPlugins.put("asciidoc", new AsciidocReportPlugin());
         reportPlugins.put("plantuml-component-diagram", new ComponentDiagramReportPlugin());
@@ -52,6 +53,13 @@ public class AbstractAsciidocReportPluginTest {
             reportPlugin.initialize();
         }
     }
+
+    /**
+     * Return the list of Asciidoc file names to be used in the test.
+     *
+     * @return The Asciidoc file names.
+     */
+    protected abstract List<String> getAsciidocFiles();
 
     protected final ReportContext configureReportContext(Map<String, Object> properties) throws ReportException {
         ReportContext reportContext = new ReportContextImpl(outputDirectory);
@@ -98,7 +106,7 @@ public class AbstractAsciidocReportPluginTest {
         assertThat(values).containsExactly(expectedValues);
     }
 
-    private RuleSet getRuleSet(File ruleDirectory, String... adocFiles) throws RuleException {
+    private RuleSet getRuleSet(File ruleDirectory, Iterable<String> adocFiles) throws RuleException {
         AsciidocRuleParserPlugin ruleParserPlugin = new AsciidocRuleParserPlugin();
         ruleParserPlugin.initialize();
         ruleParserPlugin.configure(RuleConfiguration.DEFAULT);

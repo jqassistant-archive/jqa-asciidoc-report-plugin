@@ -11,7 +11,10 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import com.buschmais.jqassistant.core.analysis.api.Result;
 import com.buschmais.jqassistant.core.analysis.api.Result.Status;
@@ -35,6 +38,11 @@ import org.jsoup.select.Elements;
 import org.junit.jupiter.api.Test;
 
 public class AsciidocReportPluginTest extends AbstractAsciidocReportPluginTest {
+
+    @Override
+    protected List<String> getAsciidocFiles() {
+        return asList("index.adoc", "additional-rules/importedRules.adoc");
+    }
 
     @Test
     public void defaultIndexDocument() throws RuleException, IOException {
@@ -212,7 +220,7 @@ public class AsciidocReportPluginTest extends AbstractAsciidocReportPluginTest {
         when(node.getId()).thenReturn(id);
         Neo4jLabel artifactLabel = mock(Neo4jLabel.class);
         when(artifactLabel.getName()).thenReturn("Artifact");
-        when(node.getLabels()).thenReturn(Arrays.asList(artifactLabel));
+        when(node.getLabels()).thenReturn(asList(artifactLabel));
         ArtifactFileDescriptor artifactFileDescriptor = mock(ArtifactFileDescriptor.class);
         when(artifactFileDescriptor.getFullQualifiedName()).thenReturn(name);
         when(artifactFileDescriptor.getDelegate()).thenReturn(node);
