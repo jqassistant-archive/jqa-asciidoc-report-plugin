@@ -113,7 +113,7 @@ public class AsciidocReportPluginTest extends AbstractAsciidocReportPluginTest {
         Map<String, Object> conceptRow = new HashMap<>();
         conceptRow.put("Value", asList("Foo", "Bar"));
         rows.add(conceptRow);
-        processRule(plugin, concept, new Result<>(concept, SUCCESS, Severity.MAJOR, singletonList("Value"), rows));
+        processConcept(plugin, concept, new Result<>(concept, SUCCESS, Severity.MAJOR, singletonList("Value"), rows));
 
         Concept componentDiagram = ruleSet.getConceptBucket().getById("test:ComponentDiagram");
         List<Map<String, Object>> diagramRows = new ArrayList<>();
@@ -130,7 +130,7 @@ public class AsciidocReportPluginTest extends AbstractAsciidocReportPluginTest {
         diagramRow2.put("Node", node2);
         diagramRow2.put("DependsOn", null);
         diagramRows.add(diagramRow2);
-        processRule(plugin, componentDiagram, Result.<Concept> builder().rule(componentDiagram).status(SUCCESS).severity(Severity.INFO)
+        processConcept(plugin, componentDiagram, Result.<Concept> builder().rule(componentDiagram).status(SUCCESS).severity(Severity.INFO)
                 .columnNames(asList("Node", "DependsOn")).rows(diagramRows).build());
 
         Concept importedConcept = ruleSet.getConceptBucket().getById("test:ImportedConcept");
@@ -138,11 +138,11 @@ public class AsciidocReportPluginTest extends AbstractAsciidocReportPluginTest {
         Map<String, Object> importedConceptRow = new HashMap<>();
         importedConceptRow.put("ImportedConceptValue", asList("FooBar"));
         importedConceptRows.add(importedConceptRow);
-        processRule(plugin, importedConcept, Result.<Concept> builder().rule(importedConcept).status(Status.FAILURE).severity(Severity.MINOR)
+        processConcept(plugin, importedConcept, Result.<Concept> builder().rule(importedConcept).status(Status.FAILURE).severity(Severity.MINOR)
                 .columnNames(singletonList("ImportedConceptValue")).rows(importedConceptRows).build());
 
         Constraint importedConstraintWithoutDescription = ruleSet.getConstraintBucket().getById("test:ImportedConstraintWithoutDescription");
-        processRule(plugin, importedConstraintWithoutDescription, Result.<Constraint> builder().rule(importedConstraintWithoutDescription).status(SUCCESS)
+        processConstraint(plugin, importedConstraintWithoutDescription, Result.<Constraint> builder().rule(importedConstraintWithoutDescription).status(SUCCESS)
                 .severity(Severity.MAJOR).columnNames(emptyList()).rows(emptyList()).build());
 
         plugin.end();

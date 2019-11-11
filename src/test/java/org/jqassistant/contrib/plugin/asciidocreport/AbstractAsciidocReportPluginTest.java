@@ -8,10 +8,7 @@ import java.util.*;
 
 import com.buschmais.jqassistant.core.analysis.api.Result;
 import com.buschmais.jqassistant.core.analysis.api.Result.Status;
-import com.buschmais.jqassistant.core.analysis.api.rule.Concept;
-import com.buschmais.jqassistant.core.analysis.api.rule.Constraint;
-import com.buschmais.jqassistant.core.analysis.api.rule.RuleException;
-import com.buschmais.jqassistant.core.analysis.api.rule.RuleSet;
+import com.buschmais.jqassistant.core.analysis.api.rule.*;
 import com.buschmais.jqassistant.core.report.api.ReportContext;
 import com.buschmais.jqassistant.core.report.api.ReportException;
 import com.buschmais.jqassistant.core.report.api.ReportPlugin;
@@ -118,13 +115,25 @@ public abstract class AbstractAsciidocReportPluginTest {
         return ruleParser.parse(ruleSources);
     }
 
-    protected final void processRule(ReportPlugin plugin, Concept rule, Result<Concept> result) throws ReportException {
+    protected final void processConcept(ReportPlugin plugin, String id, Status status, Severity severity, List<String> columnNames,
+            List<Map<String, Object>> rows) throws NoConceptException, ReportException {
+        Concept includedConcept = ruleSet.getConceptBucket().getById(id);
+        processConcept(plugin, includedConcept, new Result<>(includedConcept, status, severity, columnNames, rows));
+    }
+
+    protected final void processConcept(ReportPlugin plugin, Concept rule, Result<Concept> result) throws ReportException {
         plugin.beginConcept(rule);
         plugin.setResult(result);
         plugin.endConcept();
     }
 
-    protected final void processRule(ReportPlugin plugin, Constraint rule, Result<Constraint> result) throws ReportException {
+    protected final void processConstraint(ReportPlugin plugin, String id, Status status, Severity severity, List<String> columnNames,
+            List<Map<String, Object>> rows) throws NoConstraintException, ReportException {
+        Constraint constraint = ruleSet.getConstraintBucket().getById(id);
+        processConstraint(plugin, constraint, new Result<>(constraint, status, severity, columnNames, rows));
+    }
+
+    protected final void processConstraint(ReportPlugin plugin, Constraint rule, Result<Constraint> result) throws ReportException {
         plugin.beginConstraint(rule);
         plugin.setResult(result);
         plugin.endConstraint();

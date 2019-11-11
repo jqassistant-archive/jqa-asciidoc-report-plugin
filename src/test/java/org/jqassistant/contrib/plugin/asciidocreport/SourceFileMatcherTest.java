@@ -1,7 +1,6 @@
 package org.jqassistant.contrib.plugin.asciidocreport;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.util.Collections;
@@ -33,15 +32,15 @@ public class SourceFileMatcherTest {
      */
     @Test
     public void scanRuleDirectory() throws ReportException {
-        SourceFileMatcher sourceFileMatcher = new SourceFileMatcher(ruleDirectory, "*.adoc", null);
+        SourceFileMatcher sourceFileMatcher = new SourceFileMatcher(ruleDirectory, "index.adoc", null);
 
         Map<File, List<File>> filesByBaseDir = sourceFileMatcher.match(Collections.emptySet());
 
-        assertThat(filesByBaseDir.size(), equalTo(1));
+        assertThat(filesByBaseDir.size()).isEqualTo(1);
         List<File> rulesDirectoryFiles = filesByBaseDir.get(ruleDirectory);
-        assertThat(rulesDirectoryFiles, notNullValue());
-        assertThat(rulesDirectoryFiles.size(), equalTo(1));
-        assertThat(rulesDirectoryFiles.get(0).getName(), equalTo("index.adoc"));
+        assertThat(rulesDirectoryFiles).isNotNull();
+        assertThat(rulesDirectoryFiles.size()).isEqualTo(1);
+        assertThat(rulesDirectoryFiles.get(0).getName()).isEqualTo("index.adoc");
     }
 
     /**
@@ -59,11 +58,10 @@ public class SourceFileMatcherTest {
 
         Map<File, List<File>> filesByBaseDir = sourceFileMatcher.match(ruleSources);
 
-        assertThat(filesByBaseDir.size(), equalTo(1));
+        assertThat(filesByBaseDir.size()).isEqualTo(1);
         List<File> rulesDirectoryFiles = filesByBaseDir.get(ruleDirectory);
-        assertThat(rulesDirectoryFiles, notNullValue());
-        assertThat(rulesDirectoryFiles.size(), equalTo(1));
-        assertThat(rulesDirectoryFiles.get(0), is(index));
+        assertThat(rulesDirectoryFiles).isNotNull();
+        assertThat(rulesDirectoryFiles).contains(index);
     }
 
 }
