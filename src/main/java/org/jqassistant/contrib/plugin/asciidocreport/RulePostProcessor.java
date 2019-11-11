@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.buschmais.jqassistant.core.analysis.api.Result.Status;
 import com.buschmais.jqassistant.core.analysis.api.rule.ExecutableRule;
 
 import org.asciidoctor.ast.Document;
@@ -48,34 +49,36 @@ public class RulePostProcessor extends Postprocessor {
     }
 
     private void processListingBlock(Element listingBlock, List<String> contentIds, Map<String, RuleResult> ruleResults) {
-        String contentId = "rule-listing" + contentIds.size();
+        Element status = listingBlock.prependElement("div").addClass("jqassistant-rule-status");
+        RuleResult ruleResult = ruleResults.get(listingBlock.id());
+        if (ruleResult != null) {
+            ExecutableRule<?> rule = ruleResult.getRule();
+            switch (ruleResult.getStatus()) {
+            case SUCCESS:
+                status.addClass("fa").addClass("fa-check").addClass("jqassistant-status-success");
+                break;
+            case FAILURE:
+                status.addClass("fa").addClass("fa-ban").addClass("jqassistant-status-failure");
+                break;
+            }
+            String hover = "Status: " + ruleResult.getStatus() + ", Severity: " + rule.getSeverity().getInfo(ruleResult.getEffectiveSeverity());
+            status.attr("title", hover);
+        } else {
+            status.addClass("fa").addClass("fa-question");
+            status.attr("title", "Rule has not been executed.");
+        }
+
+        String contentId = "jqassistant-rule-listing" + contentIds.size();
         contentIds.add(contentId);
         Elements contents = listingBlock.getElementsByClass("content");
         Element content = contents.first();
-        content.before("<input type=\"checkbox\" class=\"rule-toggle\" title=\"Rule details\"/>");
+        content.before("<input type=\"checkbox\" class=\"jqassistant-rule-toggle\" title=\"Rule details\"/>");
         contents.attr("id", contentId);
+
         Elements title = listingBlock.getElementsByClass("title");
         Element titleElement = title.first();
         if (titleElement != null) {
             titleElement.attr("style", "display:inline;");
-            Element status = titleElement.appendElement("span");
-            RuleResult ruleResult = ruleResults.get(listingBlock.id());
-            if (ruleResult != null) {
-                ExecutableRule<?> rule = ruleResult.getRule();
-                switch (ruleResult.getStatus()) {
-                case SUCCESS:
-                    status.addClass("fa").addClass("fa-check");
-                    break;
-                case FAILURE:
-                    status.addClass("fa").addClass("fa-ban");
-                    break;
-                }
-                String hover = "Status: " + ruleResult.getStatus() + ", Severity: " + rule.getSeverity().getInfo(ruleResult.getEffectiveSeverity());
-                status.attr("title", hover);
-            } else {
-                status.addClass("fa").addClass("fa-question");
-                status.attr("title", "Result not available");
-            }
         }
     }
 
@@ -86,10 +89,13 @@ public class RulePostProcessor extends Postprocessor {
             styles.append("#").append(contentId).append("{\n");
             styles.append("  display:none;\n"); // disable source content blocks by default
             styles.append("}\n");
-            styles.append("input.rule-toggle:checked + #").append(contentId).append("{\n");
+            styles.append("input.jqassistant-rule-toggle:checked + #").append(contentId).append("{\n");
             styles.append("  display:block;\n"); // activate them if the checkbox element is checked
             styles.append("}\n");
         }
+        styles.append(".jqassistant-status-success {color:" + StatusHelper.getStatusColor(Status.SUCCESS) + "}");
+        styles.append(".jqassistant-status-failure {color:" + StatusHelper.getStatusColor(Status.FAILURE) + "}");
+        styles.append(".jqassistant-status-skipped {color:" + StatusHelper.getStatusColor(Status.SKIPPED) + "}");
         styles.append("</style>\n");
         return styles;
     }

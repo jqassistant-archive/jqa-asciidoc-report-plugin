@@ -71,19 +71,23 @@ public abstract class AbstractAsciidocReportPluginTest {
         Element title = rule.getElementsByClass("title").first();
         assertThat(title).isNotNull();
         assertThat(title.text()).isEqualTo(expectedDescription);
-        Element status = title.getElementsByTag("span").first();
+
+        Element status = rule.getElementsByClass("jqassistant-rule-status").first();
         assertThat(status).isNotNull();
         assertThat(status.hasClass("fa")).isEqualTo(true);
         switch (expectedStatus) {
         case SUCCESS:
             assertThat(status.hasClass("fa-check")).isEqualTo(true);
+            assertThat(status.hasClass("jqassistant-status-success")).isEqualTo(true);
             break;
         case FAILURE:
             assertThat(status.hasClass("fa-ban")).isEqualTo(true);
+            assertThat(status.hasClass("jqassistant-status-failure")).isEqualTo(true);
             break;
         }
         assertThat(status.attr("title")).isEqualTo(expectedSeverity);
-        Element ruleToggle = rule.getElementsByClass("rule-toggle").first();
+
+        Element ruleToggle = rule.getElementsByClass("jqassistant-rule-toggle").first();
         assertThat(ruleToggle).isNotNull();
         Element content = rule.getElementsByClass("content").first();
         assertThat(content).isNotNull();

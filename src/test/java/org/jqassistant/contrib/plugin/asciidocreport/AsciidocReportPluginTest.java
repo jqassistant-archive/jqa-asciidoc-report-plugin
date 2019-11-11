@@ -151,13 +151,13 @@ public class AsciidocReportPluginTest extends AbstractAsciidocReportPluginTest {
 
     private void verifyToggle(String html) {
         // Toggle for rule content (i.e. Cypher source)
-        assertThat(html).contains("<input type=\"checkbox\" class=\"rule-toggle\" title=\"Rule details\">");
-        assertThat(html).contains("<div class=\"content\" id=\"rule-listing0\">");
+        assertThat(html).contains("<input type=\"checkbox\" class=\"jqassistant-rule-toggle\" title=\"Rule details\">");
+        assertThat(html).contains("<div class=\"content\" id=\"jqassistant-rule-listing0\">");
         assertThat(html).contains("<style>" + lineSeparator() + //
-                "#rule-listing0{" + lineSeparator() + //
+                "#jqassistant-rule-listing0{" + lineSeparator() + //
                 "  display:none;" + lineSeparator() + //
                 "}" + lineSeparator() + //
-                "input.rule-toggle:checked + #rule-listing0{" + lineSeparator() + //
+                "input.jqassistant-rule-toggle:checked + #jqassistant-rule-listing0{" + lineSeparator() + //
                 "  display:block;" + lineSeparator() + //
                 "}");
     }
