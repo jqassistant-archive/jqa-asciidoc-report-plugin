@@ -179,7 +179,7 @@ public class AsciidocReportPluginTest extends AbstractAsciidocReportPluginTest {
         Element constraintSummaryTableBody = constraintSummaryTable.getElementsByTag("tbody").first();
         Elements rows = constraintSummaryTableBody.getElementsByTag("tr");
         assertThat(rows.size()).isEqualTo(1);
-        verifySummaryColumns(rows.get(0), "test:ImportedConstraintWithoutDescription", "", "MAJOR", "SUCCESS", "green");
+        verifySummaryColumns(rows.get(0), "test:ImportedConstraintWithoutDescription", "", "MAJOR", "SUCCESS", "jqassistant-status-success");
     }
 
     private void verifyConceptsSummary(Element conceptSummaryTable) {
@@ -188,13 +188,14 @@ public class AsciidocReportPluginTest extends AbstractAsciidocReportPluginTest {
         assertThat(conceptSummaryTable).isNotNull();
         Elements rows = conceptSummaryTableBody.getElementsByTag("tr");
         assertThat(rows.size()).isEqualTo(3);
-        verifySummaryColumns(rows.get(0), "test:ImportedConcept", "Imported Concept", "MINOR", "FAILURE", "red");
-        verifySummaryColumns(rows.get(1), "test:Concept", "Concept Description", "MAJOR (from MINOR)", "SUCCESS", "green");
-        verifySummaryColumns(rows.get(2), "test:ComponentDiagram", "Component Diagram Description", "INFO (from MINOR)", "SUCCESS", "green");
+        verifySummaryColumns(rows.get(0), "test:ImportedConcept", "Imported Concept", "MINOR", "FAILURE", "jqassistant-status-failure");
+        verifySummaryColumns(rows.get(1), "test:Concept", "Concept Description", "MAJOR (from MINOR)", "SUCCESS", "jqassistant-status-success");
+        verifySummaryColumns(rows.get(2), "test:ComponentDiagram", "Component Diagram Description", "INFO (from MINOR)", "SUCCESS",
+                "jqassistant-status-success");
     }
 
     private void verifySummaryColumns(Element row, String expectedId, String expectedDescription, String expectedSeverity, String expectedStatus,
-            String expectedColor) {
+            String expectedStatusClass) {
         Elements columns = row.getElementsByTag("td");
         Element id = columns.get(0).getElementsByTag("a").first();
         assertThat(id).isNotNull();
@@ -212,7 +213,7 @@ public class AsciidocReportPluginTest extends AbstractAsciidocReportPluginTest {
         Elements status = columns.get(3).getElementsByTag("span");
         assertThat(status).isNotNull();
         assertThat(status.text()).isEqualTo(expectedStatus);
-        assertThat(status.hasClass(expectedColor)).isTrue();
+        assertThat(status.hasClass(expectedStatusClass)).isTrue();
     }
 
     private ArtifactFileDescriptor createNode(long id, String name) {

@@ -12,14 +12,19 @@ import org.asciidoctor.ast.AbstractBlock;
 import org.asciidoctor.ast.Document;
 import org.asciidoctor.ast.DocumentRuby;
 import org.asciidoctor.extension.PreprocessorReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class IncludeProcessor extends org.asciidoctor.extension.IncludeProcessor {
 
     public static final String PREFIX = "jQA:";
 
+    @Deprecated
     public static final String INCLUDE_IMPORTED_RULES = "ImportedRules";
     public static final String INCLUDE_RULES = "Rules";
     public static final String INCLUDE_SUMMARY = "Summary";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(IncludeProcessor.class);
 
     private final RuleFilter<RuleResult> ruleFilter;
     private final Map<String, RuleResult> conceptResults;
@@ -55,6 +60,7 @@ public class IncludeProcessor extends org.asciidoctor.extension.IncludeProcessor
             includeRules(attributes, "concepts", conceptResults, builder);
             includeRules(attributes, "constraints", constraintResults, builder);
         } else if (INCLUDE_IMPORTED_RULES.equalsIgnoreCase(include)) {
+            LOGGER.warn("{}:{} has been deprecated, please migrate to {}:{}.", PREFIX, INCLUDE_IMPORTED_RULES, PREFIX, INCLUDE_RULES);
             includeImportedRules(builder);
         } else {
             throw new IllegalArgumentException("jQA include not supported: " + target);
@@ -75,8 +81,8 @@ public class IncludeProcessor extends org.asciidoctor.extension.IncludeProcessor
             builder.append("| ").append(escape(rule.getDescription()));
             builder.append("| ").append(rule.getSeverity().getInfo(result.getEffectiveSeverity()));
             Result.Status status = result.getStatus();
-            String statusColor = StatusHelper.getStatusColor(status);
-            builder.append("| ").append("[").append(statusColor).append("]#").append(status.toString()).append('#').append('\n');
+            String statusClass = StatusHelper.getStatusClass(status);
+            builder.append("| ").append("[").append(statusClass).append("]#").append(status.toString()).append('#').append('\n');
         }
         builder.append("|===").append('\n');
     }

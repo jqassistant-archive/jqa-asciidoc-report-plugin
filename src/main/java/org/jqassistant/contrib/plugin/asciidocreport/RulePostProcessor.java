@@ -1,10 +1,12 @@
 package org.jqassistant.contrib.plugin.asciidocreport;
 
+import static com.buschmais.jqassistant.core.analysis.api.Result.Status.*;
+import static org.jqassistant.contrib.plugin.asciidocreport.StatusHelper.getStatusClass;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.buschmais.jqassistant.core.analysis.api.Result.Status;
 import com.buschmais.jqassistant.core.analysis.api.rule.ExecutableRule;
 
 import org.asciidoctor.ast.Document;
@@ -53,12 +55,13 @@ public class RulePostProcessor extends Postprocessor {
         RuleResult ruleResult = ruleResults.get(listingBlock.id());
         if (ruleResult != null) {
             ExecutableRule<?> rule = ruleResult.getRule();
+            status.addClass(getStatusClass(ruleResult.getStatus()));
             switch (ruleResult.getStatus()) {
             case SUCCESS:
-                status.addClass("fa").addClass("fa-check").addClass("jqassistant-status-success");
+                status.addClass("fa").addClass("fa-check");
                 break;
             case FAILURE:
-                status.addClass("fa").addClass("fa-ban").addClass("jqassistant-status-failure");
+                status.addClass("fa").addClass("fa-ban");
                 break;
             }
             String hover = "Status: " + ruleResult.getStatus() + ", Severity: " + rule.getSeverity().getInfo(ruleResult.getEffectiveSeverity());
@@ -93,9 +96,9 @@ public class RulePostProcessor extends Postprocessor {
             styles.append("  display:block;\n"); // activate them if the checkbox element is checked
             styles.append("}\n");
         }
-        styles.append(".jqassistant-status-success {color:" + StatusHelper.getStatusColor(Status.SUCCESS) + "}");
-        styles.append(".jqassistant-status-failure {color:" + StatusHelper.getStatusColor(Status.FAILURE) + "}");
-        styles.append(".jqassistant-status-skipped {color:" + StatusHelper.getStatusColor(Status.SKIPPED) + "}");
+        styles.append("." + getStatusClass(SUCCESS) + "{color: green}");
+        styles.append("." + getStatusClass(FAILURE) + "{color: crimson}");
+        styles.append("." + getStatusClass(SKIPPED) + "{color: yellow}");
         styles.append("</style>\n");
         return styles;
     }

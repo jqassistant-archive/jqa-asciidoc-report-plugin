@@ -11,18 +11,19 @@ public class StatusHelper {
 
     private static final RuleResultComparator RULE_RESULT_COMPARATOR = new RuleResultComparator();
 
-    public static String getStatusColor(Result.Status status) {
+    public static String getStatusClass(Result.Status status) {
         switch (status) {
-        case SUCCESS:
-            return "green";
-        case FAILURE:
-            return "red";
-        case SKIPPED:
-            return "yellow";
-        default:
-            throw new IllegalArgumentException("Unknown status " + status);
+            case SUCCESS:
+                return "jqassistant-status-success";
+            case FAILURE:
+                return "jqassistant-status-failure";
+            case SKIPPED:
+                return "jqassistant-status-skipped";
+            default:
+                throw new IllegalArgumentException("Unknown status " + status);
         }
     }
+
 
     public static Comparator<RuleResult> getRuleResultComparator() {
         return RULE_RESULT_COMPARATOR;
