@@ -39,9 +39,7 @@ public class AsciidocReportPlugin implements ReportPlugin {
     private static final String BACKEND_HTML5 = "html5";
     private static final String CODERAY = "coderay";
 
-    private final RuleFilter<RuleResult> ruleFilter = new RuleFilter<>();
     private final DocumentParser documentParser = new DocumentParser();
-
 
     private ReportContext reportContext;
 
@@ -95,7 +93,7 @@ public class AsciidocReportPlugin implements ReportPlugin {
                     LOGGER.info("-> {}", file.getPath());
                     Document document = asciidoctor.loadFile(file, optionsBuilder.asMap());
                     JavaExtensionRegistry extensionRegistry = asciidoctor.javaExtensionRegistry();
-                    IncludeProcessor includeProcessor = new IncludeProcessor(documentParser, document, ruleFilter, conceptResults, constraintResults);
+                    IncludeProcessor includeProcessor = new IncludeProcessor(documentParser, document, conceptResults, constraintResults);
                     extensionRegistry.includeProcessor(includeProcessor);
                     extensionRegistry.inlineMacro(new InlineMacroProcessor(documentParser));
                     extensionRegistry.treeprocessor(new TreePreprocessor(documentParser, conceptResults, constraintResults, reportDirectory, reportContext));

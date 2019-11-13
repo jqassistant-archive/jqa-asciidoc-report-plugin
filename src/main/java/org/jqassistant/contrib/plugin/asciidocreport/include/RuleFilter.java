@@ -1,4 +1,4 @@
-package org.jqassistant.contrib.plugin.asciidocreport;
+package org.jqassistant.contrib.plugin.asciidocreport.include;
 
 import static java.util.Arrays.asList;
 
@@ -7,7 +7,16 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
+import org.jqassistant.contrib.plugin.asciidocreport.RuleResult;
 
+/**
+ * A filter for rules.
+ *
+ * TODO Move this to jQA core report.
+ *
+ * @param <T>
+ *            The value type.
+ */
 public class RuleFilter<T> {
 
     /**
@@ -22,7 +31,7 @@ public class RuleFilter<T> {
      *            The {@link RuleResult}s to match.
      * @return The matching {@link RuleResult}s.
      */
-    List<T> match(String filter, Map<String, T> results) {
+    public List<T> match(String filter, Map<String, T> results) {
         List<T> matchingResults = new LinkedList<>();
         if (filter != null) {
             List<String> rulePatterns = asList(filter.split("\\s*,\\s*"));
