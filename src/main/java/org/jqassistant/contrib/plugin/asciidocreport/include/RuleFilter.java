@@ -1,10 +1,12 @@
 package org.jqassistant.contrib.plugin.asciidocreport.include;
 
 import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
 
-import java.util.LinkedList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
+import java.util.function.Consumer;
 
 import org.apache.commons.io.FilenameUtils;
 import org.jqassistant.contrib.plugin.asciidocreport.RuleResult;
@@ -22,28 +24,39 @@ public class RuleFilter<T> {
     /**
      * Match {@link RuleResult}s by the given filter.
      *
-     * Accepts a comma separated list of strings, each one may contain wildcards "*"
-     * or "?".
+     * Accepts a comma separated list of filter patterns, each one may contain
+     * wildcards "*" or "?". Any pattern starting with "!" will be interpreted as
+     * exlcusion.
      *
+     * @param rules
+     *            The rules ids to match.
      * @param filter
      *            The filter.
-     * @param results
-     *            The {@link RuleResult}s to match.
      * @return The matching {@link RuleResult}s.
      */
-    public List<T> match(String filter, Map<String, T> results) {
-        List<T> matchingResults = new LinkedList<>();
+    public Set<String> match(Iterable<String> rules, String filter) {
+        Set<String> matches = new HashSet<>();
         if (filter != null) {
             List<String> rulePatterns = asList(filter.split("\\s*,\\s*"));
-            for (Map.Entry<String, T> entry : results.entrySet()) {
-                for (String rulePattern : rulePatterns) {
-                    if (FilenameUtils.wildcardMatch(entry.getKey(), rulePattern)) {
-                        matchingResults.add(entry.getValue());
-                    }
+
+            List<String> includePatterns = rulePatterns.stream().filter(pattern -> !pattern.startsWith("!")).collect(toList());
+            List<String> excludePatterns = rulePatterns.stream().filter(pattern -> pattern.startsWith("!")).map(pattern -> pattern.substring(1))
+                    .collect(toList());
+
+            apply(rules, includePatterns, rule -> matches.add(rule));
+            apply(rules, excludePatterns, rule -> matches.remove(rule));
+        }
+        return matches;
+    }
+
+    private void apply(Iterable<String> rules, List<String> patterns, Consumer<String> consumer) {
+        for (String rule : rules) {
+            for (String pattern : patterns) {
+                if (FilenameUtils.wildcardMatch(rule, pattern)) {
+                    consumer.accept(rule);
                 }
             }
         }
-        return matchingResults;
     }
 
 }

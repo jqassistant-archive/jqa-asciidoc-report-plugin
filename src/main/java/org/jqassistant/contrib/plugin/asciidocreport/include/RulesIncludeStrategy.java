@@ -13,7 +13,7 @@ public class RulesIncludeStrategy extends AbstractIncludeRulesStrategy {
     private final RuleFilter<RuleResult> ruleFilter;
 
     public RulesIncludeStrategy(Map<String, RuleResult> conceptResults, Map<String, RuleResult> constraintResults, RuleFilter<RuleResult> ruleFilter,
-                                Map<String, AbstractBlock> ruleBlocks, Set<ExecutableRule<?>> includedRules) {
+            Map<String, AbstractBlock> ruleBlocks, Set<ExecutableRule<?>> includedRules) {
         super(conceptResults, constraintResults, ruleBlocks, includedRules);
         this.ruleFilter = ruleFilter;
     }
@@ -44,8 +44,9 @@ public class RulesIncludeStrategy extends AbstractIncludeRulesStrategy {
      */
     private void includeRules(Map<String, Object> attributes, String filterAttribute, Map<String, RuleResult> results, StringBuilder builder) {
         String filterValue = (String) attributes.get(filterAttribute);
-        for (RuleResult ruleResult : ruleFilter.match(filterValue, results)) {
-            includeRuleResult(ruleResult, builder);
+        Set<String> matches = ruleFilter.match(results.keySet(), filterValue);
+        for (String match : matches) {
+            includeRuleResult(results.get(match), builder);
         }
     }
 }

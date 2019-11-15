@@ -1,11 +1,9 @@
 package org.jqassistant.contrib.plugin.asciidocreport.include;
 
-import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toList;
 
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -64,16 +62,14 @@ public class SummaryFilter {
     }
 
     private List<RuleResult> filterRuleResults(Map<String, RuleResult> results, String rulesFilter, String importedRulesFilter) {
-        List<RuleResult> ruleResults = new LinkedList<>();
+        Set<String> ruleResults = new HashSet<>();
         // collect rules from documents
-        Map<String, RuleResult> rules = results.entrySet().stream().filter(entry -> ruleBlocks.keySet().contains(entry.getKey()))
-                .collect(toMap(entry -> entry.getKey(), entry -> entry.getValue()));
-        ruleResults.addAll(ruleFilter.match(rulesFilter, rules));
+        Set<String> rules = results.keySet().stream().filter(rule -> ruleBlocks.keySet().contains(rule)).collect(Collectors.toSet());
+        ruleResults.addAll(ruleFilter.match(rules, rulesFilter));
         // collect imported rules
-        Map<String, RuleResult> importedRules = results.entrySet().stream().filter(entry -> !ruleBlocks.keySet().contains(entry.getKey()))
-                .collect(toMap(entry -> entry.getKey(), entry -> entry.getValue()));
-        ruleResults.addAll(ruleFilter.match(importedRulesFilter, importedRules));
-        return ruleResults;
+        Set<String> importedRules = results.keySet().stream().filter(rule -> !ruleBlocks.keySet().contains(rule)).collect(Collectors.toSet());
+        ruleResults.addAll(ruleFilter.match(importedRules, importedRulesFilter));
+        return results.entrySet().stream().filter(entry -> ruleResults.contains(entry.getKey())).map(entry -> entry.getValue()).collect(toList());
     }
 
 }

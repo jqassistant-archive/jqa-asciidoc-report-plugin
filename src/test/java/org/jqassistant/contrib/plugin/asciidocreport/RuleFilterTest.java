@@ -2,9 +2,7 @@ package org.jqassistant.contrib.plugin.asciidocreport;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.jqassistant.contrib.plugin.asciidocreport.include.RuleFilter;
 import org.junit.jupiter.api.Test;
@@ -15,13 +13,24 @@ public class RuleFilterTest {
 
     @Test
     public void filter() {
-        Map<String, String> rules = new HashMap<>();
-        rules.put("foo", "foo");
-        rules.put("bar", "bar");
-        rules.put("wildcard", "wildcard");
+        Set<String> rules = new HashSet<>();
+        rules.add("foo");
+        rules.add("bar");
+        rules.add("wildcard");
 
-        List<String> result = ruleFilter.match("foo, w?ldc*d", rules);
+        Set<String> result = ruleFilter.match(rules, "foo, w?ldc*d");
 
-        assertThat(result).containsExactly("foo", "wildcard");
+        assertThat(result).containsOnly("foo", "wildcard");
+    }
+
+    @Test
+    public void negation() {
+        Set<String> rules = new HashSet<>();
+        rules.add("foo");
+        rules.add("bar");
+
+        Set<String> result = ruleFilter.match(rules, "*, !b*r");
+
+        assertThat(result).containsExactly("foo");
     }
 }
