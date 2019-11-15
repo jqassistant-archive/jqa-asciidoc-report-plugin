@@ -26,8 +26,9 @@ public class IncludeProcessor extends org.asciidoctor.extension.IncludeProcessor
         ruleBlocks.putAll(result.getConstraintBlocks());
         Set<ExecutableRule<?>> includedRules = new HashSet<>();
         RuleFilter<RuleResult> ruleFilter = new RuleFilter<>();
+        SummaryFilter summaryFilter = new SummaryFilter(conceptResults, constraintResults, ruleBlocks, ruleFilter);
         strategies = Arrays
-                .<IncludeStrategy> asList(new SummaryIncludeStrategy(conceptResults, constraintResults),
+                .<IncludeStrategy> asList(new SummaryIncludeStrategy(conceptResults, constraintResults, summaryFilter),
                         new RulesIncludeStrategy(conceptResults, constraintResults, ruleFilter, ruleBlocks, includedRules),
                         new ImportedRulesIncludeStrategy(conceptResults, constraintResults, ruleBlocks, includedRules))
                 .stream().collect(toMap(strategy -> strategy.getName(), strategy -> strategy));
