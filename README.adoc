@@ -73,14 +73,17 @@ The report properties `asciidoc.report.rule.directory` and `asciidoc.report.file
 
 The report may be enhanced by `jQA` include directives:
 
-`jQA:Summary[]`::
-  Embeds a summary table containing all executed rules, their description and status.
-`jQA:Rules[concepts="<list of concept filters>",constraints="<list of constraint filters>"]`::
-  `Since 1.8.0` Embeds rules and their results identified by the given filters.
-  Both attributes are optional, their values are comma separated lists of rules ids.
-  These may contain wildcards, e.g. `concepts="spring-:*,jpa2:*"`.
+`jQA:Summary[concepts="...",importedConcepts="...",constraints="...",importedConstraints="..."]`::
+  Includes two summary tables containing executed rules, their description, status and severity.
+  The filter attributes are optional, if none is given all results are included.
+  `concepts` and `constraints` refer to rules that are defined in the rendered Asciidoc document(s).
+  `importedConcepts` and `importedConstraints` refer to rules that are imported from plugins.
+`jQA:Rules[concepts="...",constraints="..."]`::
+  `Since 1.8.0` Embeds imported rules and their results identified by the specified filters. Both filter attributes are optional but at least one must be specified.
 `jQA:ImportedRules[]`::
-  `Deprecated` Renders descriptions for all rules which have been executed but which are not part of the document itself (i.e. provided by plugins).
+  `Deprecated` Renders descriptions for all imported rules which have been executed but which are not part of the document itself (i.e. provided by plugins).
+
+TIP: Filter attributse are comma separated lists of id patterns and may contain wildcards, e.g. "layer:*, spring-*:*".
 
 .jqassistant/index.adoc
 ....

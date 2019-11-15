@@ -48,31 +48,31 @@ public class SummaryFilter {
             return Result.builder().constraints(constraintResults.values()).concepts(conceptResults.values()).build();
         } else {
             // Apply filters, render only selected rules
-            List<RuleResult> constraints = include(attributes, "constraints", "includedConstraints", constraintResults);
-            List<RuleResult> concepts = include(attributes, "concepts", "includedConcepts", conceptResults);
+            List<RuleResult> constraints = include(attributes, "constraints", "importedConstraints", constraintResults);
+            List<RuleResult> concepts = include(attributes, "concepts", "importedConcepts", conceptResults);
             if (concepts.isEmpty() && constraints.isEmpty()) {
-                log.warn("No constraints/concepts found matching filters {}.", attributes);
+                log.warn("No constraints/concepts found matching the given filters {}.", attributes);
             }
             return Result.builder().constraints(constraints).concepts(concepts).build();
         }
     }
 
-    private List<RuleResult> include(Map<String, Object> attributes, String rulesAttribute, String includedRulesAttribute, Map<String, RuleResult> results) {
+    private List<RuleResult> include(Map<String, Object> attributes, String rulesAttribute, String importedRulesAttribute, Map<String, RuleResult> results) {
         String rulesFilter = (String) attributes.get(rulesAttribute);
-        String includedRulesFilter = (String) attributes.get(includedRulesAttribute);
-        return filterRuleResults(results, rulesFilter, includedRulesFilter);
+        String importedRulesFilter = (String) attributes.get(importedRulesAttribute);
+        return filterRuleResults(results, rulesFilter, importedRulesFilter);
     }
 
-    private List<RuleResult> filterRuleResults(Map<String, RuleResult> results, String rulesFilter, String includedRulesFilter) {
+    private List<RuleResult> filterRuleResults(Map<String, RuleResult> results, String rulesFilter, String importedRulesFilter) {
         List<RuleResult> ruleResults = new LinkedList<>();
         // collect rules from documents
         Map<String, RuleResult> rules = results.entrySet().stream().filter(entry -> ruleBlocks.keySet().contains(entry.getKey()))
                 .collect(toMap(entry -> entry.getKey(), entry -> entry.getValue()));
         ruleResults.addAll(ruleFilter.match(rulesFilter, rules));
-        // collect included rules
-        Map<String, RuleResult> includedRules = results.entrySet().stream().filter(entry -> !ruleBlocks.keySet().contains(entry.getKey()))
+        // collect imported rules
+        Map<String, RuleResult> importedRules = results.entrySet().stream().filter(entry -> !ruleBlocks.keySet().contains(entry.getKey()))
                 .collect(toMap(entry -> entry.getKey(), entry -> entry.getValue()));
-        ruleResults.addAll(ruleFilter.match(includedRulesFilter, includedRules));
+        ruleResults.addAll(ruleFilter.match(importedRulesFilter, importedRules));
         return ruleResults;
     }
 

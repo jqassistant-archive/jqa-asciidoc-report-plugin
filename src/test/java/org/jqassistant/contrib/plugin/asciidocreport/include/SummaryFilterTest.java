@@ -25,20 +25,20 @@ class SummaryFilterTest {
     @Mock
     private RuleResult conceptResult;
     @Mock
-    private RuleResult includedConceptResult;
+    private RuleResult importedConceptResult;
     @Mock
     private RuleResult constraintResult;
     @Mock
-    private RuleResult includedConstraintResult;
+    private RuleResult importedConstraintResult;
 
     private SummaryFilter summaryFilter;
 
     @BeforeEach
     public void setUp() {
         conceptResults.put("concept", conceptResult);
-        conceptResults.put("includedConcept", includedConceptResult);
+        conceptResults.put("importedConcept", importedConceptResult);
         constraintResults.put("constraint", constraintResult);
-        constraintResults.put("includedConstraint", includedConstraintResult);
+        constraintResults.put("importedConstraint", importedConstraintResult);
         ruleBlocks.put("concept", mock(AbstractBlock.class));
         ruleBlocks.put("constraint", mock(AbstractBlock.class));
         summaryFilter = new SummaryFilter(conceptResults, constraintResults, ruleBlocks, new RuleFilter<>());
@@ -48,8 +48,8 @@ class SummaryFilterTest {
     void emtpyFilter() {
         SummaryFilter.Result result = summaryFilter.apply(Collections.emptyMap());
 
-        assertThat(result.getConcepts()).containsOnly(conceptResult, includedConceptResult);
-        assertThat(result.getConstraints()).containsOnly(constraintResult, includedConstraintResult);
+        assertThat(result.getConcepts()).containsOnly(conceptResult, importedConceptResult);
+        assertThat(result.getConstraints()).containsOnly(constraintResult, importedConstraintResult);
     }
 
     @Test
@@ -64,25 +64,25 @@ class SummaryFilterTest {
     }
 
     @Test
-    void includedConcepts() {
+    void importedConcepts() {
         Map<String, Object> attributes = new HashMap<>();
-        attributes.put("includedConcepts", "includedConcept");
+        attributes.put("importedConcepts", "importedConcept");
 
         SummaryFilter.Result result = summaryFilter.apply(attributes);
 
-        assertThat(result.getConcepts()).containsOnly(includedConceptResult);
+        assertThat(result.getConcepts()).containsOnly(importedConceptResult);
         assertThat(result.getConstraints()).isEmpty();
     }
 
     @Test
-    void conceptsAndIncludedConcepts() {
+    void conceptsAndimportedConcepts() {
         Map<String, Object> attributes = new HashMap<>();
         attributes.put("concepts", "concept");
-        attributes.put("includedConcepts", "includedConcept");
+        attributes.put("importedConcepts", "importedConcept");
 
         SummaryFilter.Result result = summaryFilter.apply(attributes);
 
-        assertThat(result.getConcepts()).containsOnly(conceptResult, includedConceptResult);
+        assertThat(result.getConcepts()).containsOnly(conceptResult, importedConceptResult);
         assertThat(result.getConstraints()).isEmpty();
     }
 
@@ -99,27 +99,27 @@ class SummaryFilterTest {
     }
 
     @Test
-    void includedConstraints() {
+    void importedConstraints() {
         Map<String, Object> attributes = new HashMap<>();
-        attributes.put("includedConstraints", "includedConstraint");
+        attributes.put("importedConstraints", "importedConstraint");
 
         SummaryFilter.Result result = summaryFilter.apply(attributes);
 
         assertThat(result.getConcepts()).isEmpty();
         ;
-        assertThat(result.getConstraints()).containsOnly(includedConstraintResult);
+        assertThat(result.getConstraints()).containsOnly(importedConstraintResult);
     }
 
     @Test
-    void constraintsAndIncludedConstraints() {
+    void constraintsAndimportedConstraints() {
         Map<String, Object> attributes = new HashMap<>();
         attributes.put("constraints", "constraint");
-        attributes.put("includedConstraints", "includedConstraint");
+        attributes.put("importedConstraints", "importedConstraint");
 
         SummaryFilter.Result result = summaryFilter.apply(attributes);
 
         assertThat(result.getConcepts()).isEmpty();
-        assertThat(result.getConstraints()).containsOnly(constraintResult, includedConstraintResult);
+        assertThat(result.getConstraints()).containsOnly(constraintResult, importedConstraintResult);
     }
 
     @Test
@@ -135,14 +135,14 @@ class SummaryFilterTest {
     }
 
     @Test
-    void includedConceptsAndIncludedConstraints() {
+    void importedConceptsAndimportedConstraints() {
         Map<String, Object> attributes = new HashMap<>();
-        attributes.put("includedConcepts", "*");
-        attributes.put("includedConstraints", "*");
+        attributes.put("importedConcepts", "*");
+        attributes.put("importedConstraints", "*");
 
         SummaryFilter.Result result = summaryFilter.apply(attributes);
 
-        assertThat(result.getConcepts()).containsOnly(includedConceptResult);
-        assertThat(result.getConstraints()).containsOnly(includedConstraintResult);
+        assertThat(result.getConcepts()).containsOnly(importedConceptResult);
+        assertThat(result.getConstraints()).containsOnly(importedConstraintResult);
     }
 }
