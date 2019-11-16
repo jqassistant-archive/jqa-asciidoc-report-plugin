@@ -5,6 +5,8 @@ import static java.util.stream.Collectors.toList;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.buschmais.jqassistant.core.rule.api.filter.RuleFilter;
+
 import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
@@ -30,10 +32,10 @@ public class SummaryFilter {
     private final Map<String, RuleResult> constraintResults;
     private final Map<String, AbstractBlock> ruleBlocks;
 
-    private final RuleFilter<RuleResult> ruleFilter;
+    private final RuleFilter ruleFilter;
 
     public SummaryFilter(Map<String, RuleResult> conceptResults, Map<String, RuleResult> constraintResults, Map<String, AbstractBlock> ruleBlocks,
-            RuleFilter<RuleResult> ruleFilter) {
+            RuleFilter ruleFilter) {
         this.conceptResults = conceptResults;
         this.constraintResults = constraintResults;
         this.ruleBlocks = ruleBlocks;

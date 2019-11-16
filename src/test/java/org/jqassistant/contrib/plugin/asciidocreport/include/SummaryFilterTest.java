@@ -7,6 +7,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.buschmais.jqassistant.core.rule.api.filter.RuleFilter;
+
 import org.asciidoctor.ast.AbstractBlock;
 import org.jqassistant.contrib.plugin.asciidocreport.RuleResult;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,7 +43,7 @@ class SummaryFilterTest {
         constraintResults.put("importedConstraint", importedConstraintResult);
         ruleBlocks.put("concept", mock(AbstractBlock.class));
         ruleBlocks.put("constraint", mock(AbstractBlock.class));
-        summaryFilter = new SummaryFilter(conceptResults, constraintResults, ruleBlocks, new RuleFilter<>());
+        summaryFilter = new SummaryFilter(conceptResults, constraintResults, ruleBlocks, RuleFilter.getInstance());
     }
 
     @Test

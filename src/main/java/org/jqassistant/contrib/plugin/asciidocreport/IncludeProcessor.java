@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.toMap;
 import java.util.*;
 
 import com.buschmais.jqassistant.core.analysis.api.rule.ExecutableRule;
+import com.buschmais.jqassistant.core.rule.api.filter.RuleFilter;
 
 import org.asciidoctor.ast.AbstractBlock;
 import org.asciidoctor.ast.Document;
@@ -25,7 +26,7 @@ public class IncludeProcessor extends org.asciidoctor.extension.IncludeProcessor
         ruleBlocks.putAll(result.getConceptBlocks());
         ruleBlocks.putAll(result.getConstraintBlocks());
         Set<ExecutableRule<?>> includedRules = new HashSet<>();
-        RuleFilter<RuleResult> ruleFilter = new RuleFilter<>();
+        RuleFilter ruleFilter = RuleFilter.getInstance();
         SummaryFilter summaryFilter = new SummaryFilter(conceptResults, constraintResults, ruleBlocks, ruleFilter);
         strategies = Arrays
                 .<IncludeStrategy> asList(new SummaryIncludeStrategy(conceptResults, constraintResults, summaryFilter),

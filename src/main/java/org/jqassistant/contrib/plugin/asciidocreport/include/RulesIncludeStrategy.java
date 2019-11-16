@@ -4,15 +4,16 @@ import java.util.Map;
 import java.util.Set;
 
 import com.buschmais.jqassistant.core.analysis.api.rule.ExecutableRule;
+import com.buschmais.jqassistant.core.rule.api.filter.RuleFilter;
 
 import org.asciidoctor.ast.AbstractBlock;
 import org.jqassistant.contrib.plugin.asciidocreport.RuleResult;
 
 public class RulesIncludeStrategy extends AbstractIncludeRulesStrategy {
 
-    private final RuleFilter<RuleResult> ruleFilter;
+    private final RuleFilter ruleFilter;
 
-    public RulesIncludeStrategy(Map<String, RuleResult> conceptResults, Map<String, RuleResult> constraintResults, RuleFilter<RuleResult> ruleFilter,
+    public RulesIncludeStrategy(Map<String, RuleResult> conceptResults, Map<String, RuleResult> constraintResults, RuleFilter ruleFilter,
             Map<String, AbstractBlock> ruleBlocks, Set<ExecutableRule<?>> includedRules) {
         super(conceptResults, constraintResults, ruleBlocks, includedRules);
         this.ruleFilter = ruleFilter;
