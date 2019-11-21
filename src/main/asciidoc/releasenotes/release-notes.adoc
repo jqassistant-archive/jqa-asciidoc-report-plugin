@@ -1,0 +1,5 @@
+
+= jQAssistant Asciidoc Report Plugin Release Notes
+
+include::1.8.0.adoc[]
+

@@ -2,9 +2,9 @@
                                name="Asciidoc Report">
     <description>Asciidoc Report</description>
     <report>
-        <class id="asciidoc">org.jqassistant.contrib.plugin.asciidocreport.AsciidocReportPlugin</class>
-        <class id="plantuml-component-diagram">org.jqassistant.contrib.plugin.asciidocreport.plantuml.component.ComponentDiagramReportPlugin</class>
-        <class id="plantuml-sequence-diagram">org.jqassistant.contrib.plugin.asciidocreport.plantuml.sequence.SequenceDiagramReportPlugin</class>
-        <class id="plantuml-class-diagram">org.jqassistant.contrib.plugin.asciidocreport.plantuml.clazz.ClassDiagramReportPlugin</class>
+        <class id="asciidoc">com.buschmais.jqassistant.plugin.asciidocreport.AsciidocReportPlugin</class>
+        <class id="plantuml-component-diagram">com.buschmais.jqassistant.plugin.asciidocreport.plantuml.component.ComponentDiagramReportPlugin</class>
+        <class id="plantuml-sequence-diagram">com.buschmais.jqassistant.plugin.asciidocreport.plantuml.sequence.SequenceDiagramReportPlugin</class>
+        <class id="plantuml-class-diagram">com.buschmais.jqassistant.plugin.asciidocreport.plantuml.clazz.ClassDiagramReportPlugin</class>
     </report>
 </jqa-plugin:jqassistant-plugin>
