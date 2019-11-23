@@ -4,6 +4,8 @@
 This project provides a http://jqassistant.org/[jQAssistant] report plugin for rendering
 http://www.methods.co.nz/asciidoc/[Asciidoc] documents containing rules and embedding their results.
 
+NOTE: This repository has been archived as the plugin has been integrated into the jQAssistant main project: https://github.com/jQAssistant/jqa-asciidoc-report-plugin[].
+
 == How It Works
 
 The plugin records the results of executed rules (i.e. concepts and constraints).
