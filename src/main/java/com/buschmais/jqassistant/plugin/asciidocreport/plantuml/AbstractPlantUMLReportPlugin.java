@@ -15,8 +15,8 @@ import net.sourceforge.plantuml.FileFormat;
 
 public abstract class AbstractPlantUMLReportPlugin implements ReportPlugin {
 
-    private static final String PROPERTY_FILE_FORMAT = "asciidoc.report.plantuml.format";
-    private static final String PROPERTY_RENDER_MODE = "asciidoc.report.plantuml.rendermode";
+    private static final String PROPERTY_FILE_FORMAT = "plantuml.report.format";
+    private static final String PROPERTY_RENDER_MODE = "plantuml.report.rendermode";
 
     private static final String DEFAULT_RENDER_MODE = RenderMode.GRAPHVIZ.name();
     private static final String DEFAULT_FILE_FORMAT = FileFormat.SVG.name();

@@ -72,7 +72,7 @@ public class AsciidocReportPluginTest extends AbstractAsciidocReportPluginTest {
         HashMap<String, Object> properties = new HashMap<>();
         properties.put("asciidoc.report.rule.directory", ruleDirectory.getAbsolutePath());
         properties.put("asciidoc.report.file.include", "index.adoc");
-        properties.put("asciidoc.report.plantuml.rendermode", "jdot");
+        properties.put("plantuml.report.rendermode", "jdot");
         verify(properties, new File(outputDirectory, "report/asciidoc"));
     }
 
