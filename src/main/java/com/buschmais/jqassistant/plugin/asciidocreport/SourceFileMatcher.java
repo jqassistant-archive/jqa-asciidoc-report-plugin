@@ -81,7 +81,7 @@ public class SourceFileMatcher {
     }
 
     private List<File> matchFilesFromRuleDirectory() {
-        FilePatternMatcher filePatternMatcher = FilePatternMatcher.Builder.newInstance().include(this.fileInclude).exclude(this.fileExclude).build();
+        FilePatternMatcher filePatternMatcher = FilePatternMatcher.builder().include(this.fileInclude).exclude(this.fileExclude).build();
         return asList(ruleDirectory.listFiles(file -> file.isFile() && filePatternMatcher.accepts(file.getName())));
     }
 }
