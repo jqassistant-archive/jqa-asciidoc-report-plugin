@@ -6,7 +6,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import com.buschmais.jqassistant.core.analysis.api.Result;
-import com.buschmais.jqassistant.core.analysis.api.rule.ExecutableRule;
+import com.buschmais.jqassistant.core.rule.api.model.ExecutableRule;
 import com.buschmais.jqassistant.plugin.asciidocreport.RuleResult;
 import com.buschmais.jqassistant.plugin.asciidocreport.StatusHelper;
 

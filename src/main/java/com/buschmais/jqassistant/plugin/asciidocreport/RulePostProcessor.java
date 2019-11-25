@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.buschmais.jqassistant.core.analysis.api.rule.ExecutableRule;
+import com.buschmais.jqassistant.core.rule.api.model.ExecutableRule;
 
 import org.asciidoctor.ast.Document;
 import org.asciidoctor.extension.Postprocessor;

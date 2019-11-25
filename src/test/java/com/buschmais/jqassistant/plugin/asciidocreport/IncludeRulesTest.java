@@ -5,11 +5,11 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
-import com.buschmais.jqassistant.core.analysis.api.rule.NoRuleException;
-import com.buschmais.jqassistant.core.analysis.api.rule.Severity;
 import com.buschmais.jqassistant.core.report.api.ReportException;
 import com.buschmais.jqassistant.core.report.api.ReportPlugin;
 import com.buschmais.jqassistant.core.report.impl.CompositeReportPlugin;
+import com.buschmais.jqassistant.core.rule.api.model.NoRuleException;
+import com.buschmais.jqassistant.core.rule.api.model.Severity;
 
 import org.apache.commons.io.FileUtils;
 import org.jsoup.Jsoup;

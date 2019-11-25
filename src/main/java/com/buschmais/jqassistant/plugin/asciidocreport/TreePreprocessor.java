@@ -10,8 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.buschmais.jqassistant.core.analysis.api.rule.ExecutableRule;
 import com.buschmais.jqassistant.core.report.api.ReportContext;
+import com.buschmais.jqassistant.core.rule.api.model.ExecutableRule;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.asciidoctor.ast.AbstractBlock;

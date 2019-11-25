@@ -2,8 +2,8 @@ package com.buschmais.jqassistant.plugin.asciidocreport;
 
 import java.util.*;
 
-import com.buschmais.jqassistant.core.analysis.api.rule.ExecutableRule;
 import com.buschmais.jqassistant.core.rule.api.filter.RuleFilter;
+import com.buschmais.jqassistant.core.rule.api.model.ExecutableRule;
 import com.buschmais.jqassistant.plugin.asciidocreport.include.*;
 
 import org.asciidoctor.ast.AbstractBlock;

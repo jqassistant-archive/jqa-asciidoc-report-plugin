@@ -2,7 +2,7 @@ package com.buschmais.jqassistant.plugin.asciidocreport;
 
 import java.io.File;
 
-import com.buschmais.jqassistant.core.analysis.api.rule.Concept;
+import com.buschmais.jqassistant.core.rule.api.model.Concept;
 import com.buschmais.jqassistant.plugin.asciidocreport.plantuml.ImageRenderer;
 
 import org.junit.jupiter.api.Test;

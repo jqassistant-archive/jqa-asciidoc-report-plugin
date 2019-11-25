@@ -3,11 +3,11 @@ package com.buschmais.jqassistant.plugin.asciidocreport.plantuml.clazz;
 import java.util.*;
 
 import com.buschmais.jqassistant.core.analysis.api.Result;
-import com.buschmais.jqassistant.core.analysis.api.rule.ExecutableRule;
 import com.buschmais.jqassistant.core.report.api.ReportException;
 import com.buschmais.jqassistant.core.report.api.graph.SubGraphFactory;
 import com.buschmais.jqassistant.core.report.api.graph.model.Node;
 import com.buschmais.jqassistant.core.report.api.graph.model.Relationship;
+import com.buschmais.jqassistant.core.rule.api.model.ExecutableRule;
 import com.buschmais.jqassistant.plugin.asciidocreport.AbstractDiagramRendererTest;
 import com.buschmais.jqassistant.plugin.java.api.model.*;
 import com.buschmais.xo.api.CompositeObject;

@@ -3,8 +3,8 @@ package com.buschmais.jqassistant.plugin.asciidocreport.include;
 import java.util.Map;
 import java.util.Set;
 
-import com.buschmais.jqassistant.core.analysis.api.rule.ExecutableRule;
 import com.buschmais.jqassistant.core.rule.api.filter.RuleFilter;
+import com.buschmais.jqassistant.core.rule.api.model.ExecutableRule;
 import com.buschmais.jqassistant.plugin.asciidocreport.RuleResult;
 
 import org.asciidoctor.ast.AbstractBlock;
