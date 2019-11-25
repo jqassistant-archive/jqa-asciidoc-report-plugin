@@ -10,10 +10,12 @@ import java.util.Map;
 import com.buschmais.jqassistant.core.analysis.api.Result;
 import com.buschmais.jqassistant.core.analysis.api.Result.Status;
 import com.buschmais.jqassistant.core.report.api.ReportContext;
-import com.buschmais.jqassistant.core.report.api.ReportException;
 import com.buschmais.jqassistant.core.report.api.ReportPlugin;
 import com.buschmais.jqassistant.core.report.impl.CompositeReportPlugin;
-import com.buschmais.jqassistant.core.rule.api.model.*;
+import com.buschmais.jqassistant.core.rule.api.model.Concept;
+import com.buschmais.jqassistant.core.rule.api.model.Constraint;
+import com.buschmais.jqassistant.core.rule.api.model.RuleException;
+import com.buschmais.jqassistant.core.rule.api.model.Severity;
 import com.buschmais.jqassistant.plugin.common.api.model.ArtifactFileDescriptor;
 import com.buschmais.jqassistant.plugin.common.api.model.DependsOnDescriptor;
 import com.buschmais.xo.neo4j.api.model.Neo4jLabel;
@@ -32,7 +34,9 @@ import static com.buschmais.jqassistant.core.analysis.api.Result.Status.FAILURE;
 import static com.buschmais.jqassistant.core.analysis.api.Result.Status.SUCCESS;
 import static java.lang.System.lineSeparator;
 import static java.util.Arrays.asList;
-import static java.util.Collections.*;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -104,7 +108,7 @@ public class AsciidocReportPluginTest extends AbstractAsciidocReportPluginTest {
         verifyDiagram(componentDiagram, reportContext, html);
     }
 
-    private Concept execute() throws ReportException, NoConceptException, NoConstraintException {
+    private Concept execute() throws RuleException {
         ReportPlugin plugin = new CompositeReportPlugin(reportPlugins);
         plugin.begin();
 

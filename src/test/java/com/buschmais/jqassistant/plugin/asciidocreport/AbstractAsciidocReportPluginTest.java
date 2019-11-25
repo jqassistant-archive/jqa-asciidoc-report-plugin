@@ -120,7 +120,7 @@ public abstract class AbstractAsciidocReportPluginTest {
     }
 
     protected final void processConcept(ReportPlugin plugin, String id, Status status, Severity severity, List<String> columnNames,
-            List<Map<String, Object>> rows) throws NoConceptException, ReportException {
+            List<Map<String, Object>> rows) throws RuleException {
         Concept includedConcept = ruleSet.getConceptBucket().getById(id);
         processConcept(plugin, includedConcept, new Result<>(includedConcept, status, severity, columnNames, rows));
     }
@@ -132,7 +132,7 @@ public abstract class AbstractAsciidocReportPluginTest {
     }
 
     protected final void processConstraint(ReportPlugin plugin, String id, Status status, Severity severity, List<String> columnNames,
-            List<Map<String, Object>> rows) throws NoConstraintException, ReportException {
+            List<Map<String, Object>> rows) throws RuleException {
         Constraint constraint = ruleSet.getConstraintBucket().getById(id);
         processConstraint(plugin, constraint, new Result<>(constraint, status, severity, columnNames, rows));
     }

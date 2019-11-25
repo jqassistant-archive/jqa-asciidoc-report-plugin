@@ -5,10 +5,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
-import com.buschmais.jqassistant.core.report.api.ReportException;
 import com.buschmais.jqassistant.core.report.api.ReportPlugin;
 import com.buschmais.jqassistant.core.report.impl.CompositeReportPlugin;
-import com.buschmais.jqassistant.core.rule.api.model.NoRuleException;
+import com.buschmais.jqassistant.core.rule.api.model.RuleException;
 import com.buschmais.jqassistant.core.rule.api.model.Severity;
 
 import org.apache.commons.io.FileUtils;
@@ -30,7 +29,7 @@ public class IncludeRulesTest extends AbstractAsciidocReportPluginTest {
     }
 
     @Test
-    public void include() throws ReportException, NoRuleException, IOException {
+    public void include() throws RuleException, IOException {
         HashMap<String, Object> properties = new HashMap<>();
         properties.put("asciidoc.report.rule.directory", ruleDirectory.getAbsolutePath());
         properties.put("asciidoc.report.file.include", "includeRules.adoc");
