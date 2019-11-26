@@ -1,11 +1,6 @@
 package com.buschmais.jqassistant.plugin.asciidocreport.plantuml.clazz;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import com.buschmais.jqassistant.core.report.api.ReportException;
 import com.buschmais.jqassistant.core.report.api.graph.SubGraphFactory;
@@ -14,12 +9,7 @@ import com.buschmais.jqassistant.core.report.api.graph.model.Relationship;
 import com.buschmais.jqassistant.core.report.api.model.Result;
 import com.buschmais.jqassistant.core.rule.api.model.ExecutableRule;
 import com.buschmais.jqassistant.plugin.asciidocreport.AbstractDiagramRendererTest;
-import com.buschmais.jqassistant.plugin.java.api.model.ClassTypeDescriptor;
-import com.buschmais.jqassistant.plugin.java.api.model.FieldDescriptor;
-import com.buschmais.jqassistant.plugin.java.api.model.MemberDescriptor;
-import com.buschmais.jqassistant.plugin.java.api.model.PackageDescriptor;
-import com.buschmais.jqassistant.plugin.java.api.model.PackageMemberDescriptor;
-import com.buschmais.jqassistant.plugin.java.api.model.TypeDescriptor;
+import com.buschmais.jqassistant.plugin.java.api.model.*;
 import com.buschmais.xo.api.CompositeObject;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -120,6 +110,25 @@ public class ClassDiagramResultConverterTest extends AbstractDiagramRendererTest
         Set<Relationship> relations = classDiagramResult.getRelations();
         assertThat(relations.size()).isEqualTo(1);
         assertThat(relations).containsExactly(extendsRelation);
+    }
+
+    @Test
+    public void convertIterable() throws ReportException {
+        // given
+        PackageDescriptor rootPackage = mock(PackageDescriptor.class);
+        Node rootPackageNode = getNode(1, "root");
+        doReturn(rootPackageNode).when(subGraphFactory).convert(rootPackage);
+        List<Map<String, Object>> rows = new ArrayList<>();
+        Map<String, Object> row = new HashMap<>();
+        row.put(PACKAGE, asList(rootPackage));
+        rows.add(row);
+        Result<ExecutableRule> result = Result.builder().columnNames(asList(PACKAGE)).rows(rows).build();
+
+        // when
+        ClassDiagramResult classDiagramResult = converter.convert(result);
+
+        // then
+
     }
 
     private void addRow(PackageDescriptor packageDescriptor, ClassTypeDescriptor typeDescriptor, MemberDescriptor memberDescriptor,

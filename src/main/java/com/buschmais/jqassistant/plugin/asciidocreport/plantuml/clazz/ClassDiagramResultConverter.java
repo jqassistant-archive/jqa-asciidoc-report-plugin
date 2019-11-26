@@ -1,11 +1,6 @@
 package com.buschmais.jqassistant.plugin.asciidocreport.plantuml.clazz;
 
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import com.buschmais.jqassistant.core.report.api.ReportException;
 import com.buschmais.jqassistant.core.report.api.graph.SubGraphFactory;
@@ -44,25 +39,35 @@ class ClassDiagramResultConverter {
         List<Map<String, Object>> rows = result.getRows();
         for (Map<String, Object> row : rows) {
             for (Object value : row.values()) {
-                Identifiable identifiable = this.subGraphFactory.convert(value);
-                if (identifiable instanceof Node) {
-                    Node node = (Node) identifiable;
-                    if (value instanceof PackageMemberDescriptor) {
-                        addMember(value, node, packageMembers);
-                    } else if (value instanceof MemberDescriptor) {
-                        addMember(value, node, typeMembers);
-                    }
-                } else if (identifiable instanceof Relationship) {
-                    Relationship relationship = (Relationship) identifiable;
-                    relations.add(relationship);
-                }
+                convertValue(value, packageMembers, typeMembers, relations);
             }
         }
-
         Map<PackageMemberDescriptor, Set<PackageMemberDescriptor>> children = getPackageMemberTree(packageMembers);
         Map<TypeDescriptor, Set<MemberDescriptor>> membersPerType = aggregateMembersPerType(packageMembers.keySet(), typeMembers.keySet());
         return ClassDiagramResult.builder().packageMembers(packageMembers).packageMemberTree(children).membersPerType(membersPerType).relations(relations)
                 .build();
+    }
+
+    private void convertValue(Object value, Map<PackageMemberDescriptor, Node> packageMembers, Map<MemberDescriptor, Node> typeMembers,
+            Set<Relationship> relations) throws ReportException {
+        if (value instanceof Iterable<?>) {
+            for (Object element : (Iterable<?>) value) {
+                convertValue(element, packageMembers, typeMembers, relations);
+            }
+        } else {
+            Identifiable identifiable = this.subGraphFactory.convert(value);
+            if (identifiable instanceof Node) {
+                Node node = (Node) identifiable;
+                if (value instanceof PackageMemberDescriptor) {
+                    addMember(value, node, packageMembers);
+                } else if (value instanceof MemberDescriptor) {
+                    addMember(value, node, typeMembers);
+                }
+            } else if (identifiable instanceof Relationship) {
+                Relationship relationship = (Relationship) identifiable;
+                relations.add(relationship);
+            }
+        }
     }
 
     private Map<PackageMemberDescriptor, Set<PackageMemberDescriptor>> getPackageMemberTree(Map<PackageMemberDescriptor, Node> packageMembers) {
