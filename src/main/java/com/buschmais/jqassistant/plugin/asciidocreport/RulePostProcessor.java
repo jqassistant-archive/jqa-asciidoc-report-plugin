@@ -12,7 +12,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import static com.buschmais.jqassistant.core.analysis.api.Result.Status.*;
+import static com.buschmais.jqassistant.core.report.api.model.Result.Status.*;
 
 /**
  * {@link Postprocessor} that hides listing blocks of concepts and constraints

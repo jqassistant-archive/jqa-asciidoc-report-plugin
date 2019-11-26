@@ -1,11 +1,11 @@
 package com.buschmais.jqassistant.plugin.asciidocreport.plantuml.component;
 
-import com.buschmais.jqassistant.core.analysis.api.Result;
 import com.buschmais.jqassistant.core.report.api.ReportException;
 import com.buschmais.jqassistant.core.report.api.graph.SubGraphFactory;
 import com.buschmais.jqassistant.core.report.api.graph.model.Node;
 import com.buschmais.jqassistant.core.report.api.graph.model.Relationship;
 import com.buschmais.jqassistant.core.report.api.graph.model.SubGraph;
+import com.buschmais.jqassistant.core.report.api.model.Result;
 import com.buschmais.jqassistant.plugin.asciidocreport.AbstractDiagramRendererTest;
 import com.buschmais.jqassistant.plugin.asciidocreport.plantuml.ImageRenderer;
 import com.buschmais.jqassistant.plugin.asciidocreport.plantuml.RenderMode;
