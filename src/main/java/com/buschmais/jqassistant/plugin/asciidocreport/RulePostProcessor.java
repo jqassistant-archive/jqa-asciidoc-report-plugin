@@ -32,15 +32,9 @@ public class RulePostProcessor extends Postprocessor {
     public String process(Document document, String output) {
         if (document.basebackend("html")) {
             org.jsoup.nodes.Document doc = Jsoup.parse(output, "UTF-8");
-            Elements listingBlocks = doc.getElementsByClass("listingblock");
             List<String> contentIds = new ArrayList<>();
-            for (Element listingBlock : listingBlocks) {
-                if (listingBlock.hasClass("concept")) {
-                    processListingBlock(listingBlock, contentIds, conceptResults);
-                } else if (listingBlock.hasClass("constraint")) {
-                    processListingBlock(listingBlock, contentIds, constraintResults);
-                }
-            }
+            processRuleBlocks(doc, "concept", conceptResults, contentIds);
+            processRuleBlocks(doc, "constraint", constraintResults, contentIds);
             StringBuilder styles = createStyles(contentIds);
             doc.head().append(styles.toString());
             return doc.html();
@@ -49,9 +43,16 @@ public class RulePostProcessor extends Postprocessor {
         return output;
     }
 
-    private void processListingBlock(Element listingBlock, List<String> contentIds, Map<String, RuleResult> ruleResults) {
-        Element status = listingBlock.prependElement("div").addClass("jqassistant-rule-status");
-        RuleResult ruleResult = ruleResults.get(listingBlock.id());
+    private void processRuleBlocks(org.jsoup.nodes.Document doc, String ruleClass, Map<String, RuleResult> ruleResults, List<String> contentIds) {
+        Elements ruleBlocks = doc.getElementsByClass(ruleClass);
+        for (Element ruleBlock : ruleBlocks) {
+            processRuleBlock(ruleBlock, contentIds, ruleResults);
+        }
+    }
+
+    private void processRuleBlock(Element ruleBlock, List<String> contentIds, Map<String, RuleResult> ruleResults) {
+        Element status = ruleBlock.prependElement("div").addClass("jqassistant-rule-status");
+        RuleResult ruleResult = ruleResults.get(ruleBlock.id());
         if (ruleResult != null) {
             ExecutableRule<?> rule = ruleResult.getRule();
             status.addClass(StatusHelper.getStatusClass(ruleResult.getStatus()));
@@ -72,12 +73,12 @@ public class RulePostProcessor extends Postprocessor {
 
         String contentId = "jqassistant-rule-listing" + contentIds.size();
         contentIds.add(contentId);
-        Elements contents = listingBlock.getElementsByClass("content");
+        Elements contents = ruleBlock.getElementsByClass("content");
         Element content = contents.first();
         content.before("<input type=\"checkbox\" class=\"jqassistant-rule-toggle\" title=\"Rule details\"/>");
         contents.attr("id", contentId);
 
-        Elements title = listingBlock.getElementsByClass("title");
+        Elements title = ruleBlock.getElementsByClass("title");
         Element titleElement = title.first();
         if (titleElement != null) {
             titleElement.attr("style", "display:inline;");
