@@ -16,6 +16,8 @@ import com.buschmais.jqassistant.plugin.asciidocreport.plantuml.AbstractDiagramR
 import com.google.common.base.CaseFormat;
 import org.apache.commons.lang3.StringUtils;
 
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+
 public class ComponentDiagramRenderer extends AbstractDiagramRenderer {
 
     private final SubGraphFactory subGraphFactory;
@@ -125,7 +127,7 @@ public class ComponentDiagramRenderer extends AbstractDiagramRenderer {
             Node endNode = relationship.getEndNode();
             String type = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_UNDERSCORE, relationship.getType()).replace('_', ' ');
             builder.append(getNodeId(startNode)).append(" --> ").append(getNodeId(endNode)).append(" : ").append(type);
-            if (StringUtils.isNotEmpty(relationship.getLabel())) {
+            if (isNotEmpty(relationship.getLabel())) {
                 builder.append(" (").append(relationship.getLabel()).append(")");
             }
             builder.append('\n');

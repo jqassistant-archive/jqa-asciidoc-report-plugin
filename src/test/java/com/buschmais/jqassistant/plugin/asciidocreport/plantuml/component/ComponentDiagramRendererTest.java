@@ -49,7 +49,7 @@ public class ComponentDiagramRendererTest extends AbstractDiagramRendererTest {
         assertThat(componentDiagram, containsString("[a1] <<Artifact File>> as n1"));
         assertThat(componentDiagram, containsString("[a2] <<Artifact File>> as n2"));
         assertThat(componentDiagram, containsString("[a3] <<Artifact File>> as n3"));
-        assertThat(componentDiagram, containsString("n1 --> n2 : depends on"));
+        assertThat(componentDiagram, containsString("n1 --> n2 : depends on (weight:3)"));
         assertThat(componentDiagram, not(containsString("[a4] <<Artifact File>> as n4")));
         assertThat(componentDiagram, not(containsString("n1 --> n4 : DEPENDS_ON")));
     }
@@ -97,7 +97,7 @@ public class ComponentDiagramRendererTest extends AbstractDiagramRendererTest {
         Node a2 = getNode(2, "a2", "Artifact", "File");
         Node a3 = getNode(3, "a3", "Artifact", "File");
         Node a4 = getNode(4, "a4", "Artifact", "File");
-        Relationship a1DependsOnA2 = getRelationship(1, a1, "DEPENDS_ON", a2);
+        Relationship a1DependsOnA2 = getRelationship(1, a1, "DEPENDS_ON", a2, "weight:3");
         Relationship a1DependsOnA4 = getRelationship(2, a1, "DEPENDS_ON", a4);
         SubGraph subGraph = new SubGraph();
         subGraph.getNodes().put(a1.getId(), a1);

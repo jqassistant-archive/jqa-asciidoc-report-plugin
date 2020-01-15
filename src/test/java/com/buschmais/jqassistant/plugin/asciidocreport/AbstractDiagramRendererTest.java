@@ -16,11 +16,16 @@ public abstract class AbstractDiagramRendererTest {
     }
 
     protected Relationship getRelationship(long id, Node start, String type, Node end) {
+        return getRelationship(id, start, type, end, "");
+    }
+
+    protected Relationship getRelationship(long id, Node start, String type, Node end, String label) {
         Relationship relationship = new Relationship();
         relationship.setId(id);
         relationship.setStartNode(start);
         relationship.setEndNode(end);
         relationship.setType(type);
+        relationship.setLabel(label);
         return relationship;
     }
 
