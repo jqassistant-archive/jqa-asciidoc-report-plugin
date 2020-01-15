@@ -13,6 +13,7 @@ import com.buschmais.jqassistant.core.report.api.model.Result;
 import com.buschmais.jqassistant.core.rule.api.model.ExecutableRule;
 import com.buschmais.jqassistant.plugin.asciidocreport.plantuml.AbstractDiagramRenderer;
 
+import com.google.common.base.CaseFormat;
 import org.apache.commons.lang3.StringUtils;
 
 public class ComponentDiagramRenderer extends AbstractDiagramRenderer {
@@ -122,7 +123,12 @@ public class ComponentDiagramRenderer extends AbstractDiagramRenderer {
         for (Relationship relationship : relationships.values()) {
             Node startNode = relationship.getStartNode();
             Node endNode = relationship.getEndNode();
-            builder.append(getNodeId(startNode)).append(" --> ").append(getNodeId(endNode)).append(" : ").append(relationship.getType()).append('\n');
+            String type = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_UNDERSCORE, relationship.getType()).replace('_', ' ');
+            builder.append(getNodeId(startNode)).append(" --> ").append(getNodeId(endNode)).append(" : ").append(type);
+            if (StringUtils.isNotEmpty(relationship.getLabel())) {
+                builder.append(" (").append(relationship.getLabel()).append(")");
+            }
+            builder.append('\n');
         }
         builder.append('\n');
     }

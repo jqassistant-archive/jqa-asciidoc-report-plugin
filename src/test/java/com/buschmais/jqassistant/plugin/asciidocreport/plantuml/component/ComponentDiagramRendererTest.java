@@ -49,7 +49,7 @@ public class ComponentDiagramRendererTest extends AbstractDiagramRendererTest {
         assertThat(componentDiagram, containsString("[a1] <<Artifact File>> as n1"));
         assertThat(componentDiagram, containsString("[a2] <<Artifact File>> as n2"));
         assertThat(componentDiagram, containsString("[a3] <<Artifact File>> as n3"));
-        assertThat(componentDiagram, containsString("n1 --> n2 : DEPENDS_ON"));
+        assertThat(componentDiagram, containsString("n1 --> n2 : depends on"));
         assertThat(componentDiagram, not(containsString("[a4] <<Artifact File>> as n4")));
         assertThat(componentDiagram, not(containsString("n1 --> n4 : DEPENDS_ON")));
     }
@@ -89,7 +89,7 @@ public class ComponentDiagramRendererTest extends AbstractDiagramRendererTest {
 
         assertThat(componentDiagram, containsString("folder \"a0\" {\n" + "    [a1] <<Artifact File>> as n1\n" + "    folder \"a2\" {\n"
                 + "        [a3] <<Artifact File>> as n3\n" + "    }\n" + "}"));
-        assertThat(componentDiagram, containsString("n3 --> n1 : DEPENDS_ON"));
+        assertThat(componentDiagram, containsString("n3 --> n1 : depends on"));
     }
 
     private SubGraph getSubGraph() {
