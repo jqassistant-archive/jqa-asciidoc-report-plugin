@@ -1,6 +1,6 @@
 <jqa-plugin:jqassistant-plugin xmlns:jqa-plugin="http://www.buschmais.com/jqassistant/core/plugin/schema/v1.1"
                                name="Asciidoc Report">
-    <description>Asciidoc Report</description>
+    <description>Renders Asciidoc files containing rules to HTML reports including results as tables, diagrams or links to external files.</description>
     <report>
         <class id="asciidoc">com.buschmais.jqassistant.plugin.asciidocreport.AsciidocReportPlugin</class>
         <class id="plantuml-component-diagram">com.buschmais.jqassistant.plugin.asciidocreport.plantuml.component.ComponentDiagramReportPlugin</class>

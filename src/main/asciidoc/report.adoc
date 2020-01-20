@@ -1,4 +1,4 @@
-= Asciidoc Report
+== Asciidoc Report
 
 The plugin records the results of executed rules (i.e. concepts and constraints).
 At the end of the analysis phase http://www.asciidoctor[Asciidoctor] is used for rendering the input documents providing the rules to HTML documents. The listings containing rules are identified and their status and results appended.
@@ -7,7 +7,7 @@ Furthermore include directives are provided for embedding a summary about execut
 By default all rule files with the name `index.adoc` will be selected for rendering.
 The report properties `asciidoc.report.rule.directory` and `asciidoc.report.file.include` may be used to explicitly select files.
 
-== Include Directives
+=== Include Directives
 
 The report may be enhanced by `jQA` include directives:
 
@@ -46,7 +46,7 @@ project specific rules
 \include::jQA:Rules[concepts="spring*:*",constraints="spring*:*"]
 ....
 
-== Configuration
+=== Configuration
 
 The Asciidoc Report plugin accepts several options that might be passed as report properties to jQAssistant:
 
@@ -59,7 +59,7 @@ The Asciidoc Report plugin accepts several options that might be passed as repor
 | asciidoc.report.file.exclude        | A comma separated list of filter of Asciidoc files to be excluded (optional)                                       |
 |===
 
-= PlantUML Report
+== PlantUML Report
 
 The plugin provides support for generating the following diagrams from rule results:
 
@@ -71,7 +71,7 @@ NOTE: This feature is based on http://plantuml.com/[PlantUML] which itself relie
 The latter needs to be installed and the `dot` executable must be present on the system path.
 
 [[ComponentDiagrams]]
-== Component Diagrams
+=== Component Diagrams
 
 To activate component diagram rendering the report type must be set to `plantuml-component-diagram`.
 The result of the rule simply needs to return all required nodes and their relationships:
@@ -122,9 +122,7 @@ RETURN
 <5> `relationships` are the relationships between the nodes, they may reference nodes of other parents/folders
 
 [[ClassDiagrams]]
-== Class Diagrams
-
-NOTE: This feature is currently only available in the latest 1.8.0 snapshot versions.
+=== Class Diagrams
 
 To activate class diagram rendering the report type must be set to `plantuml-class-diagram`.
 The result may contain any of the following elements:
@@ -158,9 +156,7 @@ RETURN
 <3> Optionally include any dependencies, rendered as associations
 
 [[SequenceDiagrams]]
-== Sequence Diagrams
-
-NOTE: This feature is currently only available in the latest 1.8.0 snapshot versions.
+=== Sequence Diagrams
 
 To activate sequence diagram rendering the report type must be set to `plantuml-sequence-diagram`.
 The result of the rule must return a column `sequence` containing a path-structure:
@@ -203,7 +199,7 @@ RETURN
 <1> The list of participants
 <2> The list of messages exchanged between the participants
 
-== Configuration
+=== Configuration
 
 The PlantUML Report plugin accepts several options that might be passed as report properties to jQAssistant:
 
