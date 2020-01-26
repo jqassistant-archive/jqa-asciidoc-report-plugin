@@ -2,3 +2,5 @@
 target/
 .idea/
 *.iml
+pom.xml.updatetonextdevversion
+pom.xml.updatetorelease
