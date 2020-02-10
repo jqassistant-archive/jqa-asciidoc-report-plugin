@@ -14,6 +14,18 @@ import static java.util.Arrays.fill;
 
 public abstract class AbstractDiagramRenderer {
 
+    private final RenderMode renderMode;
+
+    /**
+     * Constructor.
+     *
+     * @param renderMode
+     *            The {@link RenderMode} to use.
+     */
+    protected AbstractDiagramRenderer(RenderMode renderMode) {
+        this.renderMode = renderMode;
+    }
+
     /**
      * Render a diagram from the given {@link SubGraph}.
      *
@@ -25,17 +37,15 @@ public abstract class AbstractDiagramRenderer {
      *
      * @param result
      *            The {@link SubGraph}.
-     * @param renderer
-     *            The {@link RenderMode}
      * @return The {@link String} representation of the PlantUML diagram.
      * @throws ReportException
      *             If the renderer fails.
      */
-    public String renderDiagram(Result<? extends ExecutableRule> result, RenderMode renderer) throws ReportException {
+    public String renderDiagram(Result<? extends ExecutableRule> result) throws ReportException {
         StringBuilder plantumlBuilder = new StringBuilder();
         plantumlBuilder.append("@startuml").append('\n');
         plantumlBuilder.append("skinparam componentStyle uml2").append('\n');
-        plantumlBuilder.append(renderer.getPragma());
+        plantumlBuilder.append(renderMode.getPragma());
         render(result, plantumlBuilder);
         plantumlBuilder.append("@enduml").append('\n');
         return plantumlBuilder.toString();

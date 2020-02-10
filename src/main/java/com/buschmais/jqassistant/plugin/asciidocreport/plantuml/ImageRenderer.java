@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
+import com.buschmais.jqassistant.core.report.api.ReportException;
 import com.buschmais.jqassistant.core.rule.api.model.ExecutableRule;
 
 import net.sourceforge.plantuml.FileFormat;
@@ -21,13 +22,13 @@ public class ImageRenderer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageRenderer.class);
 
-    public File renderDiagram(String plantUML, ExecutableRule rule, File directory, String format) {
+    public File renderDiagram(String plantUML, ExecutableRule rule, File directory, String format) throws ReportException {
         String diagramFileNamePrefix = rule.getId().replaceAll("\\:", "_");
         File plantUMLFile = new File(directory, diagramFileNamePrefix + ".plantuml");
         try {
             FileUtils.writeStringToFile(plantUMLFile, plantUML, Charset.defaultCharset());
         } catch (IOException e) {
-            throw new IllegalStateException("Cannot write PlantUML diagram to " + plantUMLFile.getPath(), e);
+            throw new ReportException("Cannot write PlantUML diagram to " + plantUMLFile.getPath(), e);
         }
 
         FileFormat fileFormat = toFileFormat(format);
@@ -47,7 +48,7 @@ public class ImageRenderer {
      * @param file
      *            The {@link File}.
      */
-    private void renderDiagram(String plantUML, File file, FileFormat format) {
+    private void renderDiagram(String plantUML, File file, FileFormat format) throws ReportException {
         SourceStringReader reader = new SourceStringReader(plantUML);
         try {
             LOGGER.info("Rendering diagram '{}' ", file.getPath());
@@ -56,7 +57,7 @@ public class ImageRenderer {
             }
 
         } catch (IOException e) {
-            throw new IllegalStateException("Cannot create component diagram for file " + file.getPath());
+            throw new ReportException("Cannot create component diagram for file " + file.getPath());
         }
     }
 
@@ -66,16 +67,15 @@ public class ImageRenderer {
      * @param format
      *            The {@link FileFormat} as string.
      * @return The matching {@link FileFormat}
-     * @throws IllegalArgumentException
+     * @throws ReportException
      *             if format is not valid.
      */
-    private FileFormat toFileFormat(String format) {
+    private FileFormat toFileFormat(String format) throws ReportException {
         for (FileFormat fileFormat : FileFormat.values()) {
             if (fileFormat.name().equalsIgnoreCase(format)) {
                 return fileFormat;
             }
         }
-
-        throw new IllegalArgumentException(format + " is not a valid FileFormat");
+        throw new ReportException(format + " is not a valid FileFormat");
     }
 }

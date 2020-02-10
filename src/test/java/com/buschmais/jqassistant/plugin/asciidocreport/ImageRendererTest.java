@@ -2,6 +2,7 @@ package com.buschmais.jqassistant.plugin.asciidocreport;
 
 import java.io.File;
 
+import com.buschmais.jqassistant.core.report.api.ReportException;
 import com.buschmais.jqassistant.core.rule.api.model.Concept;
 import com.buschmais.jqassistant.plugin.asciidocreport.plantuml.ImageRenderer;
 
@@ -19,14 +20,14 @@ public class ImageRendererTest {
     private ImageRenderer imageRenderer = new ImageRenderer();
 
     @Test
-    public void renderDiagramAsSvg() {
+    public void renderDiagramAsSvg() throws ReportException {
         File file = renderDiagram("svg", "svg");
 
         assertThat(file.exists(), equalTo(true));
     }
 
     @Test
-    public void renderDiagramAsPng() {
+    public void renderDiagramAsPng() throws ReportException {
         File file = renderDiagram("png", "png");
 
         assertThat(file.exists(), equalTo(true));
@@ -34,20 +35,20 @@ public class ImageRendererTest {
 
     @Test
     public void renderDiagramNoFormat() {
-        assertThrows(IllegalArgumentException.class, () -> renderDiagram(null, ""));
+        assertThrows(ReportException.class, () -> renderDiagram(null, ""));
     }
 
     @Test
     public void renderDiagramEmptyFormat() {
-        assertThrows(IllegalArgumentException.class, () -> renderDiagram("", ""));
+        assertThrows(ReportException.class, () -> renderDiagram("", ""));
     }
 
     @Test
     public void renderDiagramUnknownFormat() {
-        assertThrows(IllegalArgumentException.class, () -> renderDiagram("notExisting", ""));
+        assertThrows(ReportException.class, () -> renderDiagram("notExisting", ""));
     }
 
-    private File renderDiagram(String format, String expectedFormat) {
+    private File renderDiagram(String format, String expectedFormat) throws ReportException {
         Concept concept = Concept.builder().id("test:plantuml").build();
         File directory = new File("target");
         directory.mkdirs();

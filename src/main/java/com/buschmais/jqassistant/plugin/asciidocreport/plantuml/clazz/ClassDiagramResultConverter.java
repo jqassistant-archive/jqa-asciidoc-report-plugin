@@ -55,7 +55,7 @@ class ClassDiagramResultConverter {
                 convertValue(element, packageMembers, typeMembers, relations);
             }
         } else {
-            Identifiable identifiable = this.subGraphFactory.convert(value);
+            Identifiable identifiable = this.subGraphFactory.toIdentifiable(value);
             if (identifiable instanceof Node) {
                 Node node = (Node) identifiable;
                 if (value instanceof PackageMemberDescriptor) {

@@ -1,11 +1,6 @@
 package com.buschmais.jqassistant.plugin.asciidocreport.plantuml.sequence;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import com.buschmais.jqassistant.core.report.api.ReportException;
 import com.buschmais.jqassistant.core.report.api.graph.SubGraphFactory;
@@ -16,6 +11,7 @@ import com.buschmais.jqassistant.core.report.api.graph.model.SubGraph;
 import com.buschmais.jqassistant.core.report.api.model.Result;
 import com.buschmais.jqassistant.core.rule.api.model.ExecutableRule;
 import com.buschmais.jqassistant.plugin.asciidocreport.plantuml.AbstractDiagramRenderer;
+import com.buschmais.jqassistant.plugin.asciidocreport.plantuml.RenderMode;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +28,8 @@ public class SequenceDiagramRenderer extends AbstractDiagramRenderer {
 
     private final SubGraphFactory subGraphFactory;
 
-    SequenceDiagramRenderer(SubGraphFactory subGraphFactory) {
+    SequenceDiagramRenderer(SubGraphFactory subGraphFactory, RenderMode renderMode) {
+        super(renderMode);
         this.subGraphFactory = subGraphFactory;
     }
 
@@ -55,7 +52,7 @@ public class SequenceDiagramRenderer extends AbstractDiagramRenderer {
             List<?> sequence = (List<?>) row.getOrDefault(COLUMN_SEQUENCE, emptyList());
             if (!sequence.isEmpty()) {
                 for (Object value : sequence) {
-                    Identifiable identifiable = subGraphFactory.convert(value);
+                    Identifiable identifiable = subGraphFactory.toIdentifiable(value);
                     if (identifiable instanceof Node) {
                         participants.add((Node) identifiable);
                     } else if (identifiable instanceof Relationship) {
@@ -74,7 +71,7 @@ public class SequenceDiagramRenderer extends AbstractDiagramRenderer {
     private <T extends Identifiable> List<T> convert(List<?> elements, SubGraphFactory subGraphFactory) throws ReportException {
         List<T> result = new ArrayList<>(elements.size());
         for (Object element : elements) {
-            result.add(subGraphFactory.convert(element));
+            result.add(subGraphFactory.toIdentifiable(element));
         }
         return result;
     }

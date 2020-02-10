@@ -8,7 +8,7 @@ import com.buschmais.jqassistant.core.report.api.graph.model.Node;
 import com.buschmais.jqassistant.core.report.api.graph.model.Relationship;
 import com.buschmais.jqassistant.core.report.api.model.Result;
 import com.buschmais.jqassistant.core.rule.api.model.ExecutableRule;
-import com.buschmais.jqassistant.plugin.asciidocreport.AbstractDiagramRendererTest;
+import com.buschmais.jqassistant.core.store.api.model.Descriptor;
 import com.buschmais.jqassistant.plugin.java.api.model.*;
 import com.buschmais.xo.api.CompositeObject;
 
@@ -18,13 +18,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static com.buschmais.jqassistant.plugin.asciidocreport.SubGraphTestHelper.getNode;
+import static com.buschmais.jqassistant.plugin.asciidocreport.SubGraphTestHelper.getRelationship;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
-public class ClassDiagramResultConverterTest extends AbstractDiagramRendererTest {
+public class ClassDiagramResultConverterTest {
 
     public static final String PACKAGE = "package";
     private static final String TYPE = "type";
@@ -56,10 +58,10 @@ public class ClassDiagramResultConverterTest extends AbstractDiagramRendererTest
     @Test
     public void convert() throws ReportException {
         // given
-        doReturn(null).when(subGraphFactory).convert(null);
+        doReturn(null).when(subGraphFactory).toIdentifiable(null);
         PackageDescriptor rootPackage = mock(PackageDescriptor.class);
         Node rootPackageNode = getNode(1, "root");
-        doReturn(rootPackageNode).when(subGraphFactory).convert(rootPackage);
+        doReturn(rootPackageNode).when(subGraphFactory).toIdentifiable(rootPackage);
 
         PackageDescriptor childPackage = mock(PackageDescriptor.class);
         doReturn(new HashSet<>(asList(rootPackage))).when(childPackage).getParents();
@@ -67,21 +69,21 @@ public class ClassDiagramResultConverterTest extends AbstractDiagramRendererTest
         ClassTypeDescriptor type = mock(ClassTypeDescriptor.class);
         Node typeNode = getNode(3, "root.child.Type");
         doReturn(new HashSet<>(asList(childPackage))).when(type).getParents();
-        doReturn(typeNode).when(subGraphFactory).convert(type);
+        doReturn(typeNode).when(subGraphFactory).toIdentifiable(type);
 
         ClassTypeDescriptor superType = mock(ClassTypeDescriptor.class);
         Node superTypeNode = getNode(4, "root.child.SuperType");
         doReturn(new HashSet<>(asList(childPackage))).when(superType).getParents();
-        doReturn(superTypeNode).when(subGraphFactory).convert(superType);
+        doReturn(superTypeNode).when(subGraphFactory).toIdentifiable(superType);
 
         FieldDescriptor field = mock(FieldDescriptor.class);
         doReturn(type).when(field).getDeclaringType();
         Node fieldNode = getNode(5, "field");
-        doReturn(fieldNode).when(subGraphFactory).convert(field);
+        doReturn(fieldNode).when(subGraphFactory).toIdentifiable(field);
 
         CompositeObject relation = mock(CompositeObject.class);
         Relationship extendsRelation = getRelationship(1, typeNode, "EXTENDS", superTypeNode);
-        doReturn(extendsRelation).when(subGraphFactory).convert(relation);
+        doReturn(extendsRelation).when(subGraphFactory).toIdentifiable(relation);
 
         List<Map<String, Object>> rows = new ArrayList<>();
         addRow(rootPackage, type, field, relation, rows);
@@ -117,10 +119,20 @@ public class ClassDiagramResultConverterTest extends AbstractDiagramRendererTest
         // given
         PackageDescriptor rootPackage = mock(PackageDescriptor.class);
         Node rootPackageNode = getNode(1, "root");
-        doReturn(rootPackageNode).when(subGraphFactory).convert(rootPackage);
+        doReturn(rootPackageNode).when(subGraphFactory).toIdentifiable(rootPackage);
+
+        PackageDescriptor subPackage = mock(PackageDescriptor.class);
+        Node subPackageNode = getNode(2, "sub");
+        doReturn(subPackageNode).when(subGraphFactory).toIdentifiable(subPackage);
+
+        Descriptor contains = mock(Descriptor.class);
+        Relationship containsRelationship = getRelationship(1, rootPackageNode, "CONTAINS", subPackageNode);
+        doReturn(containsRelationship).when(subGraphFactory).toIdentifiable(contains);
+
         List<Map<String, Object>> rows = new ArrayList<>();
         Map<String, Object> row = new HashMap<>();
-        row.put(PACKAGE, asList(rootPackage));
+        row.put(PACKAGE, asList(rootPackage, subPackage));
+        row.put(RELATION, asList(contains));
         rows.add(row);
         Result<ExecutableRule> result = Result.builder().columnNames(asList(PACKAGE)).rows(rows).build();
 
@@ -128,7 +140,8 @@ public class ClassDiagramResultConverterTest extends AbstractDiagramRendererTest
         ClassDiagramResult classDiagramResult = converter.convert(result);
 
         // then
-
+        assertThat(classDiagramResult.getPackageMembers()).hasSize(2);
+        assertThat(classDiagramResult.getRelations()).hasSize(1);
     }
 
     private void addRow(PackageDescriptor packageDescriptor, ClassTypeDescriptor typeDescriptor, MemberDescriptor memberDescriptor,

@@ -1,9 +1,16 @@
 package com.buschmais.jqassistant.plugin.asciidocreport.plantuml;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.buschmais.jqassistant.core.report.api.ReportException;
+
+import lombok.extern.slf4j.Slf4j;
+import net.sourceforge.plantuml.cucadiagram.dot.GraphvizUtils;
 
 import static java.util.Arrays.asList;
 
+@Slf4j
 public enum RenderMode {
 
     GRAPHVIZ(""), JDOT("!pragma graphviz_dot jdot\n");
@@ -34,5 +41,28 @@ public enum RenderMode {
             }
         }
         throw new ReportException(renderMode + " is not a valid, supported modes are " + asList(RenderMode.values()));
+    }
+
+    public static RenderMode getRenderMode(String value) throws ReportException {
+        boolean graphvizAvailable = verifyGraphviz();
+        if (value != null) {
+            RenderMode renderMode = RenderMode.fromString(value);
+            if (GRAPHVIZ == renderMode && !graphvizAvailable) {
+                throw new ReportException("GraphViz is requested but installation could not be validated.");
+            }
+            return renderMode;
+        }
+        return graphvizAvailable ? GRAPHVIZ : JDOT;
+    }
+
+    private static boolean verifyGraphviz() {
+        List<String> results = new ArrayList<>();
+        if (GraphvizUtils.addDotStatus(results, false) != 0) {
+            for (String result : results) {
+                log.info(result);
+            }
+            return false;
+        }
+        return true;
     }
 }

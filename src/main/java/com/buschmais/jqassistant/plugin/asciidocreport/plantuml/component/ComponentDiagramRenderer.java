@@ -12,6 +12,7 @@ import com.buschmais.jqassistant.core.report.api.graph.model.SubGraph;
 import com.buschmais.jqassistant.core.report.api.model.Result;
 import com.buschmais.jqassistant.core.rule.api.model.ExecutableRule;
 import com.buschmais.jqassistant.plugin.asciidocreport.plantuml.AbstractDiagramRenderer;
+import com.buschmais.jqassistant.plugin.asciidocreport.plantuml.RenderMode;
 
 import com.google.common.base.CaseFormat;
 import org.apache.commons.lang3.StringUtils;
@@ -22,7 +23,8 @@ public class ComponentDiagramRenderer extends AbstractDiagramRenderer {
 
     private final SubGraphFactory subGraphFactory;
 
-    public ComponentDiagramRenderer(SubGraphFactory subGraphFactory) {
+    public ComponentDiagramRenderer(SubGraphFactory subGraphFactory, RenderMode renderMode) {
+        super(renderMode);
         this.subGraphFactory = subGraphFactory;
     }
 

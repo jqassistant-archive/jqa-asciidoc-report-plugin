@@ -1,10 +1,6 @@
 package com.buschmais.jqassistant.plugin.asciidocreport.plantuml.clazz;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import com.buschmais.jqassistant.core.report.api.ReportException;
 import com.buschmais.jqassistant.core.report.api.graph.model.Node;
@@ -12,18 +8,8 @@ import com.buschmais.jqassistant.core.report.api.graph.model.Relationship;
 import com.buschmais.jqassistant.core.report.api.model.Result;
 import com.buschmais.jqassistant.core.rule.api.model.ExecutableRule;
 import com.buschmais.jqassistant.plugin.asciidocreport.plantuml.AbstractDiagramRenderer;
-import com.buschmais.jqassistant.plugin.java.api.model.AbstractDescriptor;
-import com.buschmais.jqassistant.plugin.java.api.model.AccessModifierDescriptor;
-import com.buschmais.jqassistant.plugin.java.api.model.AnnotationTypeDescriptor;
-import com.buschmais.jqassistant.plugin.java.api.model.EnumTypeDescriptor;
-import com.buschmais.jqassistant.plugin.java.api.model.FieldDescriptor;
-import com.buschmais.jqassistant.plugin.java.api.model.InterfaceTypeDescriptor;
-import com.buschmais.jqassistant.plugin.java.api.model.JavaByteCodeDescriptor;
-import com.buschmais.jqassistant.plugin.java.api.model.MemberDescriptor;
-import com.buschmais.jqassistant.plugin.java.api.model.MethodDescriptor;
-import com.buschmais.jqassistant.plugin.java.api.model.PackageDescriptor;
-import com.buschmais.jqassistant.plugin.java.api.model.PackageMemberDescriptor;
-import com.buschmais.jqassistant.plugin.java.api.model.TypeDescriptor;
+import com.buschmais.jqassistant.plugin.asciidocreport.plantuml.RenderMode;
+import com.buschmais.jqassistant.plugin.java.api.model.*;
 
 import static java.util.Collections.emptySet;
 
@@ -35,7 +21,8 @@ public class ClassDiagramRenderer extends AbstractDiagramRenderer {
 
     private Map<String, String> relationTypes;
 
-    public ClassDiagramRenderer(ClassDiagramResultConverter classDiagramResultConverter) {
+    public ClassDiagramRenderer(ClassDiagramResultConverter classDiagramResultConverter, RenderMode renderMode) {
+        super(renderMode);
         this.classDiagramResultConverter = classDiagramResultConverter;
         this.relationTypes = new HashMap<>();
         relationTypes.put("EXTENDS", "--|>");

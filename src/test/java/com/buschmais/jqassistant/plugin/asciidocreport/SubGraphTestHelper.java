@@ -5,9 +5,9 @@ import com.buschmais.jqassistant.core.report.api.graph.model.Relationship;
 
 import static java.util.Arrays.asList;
 
-public abstract class AbstractDiagramRendererTest {
+public final class SubGraphTestHelper {
 
-    protected Node getNode(long id, String label, String... labels) {
+    public static Node getNode(long id, String label, String... labels) {
         Node node = new Node();
         node.setId(id);
         node.setLabel(label);
@@ -15,11 +15,11 @@ public abstract class AbstractDiagramRendererTest {
         return node;
     }
 
-    protected Relationship getRelationship(long id, Node start, String type, Node end) {
+    public static Relationship getRelationship(long id, Node start, String type, Node end) {
         return getRelationship(id, start, type, end, "");
     }
 
-    protected Relationship getRelationship(long id, Node start, String type, Node end, String label) {
+    public static Relationship getRelationship(long id, Node start, String type, Node end, String label) {
         Relationship relationship = new Relationship();
         relationship.setId(id);
         relationship.setStartNode(start);

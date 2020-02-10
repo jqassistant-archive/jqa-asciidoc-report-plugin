@@ -10,7 +10,6 @@ import com.buschmais.jqassistant.core.report.api.graph.model.Node;
 import com.buschmais.jqassistant.core.report.api.model.Result;
 import com.buschmais.jqassistant.core.rule.api.model.ExecutableRule;
 import com.buschmais.jqassistant.core.store.api.model.Descriptor;
-import com.buschmais.jqassistant.plugin.asciidocreport.AbstractDiagramRendererTest;
 import com.buschmais.jqassistant.plugin.asciidocreport.plantuml.ImageRenderer;
 import com.buschmais.jqassistant.plugin.asciidocreport.plantuml.RenderMode;
 
@@ -20,6 +19,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static com.buschmais.jqassistant.plugin.asciidocreport.SubGraphTestHelper.getNode;
+import static com.buschmais.jqassistant.plugin.asciidocreport.SubGraphTestHelper.getRelationship;
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -30,7 +31,7 @@ import static org.mockito.Mockito.mock;
  * Tests for the {@link ImageRenderer}.
  */
 @ExtendWith(MockitoExtension.class)
-public class SequenceDiagramRendererTest extends AbstractDiagramRendererTest {
+public class SequenceDiagramRendererTest {
 
     @Mock
     private Descriptor p1 = mock(Descriptor.class);
@@ -52,15 +53,15 @@ public class SequenceDiagramRendererTest extends AbstractDiagramRendererTest {
     @BeforeEach
     public void setUp() throws ReportException {
         Node n1 = getNode(1, "p1", "Java", "Method");
-        doReturn(n1).when(subGraphFactory).convert(p1);
+        doReturn(n1).when(subGraphFactory).toIdentifiable(p1);
         Node n2 = getNode(2, "p2", "Java", "Method");
-        doReturn(n2).when(subGraphFactory).convert(p2);
+        doReturn(n2).when(subGraphFactory).toIdentifiable(p2);
         Node n3 = getNode(3, "p3", "Java", "Method");
-        doReturn(n3).when(subGraphFactory).convert(p3);
-        doReturn(getRelationship(1, n1, "INVOKES", n2)).when(subGraphFactory).convert(m1);
-        doReturn(getRelationship(2, n2, "INVOKES", n3)).when(subGraphFactory).convert(m2);
+        doReturn(n3).when(subGraphFactory).toIdentifiable(p3);
+        doReturn(getRelationship(1, n1, "INVOKES", n2)).when(subGraphFactory).toIdentifiable(m1);
+        doReturn(getRelationship(2, n2, "INVOKES", n3)).when(subGraphFactory).toIdentifiable(m2);
 
-        sequenceDiagramRenderer = new SequenceDiagramRenderer(subGraphFactory);
+        sequenceDiagramRenderer = new SequenceDiagramRenderer(subGraphFactory, RenderMode.GRAPHVIZ);
     }
 
     @Test
@@ -74,20 +75,13 @@ public class SequenceDiagramRendererTest extends AbstractDiagramRendererTest {
     }
 
     private void verifySequenceDiagram(Result<? extends ExecutableRule> result) throws ReportException {
-        String componentDiagram = sequenceDiagramRenderer.renderDiagram(result, RenderMode.GRAPHVIZ);
+        String componentDiagram = sequenceDiagramRenderer.renderDiagram(result);
 
         assertThat(componentDiagram, containsString("participant \"p1\" as n1 <<Java>> <<Method>>"));
         assertThat(componentDiagram, containsString("participant \"p2\" as n2 <<Java>> <<Method>>"));
         assertThat(componentDiagram, containsString("participant \"p3\" as n3 <<Java>> <<Method>>"));
         assertThat(componentDiagram, containsString("n1 -> n2 : INVOKES"));
         assertThat(componentDiagram, containsString("n2 -> n3 : INVOKES"));
-    }
-
-    @Test
-    public void jdotDiagram() throws ReportException {
-        String diagram = sequenceDiagramRenderer.renderDiagram(getParticipantsAndMessagesResult(), RenderMode.JDOT);
-
-        assertThat(diagram, containsString(RenderMode.JDOT.getPragma()));
     }
 
     private Result<? extends ExecutableRule> getSequenceResult() {

@@ -9,20 +9,8 @@ import com.buschmais.jqassistant.core.report.api.ReportException;
 import com.buschmais.jqassistant.core.report.api.graph.model.Node;
 import com.buschmais.jqassistant.core.report.api.graph.model.Relationship;
 import com.buschmais.jqassistant.core.report.api.model.Result;
-import com.buschmais.jqassistant.plugin.asciidocreport.AbstractDiagramRendererTest;
 import com.buschmais.jqassistant.plugin.asciidocreport.plantuml.RenderMode;
-import com.buschmais.jqassistant.plugin.java.api.model.AbstractDescriptor;
-import com.buschmais.jqassistant.plugin.java.api.model.AccessModifierDescriptor;
-import com.buschmais.jqassistant.plugin.java.api.model.AnnotationTypeDescriptor;
-import com.buschmais.jqassistant.plugin.java.api.model.ClassTypeDescriptor;
-import com.buschmais.jqassistant.plugin.java.api.model.EnumTypeDescriptor;
-import com.buschmais.jqassistant.plugin.java.api.model.FieldDescriptor;
-import com.buschmais.jqassistant.plugin.java.api.model.InterfaceTypeDescriptor;
-import com.buschmais.jqassistant.plugin.java.api.model.MemberDescriptor;
-import com.buschmais.jqassistant.plugin.java.api.model.MethodDescriptor;
-import com.buschmais.jqassistant.plugin.java.api.model.PackageDescriptor;
-import com.buschmais.jqassistant.plugin.java.api.model.PackageMemberDescriptor;
-import com.buschmais.jqassistant.plugin.java.api.model.TypeDescriptor;
+import com.buschmais.jqassistant.plugin.java.api.model.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,6 +18,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static com.buschmais.jqassistant.plugin.asciidocreport.SubGraphTestHelper.getNode;
+import static com.buschmais.jqassistant.plugin.asciidocreport.SubGraphTestHelper.getRelationship;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,7 +27,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
-public class ClassDiagramRendererTest extends AbstractDiagramRendererTest {
+public class ClassDiagramRendererTest {
 
     @Mock
     private ClassDiagramResultConverter resultConverter;
@@ -57,7 +47,7 @@ public class ClassDiagramRendererTest extends AbstractDiagramRendererTest {
 
     @BeforeEach
     public void setUp() throws ReportException {
-        classDiagramRenderer = new ClassDiagramRenderer(resultConverter);
+        classDiagramRenderer = new ClassDiagramRenderer(resultConverter, RenderMode.GRAPHVIZ);
         packageMembers = new HashMap<>();
         packageMemberTree = new HashMap<>();
         membersPerType = new HashMap<>();
@@ -79,7 +69,7 @@ public class ClassDiagramRendererTest extends AbstractDiagramRendererTest {
         packageMemberTree.computeIfAbsent(null, key -> new HashSet<>()).add(packageDescriptor);
         packageMemberTree.computeIfAbsent(packageDescriptor, key -> new HashSet<>()).addAll(asList(classType, interfaceType, annotationType, enumType));
 
-        String diagram = classDiagramRenderer.renderDiagram(result, RenderMode.GRAPHVIZ);
+        String diagram = classDiagramRenderer.renderDiagram(result);
 
         assertThat(diagram).contains("package n1 as \"foo.bar\"{");
         assertThat(diagram).contains("  +class n2 as \"foo.bar.ClassType\"{");
@@ -98,7 +88,7 @@ public class ClassDiagramRendererTest extends AbstractDiagramRendererTest {
         rootMembers.add(addPackageMember(ClassTypeDescriptor.class, 5, "default", false, "foo.bar.DefaultClassType"));
         rootMembers.add(addPackageMember(ClassTypeDescriptor.class, 6, null, false, "foo.bar.ClassType"));
 
-        String diagram = classDiagramRenderer.renderDiagram(result, RenderMode.GRAPHVIZ);
+        String diagram = classDiagramRenderer.renderDiagram(result);
 
         assertThat(diagram).contains("abstract class n1 as \"foo.bar.AbstractClassType\"{");
         assertThat(diagram).contains("-class n2 as \"foo.bar.PrivateClassType\"{");
@@ -124,7 +114,7 @@ public class ClassDiagramRendererTest extends AbstractDiagramRendererTest {
         Set<MemberDescriptor> members = membersPerType.computeIfAbsent(typeDescriptor, key -> new HashSet<>());
         members.add(addTypeMember(MethodDescriptor.class, "public", null, true, "String abstractMethod"));
 
-        String diagram = classDiagramRenderer.renderDiagram(result, RenderMode.GRAPHVIZ);
+        String diagram = classDiagramRenderer.renderDiagram(result);
 
         assertThat(diagram).contains("  {abstract} +String abstractMethod");
     }
@@ -145,7 +135,7 @@ public class ClassDiagramRendererTest extends AbstractDiagramRendererTest {
         doReturn("public").when(field).getVisibility();
         doReturn("associatedField").when(field).getName();
 
-        String diagram = classDiagramRenderer.renderDiagram(result, RenderMode.GRAPHVIZ);
+        String diagram = classDiagramRenderer.renderDiagram(result);
 
         assertThat(diagram).contains("n1 -> n2");
     }
@@ -165,7 +155,7 @@ public class ClassDiagramRendererTest extends AbstractDiagramRendererTest {
         relations.add(getRelationship(3, packageMembers.get(classType), "DEPENDS_ON", packageMembers.get(superClassType)));
         relations.add(getRelationship(4, packageMembers.get(classType), "DEPENDS_ON", packageMembers.get(interfaceType)));
 
-        String diagram = classDiagramRenderer.renderDiagram(result, RenderMode.GRAPHVIZ);
+        String diagram = classDiagramRenderer.renderDiagram(result);
 
         assertThat(diagram).contains("n1--|>n2");
         assertThat(diagram).contains("n1..|>n3");
@@ -183,7 +173,7 @@ public class ClassDiagramRendererTest extends AbstractDiagramRendererTest {
         members.add(addTypeMember(memberType, null, null, null, "String required" + signatureSuffix));
         members.add(addTypeMember(memberType, null, true, null, "String static" + signatureSuffix));
 
-        String diagram = classDiagramRenderer.renderDiagram(result, RenderMode.GRAPHVIZ);
+        String diagram = classDiagramRenderer.renderDiagram(result);
 
         assertThat(diagram).contains("  -String private" + signatureSuffix);
         assertThat(diagram).contains("  +String public" + signatureSuffix);

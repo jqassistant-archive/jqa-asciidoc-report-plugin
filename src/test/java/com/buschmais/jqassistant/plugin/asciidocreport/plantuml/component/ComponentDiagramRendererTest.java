@@ -6,7 +6,6 @@ import com.buschmais.jqassistant.core.report.api.graph.model.Node;
 import com.buschmais.jqassistant.core.report.api.graph.model.Relationship;
 import com.buschmais.jqassistant.core.report.api.graph.model.SubGraph;
 import com.buschmais.jqassistant.core.report.api.model.Result;
-import com.buschmais.jqassistant.plugin.asciidocreport.AbstractDiagramRendererTest;
 import com.buschmais.jqassistant.plugin.asciidocreport.plantuml.ImageRenderer;
 import com.buschmais.jqassistant.plugin.asciidocreport.plantuml.RenderMode;
 
@@ -16,6 +15,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static com.buschmais.jqassistant.plugin.asciidocreport.SubGraphTestHelper.getNode;
+import static com.buschmais.jqassistant.plugin.asciidocreport.SubGraphTestHelper.getRelationship;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -25,7 +26,7 @@ import static org.mockito.Mockito.doReturn;
  * Tests for the {@link ImageRenderer}.
  */
 @ExtendWith(MockitoExtension.class)
-public class ComponentDiagramRendererTest extends AbstractDiagramRendererTest {
+public class ComponentDiagramRendererTest {
 
     @Mock
     private Result<?> result;
@@ -37,14 +38,14 @@ public class ComponentDiagramRendererTest extends AbstractDiagramRendererTest {
 
     @BeforeEach
     public void setUp() {
-        componentDiagramRenderer = new ComponentDiagramRenderer(subGraphFactory);
+        componentDiagramRenderer = new ComponentDiagramRenderer(subGraphFactory, RenderMode.GRAPHVIZ);
     }
 
     @Test
     public void componentDiagram() throws ReportException {
         doReturn(getSubGraph()).when(subGraphFactory).createSubGraph(result);
 
-        String componentDiagram = componentDiagramRenderer.renderDiagram(result, RenderMode.GRAPHVIZ);
+        String componentDiagram = componentDiagramRenderer.renderDiagram(result);
 
         assertThat(componentDiagram, containsString("[a1] <<Artifact File>> as n1"));
         assertThat(componentDiagram, containsString("[a2] <<Artifact File>> as n2"));
@@ -52,15 +53,6 @@ public class ComponentDiagramRendererTest extends AbstractDiagramRendererTest {
         assertThat(componentDiagram, containsString("n1 --> n2 : depends on (weight:3)"));
         assertThat(componentDiagram, not(containsString("[a4] <<Artifact File>> as n4")));
         assertThat(componentDiagram, not(containsString("n1 --> n4 : DEPENDS_ON")));
-    }
-
-    @Test
-    public void jdotDiagram() throws ReportException {
-        doReturn(getSubGraph()).when(subGraphFactory).createSubGraph(result);
-
-        String componentDiagram = componentDiagramRenderer.renderDiagram(result, RenderMode.JDOT);
-
-        assertThat(componentDiagram, containsString(RenderMode.JDOT.getPragma()));
     }
 
     @Test
@@ -85,7 +77,7 @@ public class ComponentDiagramRendererTest extends AbstractDiagramRendererTest {
 
         doReturn(rootGraph).when(subGraphFactory).createSubGraph(result);
 
-        String componentDiagram = componentDiagramRenderer.renderDiagram(result, RenderMode.GRAPHVIZ);
+        String componentDiagram = componentDiagramRenderer.renderDiagram(result);
 
         assertThat(componentDiagram, containsString("folder \"a0\" {\n" + "    [a1] <<Artifact File>> as n1\n" + "    folder \"a2\" {\n"
                 + "        [a3] <<Artifact File>> as n3\n" + "    }\n" + "}"));
