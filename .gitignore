@@ -4,6 +4,7 @@ target/
 *.iml
 pom.xml.updatetonextdevversion
 pom.xml.updatetorelease
+*.backup
 
 # Ignore temporary shell scripts used to script small tasks
 *.sh.ignore
