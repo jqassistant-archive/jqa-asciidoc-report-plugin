@@ -16,6 +16,7 @@ import com.buschmais.jqassistant.core.rule.api.model.Concept;
 import com.buschmais.jqassistant.core.rule.api.model.Constraint;
 import com.buschmais.jqassistant.core.rule.api.model.RuleException;
 import com.buschmais.jqassistant.core.rule.api.model.Severity;
+import com.buschmais.jqassistant.plugin.asciidocreport.plantuml.RenderMode;
 import com.buschmais.jqassistant.plugin.common.api.model.ArtifactFileDescriptor;
 import com.buschmais.jqassistant.plugin.common.api.model.DependsOnDescriptor;
 import com.buschmais.xo.neo4j.api.model.Neo4jLabel;
@@ -34,9 +35,7 @@ import static com.buschmais.jqassistant.core.report.api.model.Result.Status.FAIL
 import static com.buschmais.jqassistant.core.report.api.model.Result.Status.SUCCESS;
 import static java.lang.System.lineSeparator;
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
-import static java.util.Collections.singletonList;
+import static java.util.Collections.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -78,9 +77,12 @@ public class AsciidocReportPluginTest extends AbstractAsciidocReportPluginTest {
         properties.put("asciidoc.report.file.include", "index.adoc");
         properties.put("plantuml.report.rendermode", "jdot");
         verify(properties, new File(outputDirectory, "report/asciidoc"));
+        File plantUmlFile = new File(outputDirectory, "report/plantuml/test_ComponentDiagram.plantuml");
+        String plantuml = FileUtils.readFileToString(plantUmlFile, "UTF-8");
+        assertThat(plantuml).contains(RenderMode.JDOT.getPragma());
     }
 
-    private void verify(Map<String, Object> properties, File expectedDirectory) throws RuleException, IOException {
+    private String verify(Map<String, Object> properties, File expectedDirectory) throws RuleException, IOException {
         ReportContext reportContext = configureReportContext(properties);
 
         Concept componentDiagram = execute();
@@ -106,10 +108,13 @@ public class AsciidocReportPluginTest extends AbstractAsciidocReportPluginTest {
         verifyToggle(html);
 
         verifyDiagram(componentDiagram, reportContext, html);
+
+        return html;
     }
 
     private Concept execute() throws RuleException {
         ReportPlugin plugin = new CompositeReportPlugin(reportPlugins);
+        plugin.initialize();
         plugin.begin();
 
         Concept concept = ruleSet.getConceptBucket().getById("test:Concept");
@@ -150,6 +155,7 @@ public class AsciidocReportPluginTest extends AbstractAsciidocReportPluginTest {
                 .severity(Severity.MAJOR).columnNames(emptyList()).rows(emptyList()).build());
 
         plugin.end();
+        plugin.destroy();
         return componentDiagram;
     }
 

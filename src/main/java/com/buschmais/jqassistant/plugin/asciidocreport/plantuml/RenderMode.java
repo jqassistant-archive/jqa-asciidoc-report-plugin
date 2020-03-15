@@ -25,24 +25,6 @@ public enum RenderMode {
         return pragma;
     }
 
-    /**
-     * Returns the {@link RenderMode} for the given string
-     *
-     * @param renderMode
-     *            The {@link RenderMode} as string.
-     * @return The matching {@link RenderMode}
-     * @throws ReportException
-     *             If renderMode is not valid.
-     */
-    public static RenderMode fromString(String renderMode) throws ReportException {
-        for (RenderMode mode : RenderMode.values()) {
-            if (mode.name().equalsIgnoreCase(renderMode)) {
-                return mode;
-            }
-        }
-        throw new ReportException(renderMode + " is not a valid, supported modes are " + asList(RenderMode.values()));
-    }
-
     public static RenderMode getRenderMode(String value) throws ReportException {
         boolean graphvizAvailable = verifyGraphviz();
         if (value != null) {
@@ -53,6 +35,24 @@ public enum RenderMode {
             return renderMode;
         }
         return graphvizAvailable ? GRAPHVIZ : JDOT;
+    }
+
+    /**
+     * Returns the {@link RenderMode} for the given string
+     *
+     * @param renderMode
+     *            The {@link RenderMode} as string.
+     * @return The matching {@link RenderMode}
+     * @throws ReportException
+     *             If renderMode is not valid.
+     */
+    private static RenderMode fromString(String renderMode) throws ReportException {
+        for (RenderMode mode : RenderMode.values()) {
+            if (mode.name().equalsIgnoreCase(renderMode)) {
+                return mode;
+            }
+        }
+        throw new ReportException(renderMode + " is not a valid, supported modes are " + asList(RenderMode.values()));
     }
 
     private static boolean verifyGraphviz() {
