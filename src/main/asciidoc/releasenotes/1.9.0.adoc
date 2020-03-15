@@ -4,4 +4,5 @@
 ifndef::jqa-in-manual[== Version 1.9.0]
 ifdef::jqa-in-manual[== Asciidoc Report Plugin 1.9.0]
 
-No changes.
+- The PlantUML diagram plugin now automatically selects GraphViz (prefered) or JDOT for rendering if not explicitly configured
+
