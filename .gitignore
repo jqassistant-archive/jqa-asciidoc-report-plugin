@@ -1,5 +1,4 @@
 # Created by .ignore support plugin (hsz.mobi)
-target/
 .idea/
 *.iml
 pom.xml.updatetonextdevversion
@@ -9,3 +8,6 @@ pom.xml.updatetorelease
 # Ignore temporary shell scripts used to script small tasks
 *.sh.ignore
 
+# Maven related files and directories
+target
+/.mvn
