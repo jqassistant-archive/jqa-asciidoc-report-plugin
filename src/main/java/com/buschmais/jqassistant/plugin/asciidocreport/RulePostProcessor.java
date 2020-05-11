@@ -31,75 +31,91 @@ public class RulePostProcessor extends Postprocessor {
     @Override
     public String process(Document document, String output) {
         if (document.basebackend("html")) {
-            org.jsoup.nodes.Document doc = Jsoup.parse(output, "UTF-8");
-            List<String> contentIds = new ArrayList<>();
-            processRuleBlocks(doc, "concept", conceptResults, contentIds);
-            processRuleBlocks(doc, "constraint", constraintResults, contentIds);
-            StringBuilder styles = createStyles(contentIds);
-            doc.head().append(styles.toString());
-            return doc.html();
-
+            return HtmlRulePostProcessor.process(conceptResults, constraintResults, output);
         }
         return output;
     }
 
-    private void processRuleBlocks(org.jsoup.nodes.Document doc, String ruleClass, Map<String, RuleResult> ruleResults, List<String> contentIds) {
-        Elements ruleBlocks = doc.getElementsByClass(ruleClass);
-        for (Element ruleBlock : ruleBlocks) {
-            processRuleBlock(ruleBlock, contentIds, ruleResults);
-        }
-    }
+    public static class HtmlRulePostProcessor {
 
-    private void processRuleBlock(Element ruleBlock, List<String> contentIds, Map<String, RuleResult> ruleResults) {
-        Element status = ruleBlock.prependElement("div").addClass("jqassistant-rule-status");
-        RuleResult ruleResult = ruleResults.get(ruleBlock.id());
-        if (ruleResult != null) {
-            ExecutableRule<?> rule = ruleResult.getRule();
-            status.addClass(StatusHelper.getStatusClass(ruleResult.getStatus()));
-            switch (ruleResult.getStatus()) {
-            case SUCCESS:
-                status.addClass("fa").addClass("fa-check");
-                break;
-            case FAILURE:
-                status.addClass("fa").addClass("fa-ban");
-                break;
+        static String process(Map<String, RuleResult> conceptResults, Map<String, RuleResult> constraintResults, String output) {
+            org.jsoup.nodes.Document doc = Jsoup.parse(output, "UTF-8");
+            List<String> contentIds = new ArrayList<>();
+            processRuleBlocks(doc, "concept", conceptResults, contentIds);
+            processRuleBlocks(doc, "constraint", constraintResults, contentIds);
+            addStyles(doc, contentIds);
+            return doc.html();
+        }
+
+        private static void processRuleBlocks(org.jsoup.nodes.Document doc, String ruleClass, Map<String, RuleResult> ruleResults, List<String> contentIds) {
+            Elements ruleBlocks = doc.getElementsByClass(ruleClass);
+            for (Element ruleBlock : ruleBlocks) {
+                addStatus(ruleBlock, ruleResults);
+                if (ruleBlock.hasClass("listingblock")) {
+                    hideListing(ruleBlock, contentIds);
+                }
             }
-            String hover = "Status: " + ruleResult.getStatus() + ", Severity: " + rule.getSeverity().getInfo(ruleResult.getEffectiveSeverity());
-            status.attr("title", hover);
-        } else {
-            status.addClass("fa").addClass("fa-question");
-            status.attr("title", "Rule has not been executed.");
         }
 
-        String contentId = "jqassistant-rule-listing" + contentIds.size();
-        contentIds.add(contentId);
-        Elements contents = ruleBlock.getElementsByClass("content");
-        Element content = contents.first();
-        content.before("<input type=\"checkbox\" class=\"jqassistant-rule-toggle\" title=\"Rule details\"/>");
-        contents.attr("id", contentId);
-
-        Elements title = ruleBlock.getElementsByClass("title");
-        Element titleElement = title.first();
-        if (titleElement != null) {
-            titleElement.attr("style", "display:inline;");
+        private static void addStatus(Element ruleBlock, Map<String, RuleResult> ruleResults) {
+            Elements title = ruleBlock.getElementsByClass("title");
+            Element titleElement = title.first();
+            Element status;
+            if (titleElement != null) {
+                // insert status before title
+                status = new Element("div");
+                titleElement.before(status);
+                titleElement.attr("style", "display:inline;");
+            } else {
+                //
+                status = ruleBlock.prependElement("div");
+            }
+            status.addClass("jqassistant-rule-status");
+            RuleResult ruleResult = ruleResults.get(ruleBlock.id());
+            if (ruleResult != null) {
+                ExecutableRule<?> rule = ruleResult.getRule();
+                status.addClass(StatusHelper.getStatusClass(ruleResult.getStatus()));
+                switch (ruleResult.getStatus()) {
+                case SUCCESS:
+                    status.addClass("fa").addClass("fa-check");
+                    break;
+                case FAILURE:
+                    status.addClass("fa").addClass("fa-ban");
+                    break;
+                }
+                String hover = "Status: " + ruleResult.getStatus() + ", Severity: " + rule.getSeverity().getInfo(ruleResult.getEffectiveSeverity());
+                status.attr("title", hover);
+            } else {
+                status.addClass("fa").addClass("fa-question");
+                status.attr("title", "Rule has not been executed.");
+            }
         }
-    }
 
-    private StringBuilder createStyles(List<String> contentIds) {
-        StringBuilder styles = new StringBuilder();
-        styles.append("<style>\n");
-        for (String contentId : contentIds) {
-            styles.append("#").append(contentId).append("{\n");
-            styles.append("  display:none;\n"); // disable source content blocks by default
-            styles.append("}\n");
-            styles.append("input.jqassistant-rule-toggle:checked + #").append(contentId).append("{\n");
-            styles.append("  display:block;\n"); // activate them if the checkbox element is checked
-            styles.append("}\n");
+        private static void hideListing(Element ruleBlock, List<String> contentIds) {
+            String contentId = "jqassistant-rule-listing" + contentIds.size();
+            contentIds.add(contentId);
+            Elements contents = ruleBlock.getElementsByClass("content");
+            Element content = contents.first();
+            content.before("<input type=\"checkbox\" class=\"jqassistant-rule-toggle\" title=\"Rule details\"/>");
+            contents.attr("id", contentId);
         }
-        styles.append("." + StatusHelper.getStatusClass(SUCCESS) + "{color: green}");
-        styles.append("." + StatusHelper.getStatusClass(FAILURE) + "{color: crimson}");
-        styles.append("." + StatusHelper.getStatusClass(SKIPPED) + "{color: yellow}");
-        styles.append("</style>\n");
-        return styles;
+
+        private static void addStyles(org.jsoup.nodes.Document doc, List<String> contentIds) {
+            StringBuilder styles = new StringBuilder();
+            styles.append("<style>\n");
+            for (String contentId : contentIds) {
+                styles.append("#").append(contentId).append("{\n");
+                styles.append("  display:none;\n"); // disable source content blocks by default
+                styles.append("}\n");
+                styles.append("input.jqassistant-rule-toggle:checked + #").append(contentId).append("{\n");
+                styles.append("  display:block;\n"); // activate them if the checkbox element is checked
+                styles.append("}\n");
+            }
+            styles.append("." + StatusHelper.getStatusClass(SUCCESS) + "{color: green}");
+            styles.append("." + StatusHelper.getStatusClass(FAILURE) + "{color: crimson}");
+            styles.append("." + StatusHelper.getStatusClass(SKIPPED) + "{color: yellow}");
+            styles.append("</style>\n");
+            doc.head().append(styles.toString());
+        }
     }
 }
