@@ -2,7 +2,9 @@ package com.buschmais.jqassistant.plugin.asciidocreport;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.*;
 
 import com.buschmais.jqassistant.core.report.api.ReportException;
@@ -64,7 +66,12 @@ public class SourceFileMatcher {
                 if ("file".equals(url.getProtocol())) {
                     String path = url.getPath();
                     if (path.endsWith("/" + DEFAULT_INDEX_FILE)) {
-                        File file = new File(url.getFile());
+                        File file;
+                        try {
+                            file = new File(URLDecoder.decode(url.getFile(), "UTF-8"));
+                        } catch (UnsupportedEncodingException e) {
+                            throw new ReportException("Cannot get URL from file " + ruleSource, e);
+                        }
                         LOGGER.info("Found index document '{}'.", file);
                         File directory = file.getParentFile();
                         List<File> filesByDirectory = files.get(directory);
