@@ -1,11 +1,7 @@
 package com.buschmais.jqassistant.plugin.asciidocreport;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.buschmais.jqassistant.core.report.api.ReportContext;
 import com.buschmais.jqassistant.core.report.api.ReportException;
@@ -13,11 +9,7 @@ import com.buschmais.jqassistant.core.report.api.ReportPlugin;
 import com.buschmais.jqassistant.core.report.api.model.Result;
 import com.buschmais.jqassistant.core.report.api.model.Result.Status;
 import com.buschmais.jqassistant.core.report.impl.ReportContextImpl;
-import com.buschmais.jqassistant.core.rule.api.model.Concept;
-import com.buschmais.jqassistant.core.rule.api.model.Constraint;
-import com.buschmais.jqassistant.core.rule.api.model.RuleException;
-import com.buschmais.jqassistant.core.rule.api.model.RuleSet;
-import com.buschmais.jqassistant.core.rule.api.model.Severity;
+import com.buschmais.jqassistant.core.rule.api.model.*;
 import com.buschmais.jqassistant.core.rule.api.reader.RuleConfiguration;
 import com.buschmais.jqassistant.core.rule.api.reader.RuleParserPlugin;
 import com.buschmais.jqassistant.core.rule.api.source.FileRuleSource;
@@ -48,7 +40,7 @@ public abstract class AbstractAsciidocReportPluginTest {
     @BeforeEach
     public final void setUp() throws RuleException {
         File classesDirectory = ClasspathResource.getFile(AbstractAsciidocReportPluginTest.class, "/");
-        ruleDirectory = new File(classesDirectory, "jqassistant");
+        ruleDirectory = new File(classesDirectory, "working directory/jqassistant");
         List<String> asciidocFiles = getAsciidocFiles();
         ruleSet = getRuleSet(ruleDirectory, asciidocFiles);
         reportPlugins = new HashMap<>();

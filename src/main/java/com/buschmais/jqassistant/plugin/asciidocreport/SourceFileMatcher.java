@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.charset.Charset;
 import java.util.*;
 
 import com.buschmais.jqassistant.core.report.api.ReportException;
@@ -68,7 +69,7 @@ public class SourceFileMatcher {
                     if (path.endsWith("/" + DEFAULT_INDEX_FILE)) {
                         File file;
                         try {
-                            file = new File(URLDecoder.decode(url.getFile(), "UTF-8"));
+                            file = new File(URLDecoder.decode(url.getFile(), Charset.defaultCharset().toString()));
                         } catch (UnsupportedEncodingException e) {
                             throw new ReportException("Cannot get URL from file " + ruleSource, e);
                         }

@@ -24,7 +24,7 @@ public class SourceFileMatcherTest {
     @BeforeEach
     public void setUp() {
         File classesDirectory = ClasspathResource.getFile(SourceFileMatcherTest.class, "/");
-        ruleDirectory = new File(classesDirectory, "jqassistant");
+        ruleDirectory = new File(classesDirectory, "working directory/jqassistant");
     }
 
     /**
@@ -49,7 +49,7 @@ public class SourceFileMatcherTest {
      */
     @Test
     public void detectIndexFileFromRuleSources() throws RuleException {
-        SourceFileMatcher sourceFileMatcher = new SourceFileMatcher(ruleDirectory, null, null);
+        SourceFileMatcher sourceFileMatcher = new SourceFileMatcher(null, null, null);
         HashSet<RuleSource> ruleSources = new HashSet<>();
         File index = new File(ruleDirectory, "index.adoc");
         File other = new File(ruleDirectory, "additional-rules/importedRules.adoc");
