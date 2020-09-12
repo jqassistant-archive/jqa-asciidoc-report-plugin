@@ -49,13 +49,10 @@ public class ImageRenderer {
      *            The {@link File}.
      */
     private void renderDiagram(String plantUML, File file, FileFormat format) throws ReportException {
+        LOGGER.info("Rendering diagram '{}' ", file.getPath());
         SourceStringReader reader = new SourceStringReader(plantUML);
-        try {
-            LOGGER.info("Rendering diagram '{}' ", file.getPath());
-            try (FileOutputStream os = new FileOutputStream(file)) {
-                reader.outputImage(os, new FileFormatOption(format));
-            }
-
+        try (FileOutputStream os = new FileOutputStream(file)) {
+            reader.outputImage(os, new FileFormatOption(format));
         } catch (IOException e) {
             throw new ReportException("Cannot create component diagram for file " + file.getPath());
         }
