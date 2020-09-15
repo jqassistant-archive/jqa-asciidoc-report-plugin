@@ -1,7 +1,5 @@
 = jQAssistant Asciidoc Report Plugin
 
-image::https://github.com/jQAssistant/jqa-asciidoc-report-plugin/workflows/jQA%20Standard%20CI%20Build/badge.svg[jQA Standard CI Build]
-
 This is the http://asciidoctor.org/[Asciidoc^] report plugin for https://www.jqassistant.org[jQAssistant^].
 
 After an analysis http://www.asciidoctor[Asciidoctor] it renders the input documents that provided rules to HTML documents.
