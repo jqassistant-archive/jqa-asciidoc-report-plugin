@@ -1,3 +1,4 @@
+[[asciidoc-report-plugin]]
 == Asciidoc Report
 
 The plugin records the results of executed rules (i.e. concepts and constraints).
