@@ -8,7 +8,7 @@ import java.util.TreeMap;
 import com.buschmais.jqassistant.core.rule.api.model.ExecutableRule;
 import com.buschmais.jqassistant.plugin.asciidocreport.RuleResult;
 
-import org.asciidoctor.ast.AbstractBlock;
+import org.asciidoctor.ast.StructuralNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +17,7 @@ public class ImportedRulesIncludeStrategy extends AbstractIncludeRulesStrategy {
     private static final Logger LOGGER = LoggerFactory.getLogger(ImportedRulesIncludeStrategy.class);
 
     public ImportedRulesIncludeStrategy(Map<String, RuleResult> conceptResults, Map<String, RuleResult> constraintResults,
-                                        Map<String, AbstractBlock> ruleBlocks, Set<ExecutableRule<?>> includedRules) {
+                                        Map<String, StructuralNode> ruleBlocks, Set<ExecutableRule<?>> includedRules) {
         super(conceptResults, constraintResults, ruleBlocks, includedRules);
     }
 

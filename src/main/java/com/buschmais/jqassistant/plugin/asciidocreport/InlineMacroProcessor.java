@@ -3,7 +3,8 @@ package com.buschmais.jqassistant.plugin.asciidocreport;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.asciidoctor.ast.AbstractBlock;
+import org.asciidoctor.ast.ContentNode;
+import org.asciidoctor.ast.StructuralNode;
 
 public class InlineMacroProcessor extends org.asciidoctor.extension.InlineMacroProcessor {
 
@@ -18,7 +19,7 @@ public class InlineMacroProcessor extends org.asciidoctor.extension.InlineMacroP
     }
 
     @Override
-    public Object process(AbstractBlock parent, String target, Map<String, Object> attributes) {
+    public Object process(ContentNode parent, String target, Map<String, Object> attributes) {
         if (CONCEPT_REF.equals(target)) {
             DocumentParser.Result result = documentParser.parse(parent.getDocument());
             return processRef(parent, attributes, result.getConceptBlocks());
@@ -29,13 +30,13 @@ public class InlineMacroProcessor extends org.asciidoctor.extension.InlineMacroP
         throw new IllegalArgumentException("Unknown jQAssistant macro '" + target + "'");
     }
 
-    private Object processRef(AbstractBlock parent, Map<String, Object> attributes, Map<String, AbstractBlock> blocks) {
-        Object rule = attributes.get("text");
+    private Object processRef(ContentNode parent, Map<String, Object> attributes, Map<String, StructuralNode> blocks) {
+        Object rule = attributes.get("1");
         if (rule != null && blocks.containsKey(rule)) {
             Map<String, Object> options = new HashMap<>();
             options.put("type", ":link");
             options.put("target", "#" + rule);
-            return createInline(parent, "anchor", rule.toString(), attributes, options).convert();
+            return createPhraseNode(parent, "anchor", rule.toString(), attributes, options);
         }
         return rule;
     }

@@ -6,16 +6,16 @@ import java.util.Set;
 import com.buschmais.jqassistant.core.rule.api.model.*;
 import com.buschmais.jqassistant.plugin.asciidocreport.RuleResult;
 
-import org.asciidoctor.ast.AbstractBlock;
+import org.asciidoctor.ast.StructuralNode;
 
 public abstract class AbstractIncludeRulesStrategy extends AbstractIncludeStrategy {
 
-    protected final Map<String, AbstractBlock> ruleBlocks;
+    protected final Map<String, StructuralNode> ruleBlocks;
 
     private final Set<ExecutableRule<?>> includedRules;
 
     protected AbstractIncludeRulesStrategy(Map<String, RuleResult> conceptResults, Map<String, RuleResult> constraintResults,
-            Map<String, AbstractBlock> ruleBlocks, Set<ExecutableRule<?>> includedRules) {
+            Map<String, StructuralNode> ruleBlocks, Set<ExecutableRule<?>> includedRules) {
         super(conceptResults, constraintResults);
         this.ruleBlocks = ruleBlocks;
         this.includedRules = includedRules;

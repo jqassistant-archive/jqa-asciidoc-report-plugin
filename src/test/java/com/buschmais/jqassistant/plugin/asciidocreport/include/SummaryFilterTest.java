@@ -7,7 +7,7 @@ import java.util.Map;
 import com.buschmais.jqassistant.core.rule.api.filter.RuleFilter;
 import com.buschmais.jqassistant.plugin.asciidocreport.RuleResult;
 
-import org.asciidoctor.ast.AbstractBlock;
+import org.asciidoctor.ast.StructuralNode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,7 +22,7 @@ class SummaryFilterTest {
 
     private Map<String, RuleResult> conceptResults = new HashMap<>();
     private Map<String, RuleResult> constraintResults = new HashMap<>();
-    private Map<String, AbstractBlock> ruleBlocks = new HashMap<>();
+    private Map<String, StructuralNode> ruleBlocks = new HashMap<>();
 
     @Mock
     private RuleResult conceptResult;
@@ -41,8 +41,8 @@ class SummaryFilterTest {
         conceptResults.put("importedConcept", importedConceptResult);
         constraintResults.put("constraint", constraintResult);
         constraintResults.put("importedConstraint", importedConstraintResult);
-        ruleBlocks.put("concept", mock(AbstractBlock.class));
-        ruleBlocks.put("constraint", mock(AbstractBlock.class));
+        ruleBlocks.put("concept", mock(StructuralNode.class));
+        ruleBlocks.put("constraint", mock(StructuralNode.class));
         summaryFilter = new SummaryFilter(conceptResults, constraintResults, ruleBlocks, RuleFilter.getInstance());
     }
 

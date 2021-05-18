@@ -10,7 +10,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-import org.asciidoctor.ast.AbstractBlock;
+import org.asciidoctor.ast.StructuralNode;
 
 import static java.util.stream.Collectors.toList;
 
@@ -30,11 +30,11 @@ public class SummaryFilter {
 
     private final Map<String, RuleResult> conceptResults;
     private final Map<String, RuleResult> constraintResults;
-    private final Map<String, AbstractBlock> ruleBlocks;
+    private final Map<String, StructuralNode> ruleBlocks;
 
     private final RuleFilter ruleFilter;
 
-    public SummaryFilter(Map<String, RuleResult> conceptResults, Map<String, RuleResult> constraintResults, Map<String, AbstractBlock> ruleBlocks,
+    public SummaryFilter(Map<String, RuleResult> conceptResults, Map<String, RuleResult> constraintResults, Map<String, StructuralNode> ruleBlocks,
             RuleFilter ruleFilter) {
         this.conceptResults = conceptResults;
         this.constraintResults = constraintResults;

@@ -7,14 +7,14 @@ import com.buschmais.jqassistant.core.rule.api.filter.RuleFilter;
 import com.buschmais.jqassistant.core.rule.api.model.ExecutableRule;
 import com.buschmais.jqassistant.plugin.asciidocreport.RuleResult;
 
-import org.asciidoctor.ast.AbstractBlock;
+import org.asciidoctor.ast.StructuralNode;
 
 public class RulesIncludeStrategy extends AbstractIncludeRulesStrategy {
 
     private final RuleFilter ruleFilter;
 
     public RulesIncludeStrategy(Map<String, RuleResult> conceptResults, Map<String, RuleResult> constraintResults, RuleFilter ruleFilter,
-            Map<String, AbstractBlock> ruleBlocks, Set<ExecutableRule<?>> includedRules) {
+            Map<String, StructuralNode> ruleBlocks, Set<ExecutableRule<?>> includedRules) {
         super(conceptResults, constraintResults, ruleBlocks, includedRules);
         this.ruleFilter = ruleFilter;
     }

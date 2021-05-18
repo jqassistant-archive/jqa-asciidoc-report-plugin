@@ -14,9 +14,9 @@ import com.buschmais.jqassistant.core.report.api.ReportContext;
 import com.buschmais.jqassistant.core.rule.api.model.ExecutableRule;
 
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.asciidoctor.ast.AbstractBlock;
-import org.asciidoctor.ast.AbstractNode;
+import org.asciidoctor.ast.ContentNode;
 import org.asciidoctor.ast.Document;
+import org.asciidoctor.ast.StructuralNode;
 import org.asciidoctor.extension.Treeprocessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,16 +49,16 @@ public class TreePreprocessor extends Treeprocessor {
         return document;
     }
 
-    private void enrichResults(Map<String, AbstractBlock> blocks, Map<String, RuleResult> results) {
-        for (Map.Entry<String, AbstractBlock> blockEntry : blocks.entrySet()) {
+    private void enrichResults(Map<String, StructuralNode> blocks, Map<String, RuleResult> results) {
+        for (Map.Entry<String, StructuralNode> blockEntry : blocks.entrySet()) {
             String id = blockEntry.getKey();
-            AbstractBlock block = blockEntry.getValue();
+            StructuralNode block = blockEntry.getValue();
             RuleResult result = results.get(id);
             List<String> content = renderRuleResult(result);
-            AbstractNode parent = block.getParent();
-            List<AbstractBlock> siblings = ((AbstractBlock) parent).getBlocks();
+            ContentNode parent = block.getParent();
+            List<StructuralNode> siblings = ((StructuralNode) parent).getBlocks();
             int i = siblings.indexOf(block);
-            siblings.add(i + 1, createBlock((AbstractBlock) parent, "paragraph", content, new HashMap<>(), new HashMap<>()));
+            siblings.add(i + 1, createBlock((StructuralNode) parent, "paragraph", content, new HashMap<>(), new HashMap<>()));
         }
     }
 
