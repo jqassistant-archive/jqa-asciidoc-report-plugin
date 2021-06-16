@@ -3,6 +3,8 @@ package com.buschmais.jqassistant.plugin.asciidocreport;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.buschmais.jqassistant.core.shared.asciidoc.DocumentParser;
+
 import org.asciidoctor.ast.ContentNode;
 import org.asciidoctor.ast.StructuralNode;
 
@@ -22,10 +24,10 @@ public class InlineMacroProcessor extends org.asciidoctor.extension.InlineMacroP
     public Object process(ContentNode parent, String target, Map<String, Object> attributes) {
         if (CONCEPT_REF.equals(target)) {
             DocumentParser.Result result = documentParser.parse(parent.getDocument());
-            return processRef(parent, attributes, result.getConceptBlocks());
+            return processRef(parent, attributes, result.getConcepts());
         } else if (CONSTRAINT_REF.equals(target)) {
             DocumentParser.Result result = documentParser.parse(parent.getDocument());
-            return processRef(parent, attributes, result.getConstraintBlocks());
+            return processRef(parent, attributes, result.getConstraints());
         }
         throw new IllegalArgumentException("Unknown jQAssistant macro '" + target + "'");
     }

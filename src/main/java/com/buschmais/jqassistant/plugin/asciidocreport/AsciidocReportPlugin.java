@@ -22,6 +22,7 @@ import com.buschmais.jqassistant.core.rule.api.model.Group;
 import com.buschmais.jqassistant.core.rule.api.model.Rule;
 import com.buschmais.jqassistant.core.rule.api.source.RuleSource;
 import com.buschmais.jqassistant.core.shared.asciidoc.AsciidoctorFactory;
+import com.buschmais.jqassistant.core.shared.asciidoc.DocumentParser;
 
 import org.asciidoctor.Asciidoctor;
 import org.asciidoctor.Attributes;

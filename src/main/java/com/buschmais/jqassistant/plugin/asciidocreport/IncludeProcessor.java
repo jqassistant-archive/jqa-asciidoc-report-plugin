@@ -4,6 +4,7 @@ import java.util.*;
 
 import com.buschmais.jqassistant.core.rule.api.filter.RuleFilter;
 import com.buschmais.jqassistant.core.rule.api.model.ExecutableRule;
+import com.buschmais.jqassistant.core.shared.asciidoc.DocumentParser;
 import com.buschmais.jqassistant.plugin.asciidocreport.include.*;
 
 import org.asciidoctor.ast.Document;
@@ -22,8 +23,8 @@ public class IncludeProcessor extends org.asciidoctor.extension.IncludeProcessor
             Map<String, RuleResult> constraintResults) {
         DocumentParser.Result result = documentParser.parse(document);
         Map<String, StructuralNode> ruleBlocks = new HashMap<>();
-        ruleBlocks.putAll(result.getConceptBlocks());
-        ruleBlocks.putAll(result.getConstraintBlocks());
+        ruleBlocks.putAll(result.getConcepts());
+        ruleBlocks.putAll(result.getConstraints());
         Set<ExecutableRule<?>> includedRules = new HashSet<>();
         RuleFilter ruleFilter = RuleFilter.getInstance();
         SummaryFilter summaryFilter = new SummaryFilter(conceptResults, constraintResults, ruleBlocks, ruleFilter);

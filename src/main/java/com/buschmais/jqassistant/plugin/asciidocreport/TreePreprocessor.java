@@ -12,6 +12,7 @@ import java.util.Map;
 
 import com.buschmais.jqassistant.core.report.api.ReportContext;
 import com.buschmais.jqassistant.core.rule.api.model.ExecutableRule;
+import com.buschmais.jqassistant.core.shared.asciidoc.DocumentParser;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.asciidoctor.ast.ContentNode;
@@ -30,7 +31,7 @@ public class TreePreprocessor extends Treeprocessor {
     private final DocumentParser documentParser;
     private final Map<String, RuleResult> conceptResults;
     private final Map<String, RuleResult> constraintResults;
-    private final File reportDirectoy;
+    private final File reportDirectory;
     private final ReportContext reportContext;
 
     public TreePreprocessor(DocumentParser documentParser, Map<String, RuleResult> conceptResults, Map<String, RuleResult> constraintResults,
@@ -38,14 +39,14 @@ public class TreePreprocessor extends Treeprocessor {
         this.documentParser = documentParser;
         this.conceptResults = conceptResults;
         this.constraintResults = constraintResults;
-        this.reportDirectoy = reportDirectory;
+        this.reportDirectory = reportDirectory;
         this.reportContext = reportContext;
     }
 
     public Document process(Document document) {
         DocumentParser.Result result = documentParser.parse(document);
-        enrichResults(result.getConceptBlocks(), conceptResults);
-        enrichResults(result.getConstraintBlocks(), constraintResults);
+        enrichResults(result.getConcepts(), conceptResults);
+        enrichResults(result.getConstraints(), constraintResults);
         return document;
     }
 
@@ -113,7 +114,7 @@ public class TreePreprocessor extends Treeprocessor {
     }
 
     /**
-     * Determines a URL relative to the {@link #reportDirectoy}.
+     * Determines a URL relative to the {@link #reportDirectory}.
      *
      * @param url
      *            The {@link URL}.
@@ -127,7 +128,7 @@ public class TreePreprocessor extends Treeprocessor {
             LOGGER.warn("Cannot determine path from URL '" + url + "'.", e);
             return url.toExternalForm();
         }
-        Path relativePath = reportDirectoy.getAbsoluteFile().toPath().relativize(path);
+        Path relativePath = reportDirectory.getAbsoluteFile().toPath().relativize(path);
         return relativePath.toString().replace('\\', '/');
     }
 
