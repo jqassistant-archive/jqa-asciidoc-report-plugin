@@ -24,15 +24,14 @@ import com.buschmais.jqassistant.core.rule.api.source.RuleSource;
 import com.buschmais.jqassistant.core.shared.asciidoc.AsciidoctorFactory;
 
 import org.asciidoctor.Asciidoctor;
+import org.asciidoctor.Attributes;
+import org.asciidoctor.Options;
 import org.asciidoctor.OptionsBuilder;
 import org.asciidoctor.SafeMode;
 import org.asciidoctor.ast.Document;
 import org.asciidoctor.extension.JavaExtensionRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.asciidoctor.AttributesBuilder.attributes;
-import static org.asciidoctor.OptionsBuilder.options;
 
 @Default
 public class AsciidocReportPlugin implements ReportPlugin {
@@ -97,18 +96,24 @@ public class AsciidocReportPlugin implements ReportPlugin {
             LOGGER.info("Writing to report directory " + reportDirectory.getAbsolutePath());
             for (Map.Entry<File, List<File>> entry : files.entrySet()) {
                 File baseDir = entry.getKey();
-                OptionsBuilder optionsBuilder = options().mkDirs(true).baseDir(baseDir).toDir(reportDirectory).backend(BACKEND_HTML5).safe(SafeMode.UNSAFE)
-                        .attributes(attributes().experimental(true).sourceHighlighter(CODERAY).icons("font"));
+                OptionsBuilder optionsBuilder = Options.builder().mkDirs(true).baseDir(baseDir).toDir(reportDirectory).backend(BACKEND_HTML5)
+                        .safe(SafeMode.UNSAFE).attributes(Attributes.builder().experimental(true).sourceHighlighter(CODERAY).icons("font").build());
+                Options options = optionsBuilder.build();
                 for (File file : entry.getValue()) {
                     LOGGER.info("-> {}", file.getPath());
-                    Document document = asciidoctor.loadFile(file, optionsBuilder.asMap());
-                    JavaExtensionRegistry extensionRegistry = asciidoctor.javaExtensionRegistry();
-                    IncludeProcessor includeProcessor = new IncludeProcessor(documentParser, document, conceptResults, constraintResults);
-                    extensionRegistry.includeProcessor(includeProcessor);
-                    extensionRegistry.inlineMacro(new InlineMacroProcessor(documentParser));
-                    extensionRegistry.treeprocessor(new TreePreprocessor(documentParser, conceptResults, constraintResults, reportDirectory, reportContext));
-                    extensionRegistry.postprocessor(new RulePostProcessor(conceptResults, constraintResults));
-                    asciidoctor.convertFile(file, optionsBuilder);
+                    try {
+                        Document document = asciidoctor.loadFile(file, options);
+                        JavaExtensionRegistry extensionRegistry = asciidoctor.javaExtensionRegistry();
+                        IncludeProcessor includeProcessor = new IncludeProcessor(documentParser, document, conceptResults, constraintResults);
+                        extensionRegistry.includeProcessor(includeProcessor);
+                        extensionRegistry.inlineMacro(new InlineMacroProcessor(documentParser));
+                        extensionRegistry
+                                .treeprocessor(new TreePreprocessor(documentParser, conceptResults, constraintResults, reportDirectory, reportContext));
+                        extensionRegistry.postprocessor(new RulePostProcessor(conceptResults, constraintResults));
+                        asciidoctor.convertFile(file, options);
+                    } catch (Exception e) {
+                        throw new ReportException("Cannot convert file " + file, e);
+                    }
                     asciidoctor.unregisterAllExtensions();
                 }
             }

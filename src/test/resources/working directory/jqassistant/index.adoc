@@ -43,5 +43,11 @@ RETURN
 
 include::jQA:ImportedRules[]
 
+== Corner Cases
 
+=== Definition List
+
+// Definition lists cause problems
+Item1:: Description of item1
+Item2:: Description of item2
 
