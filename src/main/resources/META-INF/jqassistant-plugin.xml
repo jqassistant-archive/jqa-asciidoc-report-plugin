@@ -1,12 +1,12 @@
-<jpd:jqassistant-plugin xmlns:jpd="http://schema.jqassistant.org/plugin/v1.10"
-                        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                        xsi:schemaLocation="http://schema.jqassistant.org/plugin/v1.10 https://schema.jqassistant.org/plugin/jqassistant-plugin-v1.10.xsd"
-                        name="Asciidoc Report" id="jqa.plugin.asciidocreport">
-<description>Renders Asciidoc files containing rules to HTML reports including results as tables, diagrams or links to external files.</description>
+<jqassistant-plugin xmlns="http://schema.jqassistant.org/plugin/v1.10"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://schema.jqassistant.org/plugin/v1.10 https://schema.jqassistant.org/plugin/jqassistant-plugin-v1.10.xsd"
+                    name="Asciidoc Report" id="jqa.plugin.asciidocreport">
+    <description>Renders Asciidoc files containing rules to HTML reports including results as tables, diagrams or links to external files.</description>
     <report>
         <class id="asciidoc">com.buschmais.jqassistant.plugin.asciidocreport.AsciidocReportPlugin</class>
         <class id="plantuml-component-diagram">com.buschmais.jqassistant.plugin.asciidocreport.plantuml.component.ComponentDiagramReportPlugin</class>
         <class id="plantuml-sequence-diagram">com.buschmais.jqassistant.plugin.asciidocreport.plantuml.sequence.SequenceDiagramReportPlugin</class>
         <class id="plantuml-class-diagram">com.buschmais.jqassistant.plugin.asciidocreport.plantuml.clazz.ClassDiagramReportPlugin</class>
     </report>
-</jpd:jqassistant-plugin>
+</jqassistant-plugin>
