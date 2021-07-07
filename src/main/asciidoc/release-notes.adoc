@@ -1,8 +1,11 @@
-//
-//
-//
-ifndef::jqa-in-manual[== Version 1.8.0]
-ifdef::jqa-in-manual[== Asciidoc Report Plugin 1.8.0]
+
+= Asciidoc Report Plugin
+
+== 1.9.0
+
+* The PlantUML diagram plugin now automatically selects GraphViz (prefered) or JDOT for rendering if not explicitly configured
+
+== 1.8.0
 
 * Include Asciidoc Report plugin into jQAssistant main project. Note that for upgrading to 1.8 any existing dependency to the Asciidoc Report plugin from the contrib area must be removed
 * Renamed properties `asciidoc.report.plantuml.format` & `asciidoc.report.plantuml.rendermode` to `plantuml.report.format` & `plantuml.report.rendermode`
