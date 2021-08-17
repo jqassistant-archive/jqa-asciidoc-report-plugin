@@ -1,7 +1,10 @@
 package com.buschmais.jqassistant.plugin.asciidocreport;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import com.buschmais.jqassistant.core.report.api.ReportContext;
 import com.buschmais.jqassistant.core.report.api.ReportException;
@@ -11,7 +14,6 @@ import com.buschmais.jqassistant.core.report.api.model.Result.Status;
 import com.buschmais.jqassistant.core.report.impl.ReportContextImpl;
 import com.buschmais.jqassistant.core.rule.api.model.*;
 import com.buschmais.jqassistant.core.rule.api.reader.RuleConfiguration;
-import com.buschmais.jqassistant.core.rule.api.reader.RuleParserPlugin;
 import com.buschmais.jqassistant.core.rule.api.source.FileRuleSource;
 import com.buschmais.jqassistant.core.rule.api.source.RuleSource;
 import com.buschmais.jqassistant.core.rule.impl.reader.AsciidocRuleParserPlugin;
@@ -24,6 +26,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.junit.jupiter.api.BeforeEach;
 
+import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -111,10 +114,10 @@ public abstract class AbstractAsciidocReportPluginTest {
         AsciidocRuleParserPlugin ruleParserPlugin = new AsciidocRuleParserPlugin();
         ruleParserPlugin.initialize();
         ruleParserPlugin.configure(RuleConfiguration.DEFAULT);
-        RuleParser ruleParser = new RuleParser(Arrays.<RuleParserPlugin> asList(ruleParserPlugin));
+        RuleParser ruleParser = new RuleParser(asList(ruleParserPlugin));
         List<RuleSource> ruleSources = new ArrayList<>();
         for (String adocFile : adocFiles) {
-            ruleSources.add(new FileRuleSource(new File(ruleDirectory, adocFile)));
+            ruleSources.add(new FileRuleSource(ruleDirectory, adocFile));
         }
         return ruleParser.parse(ruleSources);
     }

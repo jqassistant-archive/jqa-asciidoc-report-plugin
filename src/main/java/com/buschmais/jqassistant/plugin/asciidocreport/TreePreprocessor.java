@@ -31,15 +31,15 @@ public class TreePreprocessor extends Treeprocessor {
     private final DocumentParser documentParser;
     private final Map<String, RuleResult> conceptResults;
     private final Map<String, RuleResult> constraintResults;
-    private final File reportDirectory;
+    private final File outputFileDirectory;
     private final ReportContext reportContext;
 
     public TreePreprocessor(DocumentParser documentParser, Map<String, RuleResult> conceptResults, Map<String, RuleResult> constraintResults,
-            File reportDirectory, ReportContext reportContext) {
+            File outputFileDirectory, ReportContext reportContext) {
         this.documentParser = documentParser;
         this.conceptResults = conceptResults;
         this.constraintResults = constraintResults;
-        this.reportDirectory = reportDirectory;
+        this.outputFileDirectory = outputFileDirectory;
         this.reportContext = reportContext;
     }
 
@@ -114,7 +114,7 @@ public class TreePreprocessor extends Treeprocessor {
     }
 
     /**
-     * Determines a URL relative to the {@link #reportDirectory}.
+     * Determines a URL relative to the {@link #outputFileDirectory}.
      *
      * @param url
      *            The {@link URL}.
@@ -125,10 +125,10 @@ public class TreePreprocessor extends Treeprocessor {
         try {
             path = Paths.get(url.toURI());
         } catch (URISyntaxException e) {
-            LOGGER.warn("Cannot determine path from URL '" + url + "'.", e);
+            LOGGER.info("Cannot determine path from URL '" + url + "'.", e);
             return url.toExternalForm();
         }
-        Path relativePath = reportDirectory.getAbsoluteFile().toPath().relativize(path);
+        Path relativePath = outputFileDirectory.getAbsoluteFile().toPath().relativize(path);
         return relativePath.toString().replace('\\', '/');
     }
 

@@ -1,13 +1,9 @@
 package com.buschmais.jqassistant.plugin.asciidocreport;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
 
 import com.buschmais.jqassistant.core.report.api.ReportContext;
 import com.buschmais.jqassistant.core.report.api.ReportException;
@@ -15,24 +11,19 @@ import com.buschmais.jqassistant.core.report.api.ReportHelper;
 import com.buschmais.jqassistant.core.report.api.ReportPlugin;
 import com.buschmais.jqassistant.core.report.api.ReportPlugin.Default;
 import com.buschmais.jqassistant.core.report.api.model.Result;
-import com.buschmais.jqassistant.core.rule.api.model.Concept;
-import com.buschmais.jqassistant.core.rule.api.model.Constraint;
-import com.buschmais.jqassistant.core.rule.api.model.ExecutableRule;
-import com.buschmais.jqassistant.core.rule.api.model.Group;
-import com.buschmais.jqassistant.core.rule.api.model.Rule;
+import com.buschmais.jqassistant.core.rule.api.model.*;
 import com.buschmais.jqassistant.core.rule.api.source.RuleSource;
 import com.buschmais.jqassistant.core.shared.asciidoc.AsciidoctorFactory;
 import com.buschmais.jqassistant.core.shared.asciidoc.DocumentParser;
 
-import org.asciidoctor.Asciidoctor;
-import org.asciidoctor.Attributes;
-import org.asciidoctor.Options;
-import org.asciidoctor.OptionsBuilder;
-import org.asciidoctor.SafeMode;
+import org.apache.commons.io.IOUtils;
+import org.asciidoctor.*;
 import org.asciidoctor.ast.Document;
 import org.asciidoctor.extension.JavaExtensionRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Default
 public class AsciidocReportPlugin implements ReportPlugin {
@@ -55,7 +46,7 @@ public class AsciidocReportPlugin implements ReportPlugin {
 
     private File reportDirectory;
 
-    private SourceFileMatcher sourceFileMatcher;
+    private RuleSourceMatcher ruleSourceMatcher;
 
     private Set<RuleSource> ruleSources;
 
@@ -73,7 +64,7 @@ public class AsciidocReportPlugin implements ReportPlugin {
         File ruleDirectory = getFile(PROPERTY_RULE_DIRECTORY, null, properties);
         String fileInclude = (String) properties.get(PROPERTY_FILE_INCLUDE);
         String fileExclude = (String) properties.get(PROPERTY_FILE_EXCLUDE);
-        this.sourceFileMatcher = new SourceFileMatcher(ruleDirectory, fileInclude, fileExclude);
+        this.ruleSourceMatcher = new RuleSourceMatcher(ruleDirectory, fileInclude, fileExclude);
     }
 
     private File getFile(String property, File defaultValue, Map<String, Object> properties) {
@@ -90,36 +81,55 @@ public class AsciidocReportPlugin implements ReportPlugin {
 
     @Override
     public void end() throws ReportException {
-        Map<File, List<File>> files = sourceFileMatcher.match(ruleSources);
-        if (!files.isEmpty()) {
+        List<RuleSource> filteredRuleSources = ruleSourceMatcher.match(ruleSources);
+        if (!filteredRuleSources.isEmpty()) {
             LOGGER.info("Calling for the Asciidoctor...");
             Asciidoctor asciidoctor = AsciidoctorFactory.getAsciidoctor();
             LOGGER.info("Writing to report directory " + reportDirectory.getAbsolutePath());
-            for (Map.Entry<File, List<File>> entry : files.entrySet()) {
-                File baseDir = entry.getKey();
-                OptionsBuilder optionsBuilder = Options.builder().mkDirs(true).baseDir(baseDir).toDir(reportDirectory).backend(BACKEND_HTML5)
-                        .safe(SafeMode.UNSAFE).attributes(Attributes.builder().experimental(true).sourceHighlighter(CODERAY).icons("font").build());
+            for (RuleSource filteredRuleSource : filteredRuleSources) {
+                OptionsBuilder optionsBuilder = Options.builder().mkDirs(true).toDir(reportDirectory).backend(BACKEND_HTML5).safe(SafeMode.UNSAFE)
+                        .attributes(Attributes.builder().experimental(true).sourceHighlighter(CODERAY).icons("font").build());
+                filteredRuleSource.getDirectory().ifPresent(baseDir -> optionsBuilder.baseDir(baseDir));
+                String outputFileName = getOutputFileName(filteredRuleSource);
+                optionsBuilder.toFile(new File(outputFileName));
                 Options options = optionsBuilder.build();
-                for (File file : entry.getValue()) {
-                    LOGGER.info("-> {}", file.getPath());
-                    try {
-                        Document document = asciidoctor.loadFile(file, options);
-                        JavaExtensionRegistry extensionRegistry = asciidoctor.javaExtensionRegistry();
-                        IncludeProcessor includeProcessor = new IncludeProcessor(documentParser, document, conceptResults, constraintResults);
-                        extensionRegistry.includeProcessor(includeProcessor);
-                        extensionRegistry.inlineMacro(new InlineMacroProcessor(documentParser));
-                        extensionRegistry
-                                .treeprocessor(new TreePreprocessor(documentParser, conceptResults, constraintResults, reportDirectory, reportContext));
-                        extensionRegistry.postprocessor(new RulePostProcessor(conceptResults, constraintResults));
-                        asciidoctor.convertFile(file, options);
-                    } catch (Exception e) {
-                        throw new ReportException("Cannot convert file " + file, e);
-                    }
-                    asciidoctor.unregisterAllExtensions();
-                }
+                LOGGER.info("-> {}", filteredRuleSource);
+                String content = readContent(filteredRuleSource);
+                Document document = asciidoctor.load(content, options);
+                JavaExtensionRegistry extensionRegistry = asciidoctor.javaExtensionRegistry();
+                IncludeProcessor includeProcessor = new IncludeProcessor(documentParser, document, conceptResults, constraintResults);
+                extensionRegistry.includeProcessor(includeProcessor);
+                extensionRegistry.inlineMacro(new InlineMacroProcessor(documentParser));
+                extensionRegistry.treeprocessor(new TreePreprocessor(documentParser, conceptResults, constraintResults, new File(reportDirectory, outputFileName).getParentFile(), reportContext));
+                extensionRegistry.postprocessor(new RulePostProcessor(conceptResults, constraintResults));
+                asciidoctor.convert(content, options);
+                asciidoctor.unregisterAllExtensions();
             }
             LOGGER.info("The Asciidoctor finished his work successfully.");
         }
+    }
+
+    private String readContent(RuleSource ruleSource) throws ReportException {
+        String content;
+        try (InputStream inputStream = ruleSource.getInputStream()) {
+            content = IOUtils.toString(inputStream, UTF_8);
+        } catch (IOException e) {
+            throw new ReportException("Cannot read rule source " + ruleSource);
+        }
+        return content;
+    }
+
+    /**
+     * Create the output file name by replacing the relative path of the given
+     * {@link RuleSource} extension with ".html".
+     *
+     * @param ruleSource
+     *            The {@link RuleSource}.
+     * @return The output file name.
+     */
+    private String getOutputFileName(RuleSource ruleSource) {
+        String relativePath = ruleSource.getRelativePath();
+        return relativePath.substring(0, relativePath.lastIndexOf('.')) + ".html";
     }
 
     @Override
