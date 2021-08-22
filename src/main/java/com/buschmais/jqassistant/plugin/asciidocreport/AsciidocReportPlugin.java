@@ -13,6 +13,7 @@ import com.buschmais.jqassistant.core.report.api.ReportPlugin.Default;
 import com.buschmais.jqassistant.core.report.api.model.Result;
 import com.buschmais.jqassistant.core.rule.api.model.*;
 import com.buschmais.jqassistant.core.rule.api.source.RuleSource;
+import com.buschmais.jqassistant.core.shared.annotation.ToBeRemovedInVersion;
 import com.buschmais.jqassistant.core.shared.asciidoc.AsciidoctorFactory;
 import com.buschmais.jqassistant.core.shared.asciidoc.DocumentParser;
 
@@ -31,6 +32,7 @@ public class AsciidocReportPlugin implements ReportPlugin {
     private static final Logger LOGGER = LoggerFactory.getLogger(AsciidocReportPlugin.class);
 
     private static final String PROPERTY_DIRECTORY = "asciidoc.report.directory";
+    @ToBeRemovedInVersion(major = 1, minor = 12)
     private static final String PROPERTY_RULE_DIRECTORY = "asciidoc.report.rule.directory";
     private static final String PROPERTY_FILE_INCLUDE = "asciidoc.report.file.include";
     private static final String PROPERTY_FILE_EXCLUDE = "asciidoc.report.file.exclude";
@@ -86,27 +88,30 @@ public class AsciidocReportPlugin implements ReportPlugin {
             LOGGER.info("Calling for the Asciidoctor...");
             Asciidoctor asciidoctor = AsciidoctorFactory.getAsciidoctor();
             LOGGER.info("Writing to report directory " + reportDirectory.getAbsolutePath());
-            for (RuleSource filteredRuleSource : filteredRuleSources) {
+            for (RuleSource ruleSource : filteredRuleSources) {
                 OptionsBuilder optionsBuilder = Options.builder().mkDirs(true).toDir(reportDirectory).backend(BACKEND_HTML5).safe(SafeMode.UNSAFE)
                         .attributes(Attributes.builder().experimental(true).sourceHighlighter(CODERAY).icons("font").build());
-                filteredRuleSource.getDirectory().ifPresent(baseDir -> optionsBuilder.baseDir(baseDir));
-                String outputFileName = getOutputFileName(filteredRuleSource);
+                ruleSource.getDirectory().ifPresent(baseDir -> optionsBuilder.baseDir(baseDir));
+                String outputFileName = getOutputFileName(ruleSource);
                 optionsBuilder.toFile(new File(outputFileName));
                 Options options = optionsBuilder.build();
-                LOGGER.info("-> {}", filteredRuleSource);
-                String content = readContent(filteredRuleSource);
+                LOGGER.info("-> {}", ruleSource);
+                String content = readContent(ruleSource);
                 Document document = asciidoctor.load(content, options);
                 JavaExtensionRegistry extensionRegistry = asciidoctor.javaExtensionRegistry();
                 IncludeProcessor includeProcessor = new IncludeProcessor(documentParser, document, conceptResults, constraintResults);
                 extensionRegistry.includeProcessor(includeProcessor);
+                extensionRegistry.includeProcessor(new PluginIncludeProcessor(ruleSource.getRelativePath()));
                 extensionRegistry.inlineMacro(new InlineMacroProcessor(documentParser));
-                extensionRegistry.treeprocessor(new TreePreprocessor(documentParser, conceptResults, constraintResults, new File(reportDirectory, outputFileName).getParentFile(), reportContext));
+                extensionRegistry.treeprocessor(new TreePreprocessor(documentParser, conceptResults, constraintResults,
+                        new File(reportDirectory, outputFileName).getParentFile(), reportContext));
                 extensionRegistry.postprocessor(new RulePostProcessor(conceptResults, constraintResults));
                 asciidoctor.convert(content, options);
                 asciidoctor.unregisterAllExtensions();
             }
             LOGGER.info("The Asciidoctor finished his work successfully.");
         }
+
     }
 
     private String readContent(RuleSource ruleSource) throws ReportException {

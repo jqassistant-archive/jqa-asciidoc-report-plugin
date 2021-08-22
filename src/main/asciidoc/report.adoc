@@ -2,13 +2,14 @@
 == Asciidoc Report
 
 The plugin records the results of executed rules (i.e. concepts and constraints).
-At the end of the analysis phase http://www.asciidoctor[Asciidoctor] is used for rendering the input documents providing the rules to HTML documents. The listings containing rules are identified and their status and results appended.
+At the end of the analysis phase http://www.asciidoctor[Asciidoctor] is used for rendering the input documents providing the rules to HTML documents. The rules blocks are identified and replaced by their status and results appended.
 Furthermore include directives are provided for embedding a summary about executed and imported rules.
 
 By default all rule files with the name `index.adoc` will be selected for rendering.
-The report properties `asciidoc.report.rule.directory` and `asciidoc.report.file.include` may be used to explicitly select files.
+The report property `asciidoc.report.file.include` may be used to explicitly select files.
+Files may be located in the rule directory of a project (e.g. `jqassistant/`) or provided by plugins.
 
-=== Include Directives
+=== jQA Include Directives
 
 The report may be enhanced by `jQA` include directives:
 
@@ -55,10 +56,43 @@ The Asciidoc Report plugin accepts several options that might be passed as repor
 |===
 | Property                            | Description                                                                                                        | Default
 | asciidoc.report.directory           | Specifies the directory where the HTML files will be written                                                       | jqassistant/report/asciidoc
-| asciidoc.report.rule.directory      | Specifies the directory where the Asciidoc files are located (optional)                                            |
 | asciidoc.report.file.include        | A comma separated list of filter of Asciidoc files to be included (optional)                                       |
 | asciidoc.report.file.exclude        | A comma separated list of filter of Asciidoc files to be excluded (optional)                                       |
 |===
+
+=== Asciidoc Files in Plugins
+
+Asciidoc files may be distributed as part of plugins to allow sharing rules and reports.
+
+* Files must be located as classpath resources in the folder `/META-INF/jqassistant-rules` or sub-folders of it:
++
+[source]
+----
+META-INF/
+  |-jqassistant-plugin.xml
+  |-jqassistant-rules/
+    |-my-rules/
+      |-index.adoc
+      |-included-file.adoc
+----
+* Each file containing rules must be registered in the plugin descriptor
++
+[source,xml]
+.META-INF/jqassistant-plugin.xml
+----
+<jqassistant-plugin>
+    <rules>
+        <resource>my-rules/index.adoc</resource>
+        <resource>my-rules/included-file.adoc</resource>
+    </rules>
+</jqassistant-plugin>
+----
+* Asciidoc files may be included using relative paths:
++
+[source,asciidoc]
+----
+\include::included-file.adoc[]
+----
 
 == PlantUML Report
 

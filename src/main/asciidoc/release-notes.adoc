@@ -1,6 +1,11 @@
 
 = Asciidoc Report Plugin
 
+== 1.11.0
+
+* Added support for rendering Asciidoc files as reports which are provided by plugins and contain rules.
+* Deprecated the report property `asciidoc.report.rule.directory`, it will be removed in future versions.
+
 == 1.9.0
 
 * The PlantUML diagram plugin now automatically selects GraphViz (prefered) or JDOT for rendering if not explicitly configured
