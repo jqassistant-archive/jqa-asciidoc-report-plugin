@@ -26,9 +26,9 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
-public class ClassDiagramResultConverterTest {
+class ClassDiagramResultConverterTest {
 
-    public static final String PACKAGE = "package";
+    private static final String PACKAGE = "package";
     private static final String TYPE = "type";
     private static final String MEMBER = "member";
     private static final String RELATION = "relation";
@@ -39,7 +39,7 @@ public class ClassDiagramResultConverterTest {
     private ClassDiagramResultConverter converter;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         converter = new ClassDiagramResultConverter(subGraphFactory);
     }
 
@@ -56,7 +56,7 @@ public class ClassDiagramResultConverterTest {
      * @throws ReportException
      */
     @Test
-    public void convert() throws ReportException {
+    void convert() throws ReportException {
         // given
         doReturn(null).when(subGraphFactory).toIdentifiable(null);
         PackageDescriptor rootPackage = mock(PackageDescriptor.class);
@@ -115,7 +115,7 @@ public class ClassDiagramResultConverterTest {
     }
 
     @Test
-    public void convertIterable() throws ReportException {
+    void convertIterable() throws ReportException {
         // given
         PackageDescriptor rootPackage = mock(PackageDescriptor.class);
         Node rootPackageNode = getNode(1, "root");

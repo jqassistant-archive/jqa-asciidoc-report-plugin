@@ -27,7 +27,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
-public class ClassDiagramRendererTest {
+class ClassDiagramRendererTest {
 
     @Mock
     private ClassDiagramResultConverter resultConverter;
@@ -46,7 +46,7 @@ public class ClassDiagramRendererTest {
     Set<Relationship> relations;
 
     @BeforeEach
-    public void setUp() throws ReportException {
+    void setUp() throws ReportException {
         classDiagramRenderer = new ClassDiagramRenderer(resultConverter, RenderMode.GRAPHVIZ);
         packageMembers = new HashMap<>();
         packageMemberTree = new HashMap<>();
@@ -58,7 +58,7 @@ public class ClassDiagramRendererTest {
     }
 
     @Test
-    public void packageMembers() throws ReportException {
+    void packageMembers() throws ReportException {
         PackageDescriptor packageDescriptor = addPackageMember(PackageDescriptor.class, 1, "public", null, "foo.bar");
         ClassTypeDescriptor classType = addPackageMember(ClassTypeDescriptor.class, 2, "public", null, "foo.bar.ClassType");
 
@@ -79,7 +79,7 @@ public class ClassDiagramRendererTest {
     }
 
     @Test
-    public void classModifiers() throws ReportException {
+    void classModifiers() throws ReportException {
         Set<PackageMemberDescriptor> rootMembers = packageMemberTree.computeIfAbsent(null, key -> new HashSet<>());
         rootMembers.add(addPackageMember(ClassTypeDescriptor.class, 1, null, true, "foo.bar.AbstractClassType"));
         rootMembers.add(addPackageMember(ClassTypeDescriptor.class, 2, "private", false, "foo.bar.PrivateClassType"));
@@ -99,17 +99,17 @@ public class ClassDiagramRendererTest {
     }
 
     @Test
-    public void fields() throws ReportException {
+    void fields() throws ReportException {
         verifyMembers(FieldDescriptor.class, "Field");
     }
 
     @Test
-    public void methods() throws ReportException {
+    void methods() throws ReportException {
         verifyMembers(MethodDescriptor.class, "Method");
     }
 
     @Test
-    public void abstractMethod() throws ReportException {
+    void abstractMethod() throws ReportException {
         ClassTypeDescriptor typeDescriptor = getClassType();
         Set<MemberDescriptor> members = membersPerType.computeIfAbsent(typeDescriptor, key -> new HashSet<>());
         members.add(addTypeMember(MethodDescriptor.class, "public", null, true, "String abstractMethod"));
@@ -120,7 +120,7 @@ public class ClassDiagramRendererTest {
     }
 
     @Test
-    public void fieldAssociation() throws ReportException {
+    void fieldAssociation() throws ReportException {
         Set<PackageMemberDescriptor> rootMembers = packageMemberTree.computeIfAbsent(null, key -> new HashSet<>());
         ClassTypeDescriptor classType = addPackageMember(ClassTypeDescriptor.class, 1, "public", null, "foo.bar.ClassType");
         ClassTypeDescriptor fieldType = addPackageMember(ClassTypeDescriptor.class, 2, "public", null, "foo.bar.FieldType");
@@ -141,7 +141,7 @@ public class ClassDiagramRendererTest {
     }
 
     @Test
-    public void relations() throws ReportException {
+    void relations() throws ReportException {
         Set<PackageMemberDescriptor> rootMembers = packageMemberTree.computeIfAbsent(null, key -> new HashSet<>());
         ClassTypeDescriptor classType = addPackageMember(ClassTypeDescriptor.class, 1, "public", null, "foo.bar.ClassType");
         ClassTypeDescriptor superClassType = addPackageMember(ClassTypeDescriptor.class, 2, "public", null, "foo.bar.SuperClassType");

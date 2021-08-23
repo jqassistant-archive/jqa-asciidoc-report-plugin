@@ -40,7 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class AsciidocReportPluginTest extends AbstractAsciidocReportPluginTest {
+class AsciidocReportPluginTest extends AbstractAsciidocReportPluginTest {
 
     @Override
     protected List<String> getAsciidocFiles() {
@@ -48,12 +48,12 @@ public class AsciidocReportPluginTest extends AbstractAsciidocReportPluginTest {
     }
 
     @Test
-    public void defaultIndexDocument() throws RuleException, IOException {
+    void defaultIndexDocument() throws RuleException, IOException {
         verify(emptyMap(), new File(outputDirectory, "report/asciidoc"));
     }
 
     @Test
-    public void defaultReportDirectory() throws RuleException, IOException {
+    void defaultReportDirectory() throws RuleException, IOException {
         HashMap<String, Object> properties = new HashMap<>();
         properties.put("asciidoc.report.rule.directory", ruleDirectory.getAbsolutePath());
         properties.put("asciidoc.report.file.include", "index.adoc");
@@ -61,7 +61,7 @@ public class AsciidocReportPluginTest extends AbstractAsciidocReportPluginTest {
     }
 
     @Test
-    public void customReportDirectory() throws RuleException, IOException {
+    void customReportDirectory() throws RuleException, IOException {
         File customReportDirectory = new File(outputDirectory, "report/custom-report");
         Map<String, Object> properties = new HashMap<>();
         properties.put("asciidoc.report.rule.directory", ruleDirectory.getAbsolutePath());
@@ -71,7 +71,7 @@ public class AsciidocReportPluginTest extends AbstractAsciidocReportPluginTest {
     }
 
     @Test
-    public void jdotPlantUmlRenderer() throws RuleException, IOException {
+    void jdotPlantUmlRenderer() throws RuleException, IOException {
         HashMap<String, Object> properties = new HashMap<>();
         properties.put("asciidoc.report.rule.directory", ruleDirectory.getAbsolutePath());
         properties.put("asciidoc.report.file.include", "index.adoc");

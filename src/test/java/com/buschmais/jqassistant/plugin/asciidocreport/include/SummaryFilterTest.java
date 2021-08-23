@@ -36,7 +36,7 @@ class SummaryFilterTest {
     private SummaryFilter summaryFilter;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         conceptResults.put("concept", conceptResult);
         conceptResults.put("importedConcept", importedConceptResult);
         constraintResults.put("constraint", constraintResult);

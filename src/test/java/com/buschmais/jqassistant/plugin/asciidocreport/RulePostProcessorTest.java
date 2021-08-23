@@ -28,12 +28,12 @@ class RulePostProcessorTest {
     private String html;
 
     @BeforeEach
-    public void readHtml() throws IOException {
+    void readHtml() throws IOException {
         this.html = IOUtils.toString(RulePostProcessorTest.class.getResource("/rulepostprocessor.html"), UTF_8);
     }
 
     @Test
-    public void listingConceptWithTitle() {
+    void listingConceptWithTitle() {
         // Given
         Map<String, RuleResult> conceptResults = createRuleResults(Concept.builder().id("listingConceptWithTitle").severity(Severity.MINOR).build());
 
@@ -49,7 +49,7 @@ class RulePostProcessorTest {
     }
 
     @Test
-    public void listingConceptWithoutTitle() {
+    void listingConceptWithoutTitle() {
         // Given
         Map<String, RuleResult> conceptResults = createRuleResults(Concept.builder().id("listingConceptWithoutTitle").severity(Severity.MINOR).build());
 
@@ -65,7 +65,7 @@ class RulePostProcessorTest {
     }
 
     @Test
-    public void nonListingConceptWithoutTitle() {
+    void nonListingConceptWithoutTitle() {
         // Given
         Map<String, RuleResult> conceptResults = createRuleResults(Concept.builder().id("nonListingConceptWithTitle").severity(Severity.MINOR).build());
 
@@ -81,7 +81,7 @@ class RulePostProcessorTest {
     }
 
     @Test
-    public void listingConstraintWithTitle() {
+    void listingConstraintWithTitle() {
         // Given
         Map<String, RuleResult> constraintResults = createRuleResults(Concept.builder().id("listingConstraintWithTitle").severity(Severity.MINOR).build());
 

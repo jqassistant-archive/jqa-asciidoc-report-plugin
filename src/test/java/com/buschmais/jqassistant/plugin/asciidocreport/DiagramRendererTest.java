@@ -13,16 +13,16 @@ import static com.buschmais.jqassistant.plugin.asciidocreport.plantuml.RenderMod
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
-public class DiagramRendererTest {
+class DiagramRendererTest {
 
     @Test
-    public void jdot() throws ReportException {
+    void jdot() throws ReportException {
         String diagram = renderDiagram(JDOT);
         assertThat(diagram).contains(JDOT.getPragma());
     }
 
     @Test
-    public void graphviz() throws ReportException {
+    void graphviz() throws ReportException {
         String diagram = renderDiagram(GRAPHVIZ);
         assertThat(diagram).doesNotContain(JDOT.getPragma());
     }
