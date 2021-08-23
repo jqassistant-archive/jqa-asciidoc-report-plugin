@@ -60,9 +60,9 @@ The Asciidoc Report plugin accepts several options that might be passed as repor
 | asciidoc.report.file.exclude        | A comma separated list of filter of Asciidoc files to be excluded (optional)                                       |
 |===
 
-=== Asciidoc Files in Plugins
+=== Distributing Of Asciidoc Files In Plugins
 
-Asciidoc files may be distributed as part of plugins to allow sharing rules and reports.
+Asciidoc files may be distributed as part of plugins to allow sharing rules and reports between projects.
 
 * Files must be located as classpath resources in the folder `/META-INF/jqassistant-rules` or sub-folders of it:
 +
@@ -71,28 +71,50 @@ Asciidoc files may be distributed as part of plugins to allow sharing rules and 
 META-INF/
   |-jqassistant-plugin.xml
   |-jqassistant-rules/
-    |-my-rules/
-      |-index.adoc
-      |-included-file.adoc
+    |-my-reports/
+      |-index.adoc             // the document to be rendered
+      |-included-rules.adoc    // a file included by index.adoc providing additional rules
+      |-included-misc.adoc     // a file included by index.adoc without additional rules
 ----
-* Each file containing rules must be registered in the plugin descriptor
++
+TIP: Plugins should provide their reports in sub-folders (e.g. `/META-INF/jqassistant-rules/my-reports`) to avoid interferences with other plugins.
+* Asciidoc files may be included using relative paths:
++
+[source,asciidoc]
+----
+\include::included-rules.adoc[]
+\include::included-misc.adoc[]
+----
+* File containing rules must be registered in the plugin descriptor (note that `included-misc.adoc` is not registered)
 +
 [source,xml]
 .META-INF/jqassistant-plugin.xml
 ----
 <jqassistant-plugin>
     <rules>
-        <resource>my-rules/index.adoc</resource>
-        <resource>my-rules/included-file.adoc</resource>
+        <resource>my-reports/index.adoc</resource>
+        <resource>my-reports/included-rules.adoc</resource>
     </rules>
 </jqassistant-plugin>
 ----
-* Asciidoc files may be included using relative paths:
+* The Asciidoc files may embed PlantUML diagrams:
 +
 [source,asciidoc]
+....
+= Component Diagram
+
+[plantuml]
+.Building Block Diagram
 ----
-\include::included-file.adoc[]
+@startuml
+component "Component 1" as c1
+component "Component 2" as c2
+
+c1 --> c2 : Depends On
+@enduml
 ----
+....
+NOTE: Embedding images or other resources into plugins that can be referenced by Asciidoc files is currently not supported.
 
 == PlantUML Report
 
