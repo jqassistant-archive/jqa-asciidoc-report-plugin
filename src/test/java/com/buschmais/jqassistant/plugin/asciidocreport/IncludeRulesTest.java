@@ -21,7 +21,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class IncludeRulesTest extends AbstractAsciidocReportPluginTest {
+class IncludeRulesTest extends AbstractAsciidocReportPluginTest {
 
     @Override
     protected List<String> getAsciidocFiles() {
@@ -29,7 +29,7 @@ public class IncludeRulesTest extends AbstractAsciidocReportPluginTest {
     }
 
     @Test
-    public void include() throws RuleException, IOException {
+    void include() throws RuleException, IOException {
         HashMap<String, Object> properties = new HashMap<>();
         properties.put("asciidoc.report.rule.directory", ruleDirectory.getAbsolutePath());
         properties.put("asciidoc.report.file.include", "includeRules.adoc");

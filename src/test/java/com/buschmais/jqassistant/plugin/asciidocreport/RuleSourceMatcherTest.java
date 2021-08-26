@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test;
 import static java.util.Collections.emptySet;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class RuleSourceMatcherTest {
+class RuleSourceMatcherTest {
 
     private File ruleDirectory;
 
@@ -31,7 +31,7 @@ public class RuleSourceMatcherTest {
      * Verifies that a given rule directory is scanned for adoc files.
      */
     @Test
-    public void scanRuleDirectory() throws ReportException {
+    void scanRuleDirectory() throws ReportException {
         RuleSourceMatcher ruleSourceMatcher = new RuleSourceMatcher(ruleDirectory, "index.adoc", null);
 
         List<RuleSource> filteredRuleSources = ruleSourceMatcher.match(emptySet());
@@ -46,7 +46,7 @@ public class RuleSourceMatcherTest {
      * "index.adoc" file.
      */
     @Test
-    public void detectIndexFileFromRuleSources() throws RuleException {
+    void detectIndexFileFromRuleSources() throws RuleException {
         RuleSourceMatcher ruleSourceMatcher = new RuleSourceMatcher(null, null, null);
         Set<RuleSource> ruleSources = new HashSet<>();
         ruleSources.add(new FileRuleSource(ruleDirectory, "index.adoc"));

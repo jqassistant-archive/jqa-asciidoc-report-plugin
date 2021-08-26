@@ -15,36 +15,36 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 /**
  * Tests for the {@link ImageRenderer}.
  */
-public class ImageRendererTest {
+class ImageRendererTest {
 
     private ImageRenderer imageRenderer = new ImageRenderer();
 
     @Test
-    public void renderDiagramAsSvg() throws ReportException {
+    void renderDiagramAsSvg() throws ReportException {
         File file = renderDiagram("svg", "svg");
 
         assertThat(file.exists(), equalTo(true));
     }
 
     @Test
-    public void renderDiagramAsPng() throws ReportException {
+    void renderDiagramAsPng() throws ReportException {
         File file = renderDiagram("png", "png");
 
         assertThat(file.exists(), equalTo(true));
     }
 
     @Test
-    public void renderDiagramNoFormat() {
+    void renderDiagramNoFormat() {
         assertThrows(ReportException.class, () -> renderDiagram(null, ""));
     }
 
     @Test
-    public void renderDiagramEmptyFormat() {
+    void renderDiagramEmptyFormat() {
         assertThrows(ReportException.class, () -> renderDiagram("", ""));
     }
 
     @Test
-    public void renderDiagramUnknownFormat() {
+    void renderDiagramUnknownFormat() {
         assertThrows(ReportException.class, () -> renderDiagram("notExisting", ""));
     }
 

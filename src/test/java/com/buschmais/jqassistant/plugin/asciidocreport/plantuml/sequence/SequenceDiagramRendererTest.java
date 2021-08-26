@@ -31,7 +31,7 @@ import static org.mockito.Mockito.mock;
  * Tests for the {@link ImageRenderer}.
  */
 @ExtendWith(MockitoExtension.class)
-public class SequenceDiagramRendererTest {
+class SequenceDiagramRendererTest {
 
     @Mock
     private Descriptor p1 = mock(Descriptor.class);
@@ -51,7 +51,7 @@ public class SequenceDiagramRendererTest {
     private SequenceDiagramRenderer sequenceDiagramRenderer;
 
     @BeforeEach
-    public void setUp() throws ReportException {
+    void setUp() throws ReportException {
         Node n1 = getNode(1, "p1", "Java", "Method");
         doReturn(n1).when(subGraphFactory).toIdentifiable(p1);
         Node n2 = getNode(2, "p2", "Java", "Method");
@@ -65,12 +65,12 @@ public class SequenceDiagramRendererTest {
     }
 
     @Test
-    public void sequenceDiagramFromSequence() throws ReportException {
+    void sequenceDiagramFromSequence() throws ReportException {
         verifySequenceDiagram(getSequenceResult());
     }
 
     @Test
-    public void sequenceDiagramFromParticipantsAndMessages() throws ReportException {
+    void sequenceDiagramFromParticipantsAndMessages() throws ReportException {
         verifySequenceDiagram(getParticipantsAndMessagesResult());
     }
 

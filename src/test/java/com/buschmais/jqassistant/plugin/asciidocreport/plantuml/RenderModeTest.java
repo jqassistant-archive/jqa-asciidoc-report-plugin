@@ -9,27 +9,27 @@ import static com.buschmais.jqassistant.plugin.asciidocreport.plantuml.RenderMod
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class RenderModeTest {
+class RenderModeTest {
 
     @Test
-    public void detect() throws ReportException {
+    void detect() throws ReportException {
         assertThat(RenderMode.getRenderMode(null)).isIn(JDOT, GRAPHVIZ);
     }
 
     @Test
-    public void jdot() throws ReportException {
+    void jdot() throws ReportException {
         assertThat(RenderMode.getRenderMode("jdot")).isSameAs(JDOT);
         assertThat(RenderMode.getRenderMode("JDOT")).isSameAs(JDOT);
     }
 
     @Test
-    public void graphviz() throws ReportException {
+    void graphviz() throws ReportException {
         assertThat(RenderMode.getRenderMode("graphviz")).isSameAs(GRAPHVIZ);
         assertThat(RenderMode.getRenderMode("GRAPHVIZ")).isSameAs(GRAPHVIZ);
     }
 
     @Test
-    public void unsupportedRenderer() {
+    void unsupportedRenderer() {
         assertThrows(ReportException.class, () -> {
             RenderMode.getRenderMode("invalidRenderer");
         });

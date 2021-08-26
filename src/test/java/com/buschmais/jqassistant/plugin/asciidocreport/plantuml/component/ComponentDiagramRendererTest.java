@@ -26,7 +26,7 @@ import static org.mockito.Mockito.doReturn;
  * Tests for the {@link ImageRenderer}.
  */
 @ExtendWith(MockitoExtension.class)
-public class ComponentDiagramRendererTest {
+class ComponentDiagramRendererTest {
 
     @Mock
     private Result<?> result;
@@ -37,12 +37,12 @@ public class ComponentDiagramRendererTest {
     private ComponentDiagramRenderer componentDiagramRenderer;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         componentDiagramRenderer = new ComponentDiagramRenderer(subGraphFactory, RenderMode.GRAPHVIZ);
     }
 
     @Test
-    public void componentDiagram() throws ReportException {
+    void componentDiagram() throws ReportException {
         doReturn(getSubGraph()).when(subGraphFactory).createSubGraph(result);
 
         String componentDiagram = componentDiagramRenderer.renderDiagram(result);
@@ -56,7 +56,7 @@ public class ComponentDiagramRendererTest {
     }
 
     @Test
-    public void componentDiagramInFolder() throws ReportException {
+    void componentDiagramInFolder() throws ReportException {
         Node rootFolder = getNode(-1, "a0", "Artifact", "File", "Container");
         Node a1 = getNode(1, "a1", "Artifact", "File");
         SubGraph rootGraph = new SubGraph();

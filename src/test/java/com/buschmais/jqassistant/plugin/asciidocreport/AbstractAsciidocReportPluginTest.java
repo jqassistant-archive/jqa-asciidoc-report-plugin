@@ -30,7 +30,7 @@ import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public abstract class AbstractAsciidocReportPluginTest {
+abstract class AbstractAsciidocReportPluginTest {
 
     protected Map<String, ReportPlugin> reportPlugins;
 
@@ -41,7 +41,7 @@ public abstract class AbstractAsciidocReportPluginTest {
     protected RuleSet ruleSet;
 
     @BeforeEach
-    public final void setUp() throws RuleException {
+    final void setUp() throws RuleException {
         File classesDirectory = ClasspathResource.getFile(AbstractAsciidocReportPluginTest.class, "/");
         ruleDirectory = new File(classesDirectory, "working directory/jqassistant");
         List<String> asciidocFiles = getAsciidocFiles();
