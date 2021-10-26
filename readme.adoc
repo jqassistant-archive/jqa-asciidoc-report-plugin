@@ -1,6 +1,6 @@
 = jQAssistant Asciidoc Report Plugin
 
-This is the http://asciidoctor.org/[Asciidoc^] report plugin for https://www.jqassistant.org[jQAssistant^].
+This is the http://asciidoctor.org/[Asciidoc^] report plugin for https://jqassistant.org[jQAssistant^].
 
 After an analysis http://www.asciidoctor[Asciidoctor] it renders the input documents that provided rules to HTML documents.
 
@@ -8,5 +8,5 @@ The output is enriched by the status of executed rules as well as their results 
 
 Furthermore include directives are provided for embedding the results of imported rules and summary tables.
 
-For more information on jQAssistant see https://www.jqassistant.org[^].
+For more information on jQAssistant see https://jqassistant.org[^].
 
