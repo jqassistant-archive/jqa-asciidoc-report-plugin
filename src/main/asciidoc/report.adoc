@@ -78,14 +78,29 @@ META-INF/
 ----
 +
 TIP: Plugins should provide their reports in sub-folders (e.g. `/META-INF/jqassistant-rules/my-reports`) to avoid interferences with other plugins.
-* Asciidoc files may be included using relative paths:
+* Asciidoc files may include Asciidoc files located within the same plugin using relative paths:
 +
 [source,asciidoc]
+.META-INF/jqassistant-rules/my-reports/index.adoc (i.e. rule file located with same plugin)
 ----
+== My Report
+
 \include::included-rules.adoc[]
 \include::included-misc.adoc[]
 ----
-* File containing rules must be registered in the plugin descriptor (note that `included-misc.adoc` is not registered)
++
+* Asciidoc files outside a plugin may include Asciidoc files provided by the plugins using absolute paths (without `/META-INF/jqassistant-rules` prefix):
++
+[source,asciidoc]
+.jqassistant/index.adoc
+----
+== Project Rules
+
+\include::/my-reports/included-rules.adoc[]
+\include::/my-reports/included-misc.adoc[]
+----
++
+* Asciidoc files containing rules must be registered in the plugin descriptor (note that `included-misc.adoc` is not registered)
 +
 [source,xml]
 .META-INF/jqassistant-plugin.xml
