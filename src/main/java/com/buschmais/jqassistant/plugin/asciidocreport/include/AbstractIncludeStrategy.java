@@ -15,7 +15,7 @@ abstract class AbstractIncludeStrategy implements IncludeStrategy {
     }
 
     protected final String escape(String content) {
-        return content.trim().replace("\n", " ");
+        return content != null ? content.trim().replace("\n", " ") : null;
     }
 
 }
