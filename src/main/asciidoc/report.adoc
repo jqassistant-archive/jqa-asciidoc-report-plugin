@@ -179,11 +179,11 @@ MATCH
 OPTIONAL MATCH
   (package)-[dependsOn:DEPENDS_ON]->(:Package)
 RETURN
-  {                                   // (1)
-    role : "graph",                   // (2)
-    parent : artifact,                // (3)
-    nodes : collect(package),         // (4)
-    relationships: collect(dependsOn) // (5)
+  {                                   // <1>
+    role : "graph",                   // <2>
+    parent : artifact,                // <3>
+    nodes : collect(package),         // <4>
+    relationships: collect(dependsOn) // <5>
   }
 ----
 ....
