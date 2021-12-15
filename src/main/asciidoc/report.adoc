@@ -1,11 +1,11 @@
 [[asciidoc-report-plugin]]
-== Asciidoc Report
+== AsciiDoc Report
 
 The plugin records the results of executed rules (i.e. concepts and constraints).
 At the end of the analysis phase http://www.asciidoctor[Asciidoctor] is used for rendering the input documents providing the rules to HTML documents. The rules blocks are identified and replaced by their status and results appended.
-Furthermore include directives are provided for embedding a summary about executed and imported rules.
+Furthermore, _++include::[]++_ directives are provided for embedding a summary about executed and imported rules.
 
-By default all rule files with the name `index.adoc` will be selected for rendering.
+By default, all rule files with the name `index.adoc` will be selected for rendering.
 The report property `asciidoc.report.file.include` may be used to explicitly select files.
 Files may be located in the rule directory of a project (e.g. `jqassistant/`) or provided by plugins.
 
@@ -16,7 +16,7 @@ The report may be enhanced by `jQA` include directives:
 `jQA:Summary[concepts="...",importedConcepts="...",constraints="...",importedConstraints="..."]`::
 Includes two summary tables containing executed rules, their description, status and severity.
 The filter attributes are optional, if none is given all results are included.
-  `concepts` and `constraints` refer to rules that are defined in the rendered Asciidoc document(s).
+  `concepts` and `constraints` refer to rules that are defined in the rendered AsciiDoc document(s).
   `importedConcepts` and `importedConstraints` refer to rules that are imported from plugins.
 `jQA:Rules[concepts="...",constraints="..."]`::
   Embeds imported rules and their results identified by the specified filters. Both filter attributes are optional but at least one must be specified.
@@ -50,19 +50,19 @@ project specific rules
 
 === Configuration
 
-The Asciidoc Report plugin accepts several options that might be passed as report properties to jQAssistant:
+The AsciiDoc Report plugin accepts several options that might be passed as report properties to jQAssistant:
 
 [options="header"]
 |===
 | Property                            | Description                                                                                                        | Default
 | asciidoc.report.directory           | Specifies the directory where the HTML files will be written                                                       | jqassistant/report/asciidoc
-| asciidoc.report.file.include        | A comma separated list of filter of Asciidoc files to be included (optional)                                       |
-| asciidoc.report.file.exclude        | A comma separated list of filter of Asciidoc files to be excluded (optional)                                       |
+| asciidoc.report.file.include        | A comma separated list of filter of AsciiDoc files to be included (optional)                                       |
+| asciidoc.report.file.exclude        | A comma separated list of filter of AsciiDoc files to be excluded (optional)                                       |
 |===
 
-=== Distributing Of Asciidoc Files In Plugins
+=== Distributing Of AsciiDoc Files In Plugins
 
-Asciidoc files may be distributed as part of plugins to allow sharing rules and reports between projects.
+AsciiDoc files may be distributed as part of plugins to allow sharing rules and reports between projects.
 
 * Files must be located as classpath resources in the folder `/META-INF/jqassistant-rules` or sub-folders of it:
 +
@@ -78,7 +78,7 @@ META-INF/
 ----
 +
 TIP: Plugins should provide their reports in sub-folders (e.g. `/META-INF/jqassistant-rules/my-reports`) to avoid interferences with other plugins.
-* Asciidoc files may include Asciidoc files located within the same plugin using relative paths:
+* AsciiDoc files may include AsciiDoc files located within the same plugin using relative paths:
 +
 [source,asciidoc]
 .META-INF/jqassistant-rules/my-reports/index.adoc (i.e. rule file located with same plugin)
@@ -89,7 +89,7 @@ TIP: Plugins should provide their reports in sub-folders (e.g. `/META-INF/jqassi
 \include::included-misc.adoc[]
 ----
 +
-* Asciidoc files outside a plugin may include Asciidoc files provided by the plugins using absolute paths (without `/META-INF/jqassistant-rules` prefix):
+* AsciiDoc files outside a plugin may include AsciiDoc files provided by the plugins using absolute paths (without `/META-INF/jqassistant-rules` prefix):
 +
 [source,asciidoc]
 .jqassistant/index.adoc
@@ -100,7 +100,7 @@ TIP: Plugins should provide their reports in sub-folders (e.g. `/META-INF/jqassi
 \include::/my-reports/included-misc.adoc[]
 ----
 +
-* Asciidoc files containing rules must be registered in the plugin descriptor (note that `included-misc.adoc` is not registered)
+* AsciiDoc files containing rules must be registered in the plugin descriptor (note that `included-misc.adoc` is not registered)
 +
 [source,xml]
 .META-INF/jqassistant-plugin.xml
@@ -112,7 +112,7 @@ TIP: Plugins should provide their reports in sub-folders (e.g. `/META-INF/jqassi
     </rules>
 </jqassistant-plugin>
 ----
-* The Asciidoc files may embed PlantUML diagrams:
+* The AsciiDoc files may embed PlantUML diagrams:
 +
 [source,asciidoc]
 ....
@@ -129,7 +129,7 @@ c1 --> c2 : Depends On
 @enduml
 ----
 ....
-NOTE: Embedding images or other resources into plugins that can be referenced by Asciidoc files is currently not supported.
+NOTE: Embedding images or other resources into plugins that can be referenced by AsciiDoc files is currently not supported.
 
 == PlantUML Report
 
@@ -151,7 +151,7 @@ The result of the rule simply needs to return all required nodes and their relat
 .jqassistant/index.adoc
 ....
 [[DependencyDiagram]]
-[source,cypher,role=concept,requiresConcepts="dependency:Package",reportType="plantuml-component-diagram"] // (1)
+[source,cypher,role=concept,requiresConcepts="dependency:Package",reportType="plantuml-component-diagram"] // <1>
 .Creates a diagram about dependencies between packages containing Java types (test artifacts are excluded).
 ----
 MATCH
@@ -159,11 +159,11 @@ MATCH
 OPTIONAL MATCH
   (package)-[dependsOn:DEPENDS_ON]->(:Package)
 RETURN
-  package, dependsOn                                                                                           // (2)
+  package, dependsOn                                                                                           // <2>
 ----
 ....
-(1) The report type is set to `plantuml-component-diagram`.
-(2) The packages are returned as nodes and their dependencies (dependsOn) as relationships.
+<1> The report type is set to `plantuml-component-diagram`.
+<2> The packages are returned as nodes and their dependencies (dependsOn) as relationships.
 
 The result might also specify graph-alike structures which will be rendered as PlantUML folders.
 The following example therefore uses a modified return clause:
