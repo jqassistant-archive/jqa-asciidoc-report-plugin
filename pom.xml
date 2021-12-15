@@ -12,8 +12,8 @@
     <artifactId>asciidoc-report</artifactId>
     <version>1.12.0-SNAPSHOT</version>
 
-    <name>jQAssistant Asciidoc Report Plugin</name>
-    <description>The jQAssistant plugin for creating reports from Asciidoc files.</description>
+    <name>jQAssistant AsciiDoc Report Plugin</name>
+    <description>The jQAssistant plugin for creating reports from AsciiDoc files.</description>
     <url>http://jqassistant.org/</url>
 
     <organization>
