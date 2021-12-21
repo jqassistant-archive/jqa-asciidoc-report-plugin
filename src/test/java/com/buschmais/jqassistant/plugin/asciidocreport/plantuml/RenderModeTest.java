@@ -5,7 +5,7 @@ import com.buschmais.jqassistant.core.report.api.ReportException;
 import org.junit.jupiter.api.Test;
 
 import static com.buschmais.jqassistant.plugin.asciidocreport.plantuml.RenderMode.GRAPHVIZ;
-import static com.buschmais.jqassistant.plugin.asciidocreport.plantuml.RenderMode.JDOT;
+import static com.buschmais.jqassistant.plugin.asciidocreport.plantuml.RenderMode.SMETANA;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -13,13 +13,13 @@ class RenderModeTest {
 
     @Test
     void detect() throws ReportException {
-        assertThat(RenderMode.getRenderMode(null)).isIn(JDOT, GRAPHVIZ);
+        assertThat(RenderMode.getRenderMode(null)).isIn(SMETANA, GRAPHVIZ);
     }
 
     @Test
-    void jdot() throws ReportException {
-        assertThat(RenderMode.getRenderMode("jdot")).isSameAs(JDOT);
-        assertThat(RenderMode.getRenderMode("JDOT")).isSameAs(JDOT);
+    void smetana() throws ReportException {
+        assertThat(RenderMode.getRenderMode("smetana")).isSameAs(SMETANA);
+        assertThat(RenderMode.getRenderMode("SMETANA")).isSameAs(SMETANA);
     }
 
     @Test

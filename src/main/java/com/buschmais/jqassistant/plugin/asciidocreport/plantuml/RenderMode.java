@@ -13,7 +13,7 @@ import static java.util.Arrays.asList;
 @Slf4j
 public enum RenderMode {
 
-    GRAPHVIZ(""), JDOT("!pragma graphviz_dot jdot\n");
+    GRAPHVIZ(""), SMETANA("!pragma layout smetana\n");
 
     RenderMode(String pragma) {
         this.pragma = pragma;
@@ -34,7 +34,7 @@ public enum RenderMode {
             }
             return renderMode;
         }
-        return graphvizAvailable ? GRAPHVIZ : JDOT;
+        return graphvizAvailable ? GRAPHVIZ : SMETANA;
     }
 
     /**
