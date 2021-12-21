@@ -9,22 +9,22 @@ import com.buschmais.jqassistant.plugin.asciidocreport.plantuml.RenderMode;
 import org.junit.jupiter.api.Test;
 
 import static com.buschmais.jqassistant.plugin.asciidocreport.plantuml.RenderMode.GRAPHVIZ;
-import static com.buschmais.jqassistant.plugin.asciidocreport.plantuml.RenderMode.JDOT;
+import static com.buschmais.jqassistant.plugin.asciidocreport.plantuml.RenderMode.SMETANA;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 class DiagramRendererTest {
 
     @Test
-    void jdot() throws ReportException {
-        String diagram = renderDiagram(JDOT);
-        assertThat(diagram).contains(JDOT.getPragma());
+    void smetana() throws ReportException {
+        String diagram = renderDiagram(SMETANA);
+        assertThat(diagram).contains(SMETANA.getPragma());
     }
 
     @Test
     void graphviz() throws ReportException {
         String diagram = renderDiagram(GRAPHVIZ);
-        assertThat(diagram).doesNotContain(JDOT.getPragma());
+        assertThat(diagram).doesNotContain(SMETANA.getPragma());
     }
 
     private String renderDiagram(RenderMode renderMode) throws ReportException {

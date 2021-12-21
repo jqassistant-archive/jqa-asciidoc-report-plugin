@@ -71,15 +71,15 @@ class AsciidocReportPluginTest extends AbstractAsciidocReportPluginTest {
     }
 
     @Test
-    void jdotPlantUmlRenderer() throws RuleException, IOException {
+    void smetanaPlantUmlRenderer() throws RuleException, IOException {
         HashMap<String, Object> properties = new HashMap<>();
         properties.put("asciidoc.report.rule.directory", ruleDirectory.getAbsolutePath());
         properties.put("asciidoc.report.file.include", "index.adoc");
-        properties.put("plantuml.report.rendermode", "jdot");
+        properties.put("plantuml.report.rendermode", "smetana");
         verify(properties, new File(outputDirectory, "report/asciidoc"));
         File plantUmlFile = new File(outputDirectory, "report/plantuml/test_ComponentDiagram.plantuml");
         String plantuml = FileUtils.readFileToString(plantUmlFile, "UTF-8");
-        assertThat(plantuml).contains(RenderMode.JDOT.getPragma());
+        assertThat(plantuml).contains(RenderMode.SMETANA.getPragma());
     }
 
     private String verify(Map<String, Object> properties, File expectedDirectory) throws RuleException, IOException {
