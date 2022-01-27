@@ -122,6 +122,12 @@ abstract class AbstractAsciidocReportPluginTest {
         return ruleParser.parse(ruleSources);
     }
 
+    protected final void processGroup(ReportPlugin plugin, String id) throws RuleException {
+        Group group = ruleSet.getGroupsBucket().getById(id);
+        plugin.beginGroup(group);
+        plugin.endGroup();
+    }
+
     protected final void processConcept(ReportPlugin plugin, String id, Status status, Severity severity, List<String> columnNames,
             List<Map<String, Object>> rows) throws RuleException {
         Concept includedConcept = ruleSet.getConceptBucket().getById(id);

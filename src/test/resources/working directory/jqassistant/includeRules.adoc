@@ -1,6 +1,8 @@
 :toc: left
 = Rules
 
+[[default]]
+[role=group]
 == Included Rules
 
 include::jQA:Rules[concepts="test:Included*",constraints="test:Included*"]
