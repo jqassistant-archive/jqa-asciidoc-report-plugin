@@ -42,11 +42,11 @@ public class ImageRenderer {
      * Render a diagram given as {@link String} to a {@link File}.
      *
      * @param plantUML
-     *            The diagram.
+     *     The diagram.
      * @param format
-     *            The target format.
+     *     The target format.
      * @param file
-     *            The {@link File}.
+     *     The {@link File}.
      */
     private void renderDiagram(String plantUML, File file, FileFormat format) throws ReportException {
         LOGGER.info("Rendering diagram '{}' ", file.getPath());
@@ -62,12 +62,15 @@ public class ImageRenderer {
      * Trys to parse a given String to a PlantUML-FileFormat
      *
      * @param format
-     *            The {@link FileFormat} as string.
+     *     The {@link FileFormat} as string.
      * @return The matching {@link FileFormat}
      * @throws ReportException
-     *             if format is not valid.
+     *     if format is not valid.
      */
     private FileFormat toFileFormat(String format) throws ReportException {
+        if (format == null) {
+            return FileFormat.SVG;
+        }
         for (FileFormat fileFormat : FileFormat.values()) {
             if (fileFormat.name().equalsIgnoreCase(format)) {
                 return fileFormat;

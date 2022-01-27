@@ -1,10 +1,8 @@
-package com.buschmais.jqassistant.plugin.asciidocreport;
+package com.buschmais.jqassistant.plugin.asciidocreport.plantuml;
 
 import com.buschmais.jqassistant.core.report.api.ReportException;
 import com.buschmais.jqassistant.core.report.api.model.Result;
 import com.buschmais.jqassistant.core.rule.api.model.ExecutableRule;
-import com.buschmais.jqassistant.plugin.asciidocreport.plantuml.AbstractDiagramRenderer;
-import com.buschmais.jqassistant.plugin.asciidocreport.plantuml.RenderMode;
 
 import org.junit.jupiter.api.Test;
 

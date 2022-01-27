@@ -1,10 +1,9 @@
-package com.buschmais.jqassistant.plugin.asciidocreport;
+package com.buschmais.jqassistant.plugin.asciidocreport.plantuml;
 
 import java.io.File;
 
 import com.buschmais.jqassistant.core.report.api.ReportException;
 import com.buschmais.jqassistant.core.rule.api.model.Concept;
-import com.buschmais.jqassistant.plugin.asciidocreport.plantuml.ImageRenderer;
 
 import org.junit.jupiter.api.Test;
 
@@ -34,8 +33,11 @@ class ImageRendererTest {
     }
 
     @Test
-    void renderDiagramNoFormat() {
-        assertThrows(ReportException.class, () -> renderDiagram(null, ""));
+    void renderDiagramDefaultFormat() throws ReportException {
+        File file = renderDiagram(null, "svg");
+
+        assertThat(file.exists(), equalTo(true));
+        assertThat(file.getName().endsWith(".svg"), equalTo(true));
     }
 
     @Test
