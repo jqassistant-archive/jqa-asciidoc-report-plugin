@@ -4,6 +4,7 @@ import com.buschmais.jqassistant.core.report.api.ReportException;
 
 import org.junit.jupiter.api.Test;
 
+import static com.buschmais.jqassistant.plugin.asciidocreport.plantuml.RenderMode.ELK;
 import static com.buschmais.jqassistant.plugin.asciidocreport.plantuml.RenderMode.GRAPHVIZ;
 import static com.buschmais.jqassistant.plugin.asciidocreport.plantuml.RenderMode.SMETANA;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -20,6 +21,12 @@ class RenderModeTest {
     void smetana() throws ReportException {
         assertThat(RenderMode.getRenderMode("smetana")).isSameAs(SMETANA);
         assertThat(RenderMode.getRenderMode("SMETANA")).isSameAs(SMETANA);
+    }
+
+    @Test
+    void elk() throws ReportException {
+        assertThat(RenderMode.getRenderMode("elk")).isSameAs(ELK);
+        assertThat(RenderMode.getRenderMode("ELK")).isSameAs(ELK);
     }
 
     @Test

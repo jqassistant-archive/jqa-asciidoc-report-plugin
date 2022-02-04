@@ -6,6 +6,7 @@
 * JDOT was replaced by Smetana for rendering the PlantUML diagram when no local GraphViz installation is used.
 * Delayed initialization of PlantUML to avoid unnecessary messages if GraphViz is not installed
 * Removed the report property `asciidoc.report.rule.directory`
+* Added support for rendering PlantUML using the Eclipse Layout Kernel (Elk)
 
 == 1.11.0
 

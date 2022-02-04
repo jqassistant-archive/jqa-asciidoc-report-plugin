@@ -13,7 +13,9 @@ import static java.util.Arrays.asList;
 @Slf4j
 public enum RenderMode {
 
-    GRAPHVIZ(""), SMETANA("!pragma layout smetana\n");
+    GRAPHVIZ(""),
+    SMETANA("!pragma layout smetana\n"),
+    ELK("!pragma layout elk");
 
     RenderMode(String pragma) {
         this.pragma = pragma;
