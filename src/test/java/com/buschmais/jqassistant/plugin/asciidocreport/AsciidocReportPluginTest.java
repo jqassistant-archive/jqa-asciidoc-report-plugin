@@ -82,6 +82,18 @@ class AsciidocReportPluginTest extends AbstractAsciidocReportPluginTest {
         assertThat(plantuml).contains(RenderMode.SMETANA.getPragma());
     }
 
+    @Test
+    void elkPlantUmlRenderer() throws RuleException, IOException {
+        HashMap<String, Object> properties = new HashMap<>();
+        properties.put("asciidoc.report.rule.directory", ruleDirectory.getAbsolutePath());
+        properties.put("asciidoc.report.file.include", "index.adoc");
+        properties.put("plantuml.report.rendermode", "elk");
+        verify(properties, new File(outputDirectory, "report/asciidoc"));
+        File plantUmlFile = new File(outputDirectory, "report/plantuml/test_ComponentDiagram.plantuml");
+        String plantuml = FileUtils.readFileToString(plantUmlFile, "UTF-8");
+        assertThat(plantuml).contains(RenderMode.ELK.getPragma());
+    }
+
     private String verify(Map<String, Object> properties, File expectedDirectory) throws RuleException, IOException {
         ReportContext reportContext = configureReportContext(properties);
 

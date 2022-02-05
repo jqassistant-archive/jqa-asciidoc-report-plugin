@@ -6,6 +6,7 @@ import com.buschmais.jqassistant.core.rule.api.model.ExecutableRule;
 
 import org.junit.jupiter.api.Test;
 
+import static com.buschmais.jqassistant.plugin.asciidocreport.plantuml.RenderMode.ELK;
 import static com.buschmais.jqassistant.plugin.asciidocreport.plantuml.RenderMode.GRAPHVIZ;
 import static com.buschmais.jqassistant.plugin.asciidocreport.plantuml.RenderMode.SMETANA;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -20,9 +21,16 @@ class DiagramRendererTest {
     }
 
     @Test
+    void elk() throws ReportException {
+        String diagram = renderDiagram(ELK);
+        assertThat(diagram).contains(ELK.getPragma());
+    }
+
+    @Test
     void graphviz() throws ReportException {
         String diagram = renderDiagram(GRAPHVIZ);
         assertThat(diagram).doesNotContain(SMETANA.getPragma());
+        assertThat(diagram).doesNotContain(ELK.getPragma());
     }
 
     private String renderDiagram(RenderMode renderMode) throws ReportException {
