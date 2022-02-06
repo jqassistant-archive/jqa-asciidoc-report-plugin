@@ -31,6 +31,7 @@ public class AsciidocReportPlugin implements ReportPlugin {
     private static final Logger LOGGER = LoggerFactory.getLogger(AsciidocReportPlugin.class);
 
     private static final String PROPERTY_DIRECTORY = "asciidoc.report.directory";
+    private static final String PROPERTY_RULE_DIRECTORY = "asciidoc.report.rule.directory";
     private static final String PROPERTY_FILE_INCLUDE = "asciidoc.report.file.include";
     private static final String PROPERTY_FILE_EXCLUDE = "asciidoc.report.file.exclude";
 
@@ -60,9 +61,10 @@ public class AsciidocReportPlugin implements ReportPlugin {
         if (this.reportDirectory.mkdirs()) {
             LOGGER.info("Created directory '" + this.reportDirectory.getAbsolutePath() + "'.");
         }
+        File ruleDirectory = getFile(PROPERTY_RULE_DIRECTORY, null, properties);
         String fileInclude = (String) properties.get(PROPERTY_FILE_INCLUDE);
         String fileExclude = (String) properties.get(PROPERTY_FILE_EXCLUDE);
-        this.ruleSourceMatcher = new RuleSourceMatcher(fileInclude, fileExclude);
+        this.ruleSourceMatcher = new RuleSourceMatcher(ruleDirectory, fileInclude, fileExclude);
     }
 
     private File getFile(String property, File defaultValue, Map<String, Object> properties) {

@@ -6,8 +6,9 @@ At the end of the analysis phase http://www.asciidoctor[Asciidoctor] is used for
 Furthermore, _++include::[]++_ directives are provided for embedding a summary about executed and imported rules.
 
 By default, all rule files with the name `index.adoc` will be selected for rendering.
-The report properties `asciidoc.report.file.include` and `asciidoc.report.file.exclude` may be used to explicitly select files.
-Files may be located in the rule directory of a project (e.g. `jqassistant/`) or provided by plugins.
+The report property `asciidoc.report.file.include` may be used to explicitly select files.
+Files may be located in the rule directory of a project (e.g. `jqassistant/`, provided by plugins or in the directory specified by `asciidoc.report.rule.directory`
+
 
 === jQA Include Directives
 
@@ -56,6 +57,7 @@ The AsciiDoc Report plugin accepts several options that might be passed as repor
 |===
 | Property                            | Description                                                                                                        | Default
 | asciidoc.report.directory           | Specifies the directory where the HTML files will be written                                                       | jqassistant/report/asciidoc
+| asciidoc.report.rule.directory      | Specifies the directory where the Asciidoc files are located (optional)                                            |
 | asciidoc.report.file.include        | A comma separated list of filter of AsciiDoc files to be included (optional)                                       |
 | asciidoc.report.file.exclude        | A comma separated list of filter of AsciiDoc files to be excluded (optional)                                       |
 |===

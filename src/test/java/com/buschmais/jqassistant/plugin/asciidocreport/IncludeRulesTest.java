@@ -31,13 +31,13 @@ class IncludeRulesTest extends AbstractAsciidocReportPluginTest {
     @Test
     void include() throws RuleException, IOException {
         HashMap<String, Object> properties = new HashMap<>();
+        properties.put("asciidoc.report.rule.directory", ruleDirectory.getAbsolutePath());
         properties.put("asciidoc.report.file.include", "includeRules.adoc");
         configureReportContext(properties);
 
         ReportPlugin plugin = new CompositeReportPlugin(reportPlugins);
         plugin.begin();
 
-        processGroup(plugin, "default");
         processConcept(plugin, "test:IncludedConcept", SUCCESS, Severity.MINOR, singletonList("Value"), emptyList());
         processConcept(plugin, "test:NonIncludedConcept", SUCCESS, Severity.MINOR, singletonList("Value"), emptyList());
         processConstraint(plugin, "test:IncludedConstraint", SUCCESS, Severity.MAJOR, singletonList("Value"), emptyList());
