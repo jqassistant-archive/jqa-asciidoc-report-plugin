@@ -59,4 +59,18 @@ class RuleSourceMatcherTest {
         assertThat(ruleSource.getRelativePath()).isEqualTo("index.adoc");
     }
 
+    /**
+     * Verifies that the provided set of {@link RuleSource}s is used to detect the
+     * "index.adoc" file.
+     */
+    @Test
+    void detectIndexFileFromRuleSourcesWithFilter() throws RuleException {
+        RuleSourceMatcher ruleSourceMatcher = new RuleSourceMatcher(null, "notmatching", null);
+        Set<RuleSource> ruleSources = new HashSet<>();
+        ruleSources.add(new FileRuleSource(ruleDirectory, "index.adoc"));
+
+        List<RuleSource> filteredRuleSources = ruleSourceMatcher.match(ruleSources);
+
+        assertThat(filteredRuleSources).isEmpty();
+    }
 }
