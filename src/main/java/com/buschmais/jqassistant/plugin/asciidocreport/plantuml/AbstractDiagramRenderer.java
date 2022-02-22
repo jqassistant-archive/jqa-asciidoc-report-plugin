@@ -45,7 +45,7 @@ public abstract class AbstractDiagramRenderer {
         StringBuilder plantumlBuilder = new StringBuilder();
         plantumlBuilder.append("@startuml").append('\n');
         plantumlBuilder.append("skinparam componentStyle uml2").append('\n');
-        plantumlBuilder.append(renderMode.getPragma());
+        plantumlBuilder.append(renderMode.getPragma()).append('\n');
         render(result, plantumlBuilder);
         plantumlBuilder.append("@enduml").append('\n');
         return plantumlBuilder.toString();
