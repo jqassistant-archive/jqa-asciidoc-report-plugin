@@ -83,7 +83,7 @@ public class RulePostProcessor extends Postprocessor {
                     status.addClass("fa").addClass("fa-ban");
                     break;
                 }
-                String hover = "Status: " + ruleResult.getStatus() + ", Severity: " + rule.getSeverity().getInfo(ruleResult.getEffectiveSeverity());
+                String hover = "Status: " + ruleResult.getStatus() + ", Severity: " + ruleResult.getEffectiveSeverity().getInfo(rule.getSeverity());
                 status.attr("title", hover);
             } else {
                 status.addClass("fa").addClass("fa-question");

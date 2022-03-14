@@ -12,8 +12,8 @@ import com.buschmais.jqassistant.core.report.api.ReportPlugin;
 import com.buschmais.jqassistant.core.report.api.model.Result;
 import com.buschmais.jqassistant.core.report.api.model.Result.Status;
 import com.buschmais.jqassistant.core.report.impl.ReportContextImpl;
+import com.buschmais.jqassistant.core.rule.api.configuration.Rule;
 import com.buschmais.jqassistant.core.rule.api.model.*;
-import com.buschmais.jqassistant.core.rule.api.reader.RuleConfiguration;
 import com.buschmais.jqassistant.core.rule.api.source.FileRuleSource;
 import com.buschmais.jqassistant.core.rule.api.source.RuleSource;
 import com.buschmais.jqassistant.core.rule.impl.reader.AsciidocRuleParserPlugin;
@@ -25,12 +25,22 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
+@ExtendWith(MockitoExtension.class)
 abstract class AbstractAsciidocReportPluginTest {
+
+    @Mock
+    private Rule rule;
 
     protected Map<String, ReportPlugin> reportPlugins;
 
@@ -113,7 +123,7 @@ abstract class AbstractAsciidocReportPluginTest {
     private RuleSet getRuleSet(File ruleDirectory, Iterable<String> adocFiles) throws RuleException {
         AsciidocRuleParserPlugin ruleParserPlugin = new AsciidocRuleParserPlugin();
         ruleParserPlugin.initialize();
-        ruleParserPlugin.configure(RuleConfiguration.DEFAULT);
+        ruleParserPlugin.configure(rule);
         RuleParser ruleParser = new RuleParser(asList(ruleParserPlugin));
         List<RuleSource> ruleSources = new ArrayList<>();
         for (String adocFile : adocFiles) {

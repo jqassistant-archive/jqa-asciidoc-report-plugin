@@ -49,10 +49,10 @@ public class SummaryIncludeStrategy extends AbstractIncludeStrategy {
                 ExecutableRule rule = result.getRule();
                 builder.append("| ").append("jQA:").append(referenceMacro).append('[').append(rule.getId()).append(']');
                 builder.append("| ").append(escape(rule.getDescription()));
-                builder.append("| ").append(rule.getSeverity().getInfo(result.getEffectiveSeverity()));
+                builder.append("| ").append(result.getEffectiveSeverity().getInfo(rule.getSeverity()));
                 Result.Status status = result.getStatus();
                 String statusClass = StatusHelper.getStatusClass(status);
-                builder.append("| ").append("[").append(statusClass).append("]#").append(status.toString()).append('#').append('\n');
+                builder.append("| ").append("[").append(statusClass).append("]#").append(status).append('#').append('\n');
             }
             builder.append("|===").append('\n');
         }

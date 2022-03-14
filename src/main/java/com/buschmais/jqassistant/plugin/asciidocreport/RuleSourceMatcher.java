@@ -45,7 +45,6 @@ public class RuleSourceMatcher {
      */
     public List<RuleSource> match(Set<RuleSource> ruleSources) throws ReportException {
         if (ruleDirectory != null) {
-            log.warn("The report parameter `asciidoc.report.rule.directory` is deprecated and will be removed in future versions.");
             try {
                 return FileRuleSource.getRuleSources(ruleDirectory).stream().filter(ruleSource -> filePatternMatcher.accepts(ruleSource.getRelativePath()))
                     .collect(toList());
