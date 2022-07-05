@@ -15,6 +15,8 @@ public class StatusHelper {
         switch (status) {
             case SUCCESS:
                 return "jqassistant-status-success";
+            case WARNING:
+                return "jqassistant-status-warning";
             case FAILURE:
                 return "jqassistant-status-failure";
             case SKIPPED:
@@ -35,8 +37,9 @@ public class StatusHelper {
 
         private RuleResultComparator() {
             statusLevels.put(Result.Status.FAILURE, 0);
-            statusLevels.put(Result.Status.SUCCESS, 1);
-            statusLevels.put(Result.Status.SKIPPED, 2);
+            statusLevels.put(Result.Status.WARNING, 1);
+            statusLevels.put(Result.Status.SUCCESS, 2);
+            statusLevels.put(Result.Status.SKIPPED, 3);
         }
 
         @Override

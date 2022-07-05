@@ -93,6 +93,10 @@ abstract class AbstractAsciidocReportPluginTest {
             assertThat(status.hasClass("fa-check")).isEqualTo(true);
             assertThat(status.hasClass("jqassistant-status-success")).isEqualTo(true);
             break;
+        case WARNING:
+            assertThat(status.hasClass("fa-exclamation")).isEqualTo(true);
+            assertThat(status.hasClass("jqassistant-status-warning")).isEqualTo(true);
+            break;
         case FAILURE:
             assertThat(status.hasClass("fa-ban")).isEqualTo(true);
             assertThat(status.hasClass("jqassistant-status-failure")).isEqualTo(true);

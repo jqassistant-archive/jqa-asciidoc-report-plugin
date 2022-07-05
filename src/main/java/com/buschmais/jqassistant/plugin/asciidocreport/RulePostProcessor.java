@@ -79,6 +79,9 @@ public class RulePostProcessor extends Postprocessor {
                 case SUCCESS:
                     status.addClass("fa").addClass("fa-check");
                     break;
+                case WARNING:
+                    status.addClass("fa").addClass("fa-exclamation");
+                    break;
                 case FAILURE:
                     status.addClass("fa").addClass("fa-ban");
                     break;
@@ -112,8 +115,9 @@ public class RulePostProcessor extends Postprocessor {
                 styles.append("}\n");
             }
             styles.append("." + StatusHelper.getStatusClass(SUCCESS) + "{color: green}");
+            styles.append("." + StatusHelper.getStatusClass(WARNING) + "{color: orange}");
             styles.append("." + StatusHelper.getStatusClass(FAILURE) + "{color: crimson}");
-            styles.append("." + StatusHelper.getStatusClass(SKIPPED) + "{color: yellow}");
+            styles.append("." + StatusHelper.getStatusClass(SKIPPED) + "{color: gray}");
             styles.append("</style>\n");
             doc.head().append(styles.toString());
         }

@@ -10,7 +10,6 @@ import java.util.Map;
 import com.buschmais.jqassistant.core.report.api.ReportContext;
 import com.buschmais.jqassistant.core.report.api.ReportPlugin;
 import com.buschmais.jqassistant.core.report.api.model.Result;
-import com.buschmais.jqassistant.core.report.api.model.Result.Status;
 import com.buschmais.jqassistant.core.report.impl.CompositeReportPlugin;
 import com.buschmais.jqassistant.core.rule.api.model.Concept;
 import com.buschmais.jqassistant.core.rule.api.model.Constraint;
@@ -31,8 +30,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.junit.jupiter.api.Test;
 
-import static com.buschmais.jqassistant.core.report.api.model.Result.Status.FAILURE;
-import static com.buschmais.jqassistant.core.report.api.model.Result.Status.SUCCESS;
+import static com.buschmais.jqassistant.core.report.api.model.Result.Status.*;
 import static java.lang.System.lineSeparator;
 import static java.util.Arrays.asList;
 import static java.util.Collections.*;
@@ -114,7 +112,7 @@ class AsciidocReportPluginTest extends AbstractAsciidocReportPluginTest {
         verifyRule(document, "test:Concept", "Concept Description", SUCCESS, "Status: SUCCESS, Severity: MAJOR (from MINOR)");
         verifyRuleResult(document, "test:Concept", "Value", "Foo Bar");
 
-        verifyRule(document, "test:ImportedConcept", "Imported Concept", FAILURE, "Status: FAILURE, Severity: MINOR");
+        verifyRule(document, "test:ImportedConcept", "Imported Concept", WARNING, "Status: WARNING, Severity: MINOR");
         verifyRuleResult(document, "test:ImportedConcept", "ImportedConceptValue", "FooBar");
 
         verifyToggle(html);
@@ -131,10 +129,14 @@ class AsciidocReportPluginTest extends AbstractAsciidocReportPluginTest {
 
         Concept concept = ruleSet.getConceptBucket().getById("test:Concept");
         List<Map<String, Object>> rows = new ArrayList<>();
-        Map<String, Object> conceptRow = new HashMap<>();
-        conceptRow.put("Value", asList("Foo", "Bar"));
-        rows.add(conceptRow);
+        Map<String, Object> row = new HashMap<>();
+        row.put("Value", asList("Foo", "Bar"));
+        rows.add(row);
         processConcept(plugin, concept, new Result<>(concept, SUCCESS, Severity.MAJOR, singletonList("Value"), rows));
+
+        Constraint constraint = ruleSet.getConstraintBucket().getById("test:Constraint");
+        processConstraint(plugin, constraint, Result.<Constraint> builder().rule(constraint).status(FAILURE)
+            .severity(Severity.MAJOR).columnNames(singletonList("Value")).rows(rows).build());
 
         Concept componentDiagram = ruleSet.getConceptBucket().getById("test:ComponentDiagram");
         List<Map<String, Object>> diagramRows = new ArrayList<>();
@@ -159,7 +161,7 @@ class AsciidocReportPluginTest extends AbstractAsciidocReportPluginTest {
         Map<String, Object> importedConceptRow = new HashMap<>();
         importedConceptRow.put("ImportedConceptValue", asList("FooBar"));
         importedConceptRows.add(importedConceptRow);
-        processConcept(plugin, importedConcept, Result.<Concept> builder().rule(importedConcept).status(Status.FAILURE).severity(Severity.MINOR)
+        processConcept(plugin, importedConcept, Result.<Concept> builder().rule(importedConcept).status(WARNING).severity(Severity.MINOR)
                 .columnNames(singletonList("ImportedConceptValue")).rows(importedConceptRows).build());
 
         Constraint importedConstraintWithoutDescription = ruleSet.getConstraintBucket().getById("test:ImportedConstraintWithoutDescription");
@@ -200,8 +202,9 @@ class AsciidocReportPluginTest extends AbstractAsciidocReportPluginTest {
         assertThat(constraintSummaryTable.getElementsByTag("caption").first().text()).contains("Constraints");
         Element constraintSummaryTableBody = constraintSummaryTable.getElementsByTag("tbody").first();
         Elements rows = constraintSummaryTableBody.getElementsByTag("tr");
-        assertThat(rows.size()).isEqualTo(1);
-        verifySummaryColumns(rows.get(0), "test:ImportedConstraintWithoutDescription", "", "MAJOR", "SUCCESS", "jqassistant-status-success");
+        assertThat(rows.size()).isEqualTo(2);
+        verifySummaryColumns(rows.get(0), "test:Constraint", "Constraint Description", "MAJOR", "FAILURE", "jqassistant-status-failure");
+        verifySummaryColumns(rows.get(1), "test:ImportedConstraintWithoutDescription", "", "MAJOR", "SUCCESS", "jqassistant-status-success");
     }
 
     private void verifyConceptsSummary(Element conceptSummaryTable) {
@@ -210,7 +213,7 @@ class AsciidocReportPluginTest extends AbstractAsciidocReportPluginTest {
         assertThat(conceptSummaryTable).isNotNull();
         Elements rows = conceptSummaryTableBody.getElementsByTag("tr");
         assertThat(rows.size()).isEqualTo(3);
-        verifySummaryColumns(rows.get(0), "test:ImportedConcept", "Imported Concept", "MINOR", "FAILURE", "jqassistant-status-failure");
+        verifySummaryColumns(rows.get(0), "test:ImportedConcept", "Imported Concept", "MINOR", "WARNING", "jqassistant-status-warning");
         verifySummaryColumns(rows.get(1), "test:Concept", "Concept Description", "MAJOR (from MINOR)", "SUCCESS", "jqassistant-status-success");
         verifySummaryColumns(rows.get(2), "test:ComponentDiagram", "Component Diagram Description", "INFO (from MINOR)", "SUCCESS",
                 "jqassistant-status-success");
