@@ -79,7 +79,7 @@ abstract class AbstractAsciidocReportPluginTest {
         return reportContext;
     }
 
-    protected final void verifyRule(Document document, String id, String expectedDescription, Status expectedStatus, String expectedSeverity) {
+    protected final void verifyRule(Document document, String id, String expectedDescription, Status expectedStatus, String expectedTitle) {
         Element rule = document.getElementById(id);
         Element title = rule.getElementsByClass("title").first();
         assertThat(title).isNotNull();
@@ -102,7 +102,7 @@ abstract class AbstractAsciidocReportPluginTest {
             assertThat(status.hasClass("jqassistant-status-failure")).isEqualTo(true);
             break;
         }
-        assertThat(status.attr("title")).isEqualTo(expectedSeverity);
+        assertThat(status.attr("title")).isEqualTo("Id: " + id + ", " + expectedTitle);
 
         Element ruleToggle = rule.getElementsByClass("jqassistant-rule-toggle").first();
         assertThat(ruleToggle).isNotNull();
