@@ -53,7 +53,7 @@ public class ComponentDiagramRenderer extends AbstractDiagramRenderer {
         Node parentNode = graph.getParent();
         if (parentNode != null) {
             nodes.put(parentNode.getId(), parentNode);
-            builder.append(indent(level)).append("folder ").append('"').append(parentNode.getLabel()).append('"').append(" {\n");
+            builder.append(indent(level)).append("folder ").append('"').append(escape(parentNode.getLabel())).append('"').append(" {\n");
             nodes.putAll(renderNodes(graph, builder, level + 1));
             nodes.putAll(renderSubGraphs(graph, builder, level + 1));
             builder.append(indent(level)).append("}\n");
@@ -80,7 +80,7 @@ public class ComponentDiagramRenderer extends AbstractDiagramRenderer {
         for (Node node : graph.getNodes().values()) {
             if (!node.equals(graph.getParent())) {
                 nodes.put(node.getId(), node);
-                builder.append(indent(level + 1)).append('[').append(node.getLabel()).append("] ");
+                builder.append(indent(level + 1)).append("component ").append('"').append(escape(node.getLabel())).append('"').append(' ');
                 Set<String> labels = node.getLabels();
                 if (!labels.isEmpty()) {
                     builder.append("<<");
@@ -130,7 +130,7 @@ public class ComponentDiagramRenderer extends AbstractDiagramRenderer {
             String type = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_UNDERSCORE, relationship.getType()).replace('_', ' ');
             builder.append(getNodeId(startNode)).append(" --> ").append(getNodeId(endNode)).append(" : ").append(type);
             if (isNotEmpty(relationship.getLabel())) {
-                builder.append(" (").append(relationship.getLabel()).append(")");
+                builder.append(" (").append(escape(relationship.getLabel())).append(")");
             }
             builder.append('\n');
         }

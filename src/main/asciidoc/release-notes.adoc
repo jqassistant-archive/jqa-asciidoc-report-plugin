@@ -5,6 +5,7 @@
 
 * Added sorting of rules included by `jQA:Rules` (alphabetically by rule id)
 * Added rule id to hover of rule result
+* Fixed escaping of node and relationship labels in component diagrams
 
 == 1.12.0
 

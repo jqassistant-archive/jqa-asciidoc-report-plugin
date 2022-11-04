@@ -47,11 +47,11 @@ class ComponentDiagramRendererTest {
 
         String componentDiagram = componentDiagramRenderer.renderDiagram(result);
 
-        assertThat(componentDiagram, containsString("[a1] <<Artifact File>> as n1"));
-        assertThat(componentDiagram, containsString("[a2] <<Artifact File>> as n2"));
-        assertThat(componentDiagram, containsString("[a3] <<Artifact File>> as n3"));
+        assertThat(componentDiagram, containsString("component \"a1\" <<Artifact File>> as n1"));
+        assertThat(componentDiagram, containsString("component \"a2\" <<Artifact File>> as n2"));
+        assertThat(componentDiagram, containsString("component \"a3\" <<Artifact File>> as n3"));
         assertThat(componentDiagram, containsString("n1 --> n2 : depends on (weight:3)"));
-        assertThat(componentDiagram, not(containsString("[a4] <<Artifact File>> as n4")));
+        assertThat(componentDiagram, not(containsString("component \"a4\" <<Artifact File>> as n4")));
         assertThat(componentDiagram, not(containsString("n1 --> n4 : DEPENDS_ON")));
     }
 
@@ -79,15 +79,34 @@ class ComponentDiagramRendererTest {
 
         String componentDiagram = componentDiagramRenderer.renderDiagram(result);
 
-        assertThat(componentDiagram, containsString("folder \"a0\" {\n" + "    [a1] <<Artifact File>> as n1\n" + "    folder \"a2\" {\n"
-                + "        [a3] <<Artifact File>> as n3\n" + "    }\n" + "}"));
+        assertThat(componentDiagram, containsString("folder \"a0\" {\n" + "    component \"a1\" <<Artifact File>> as n1\n" + "    folder \"a2\" {\n"
+                + "        component \"a3\" <<Artifact File>> as n3\n" + "    }\n" + "}"));
         assertThat(componentDiagram, containsString("n3 --> n1 : depends on"));
+    }
+
+    @Test
+    void extraCharacters() throws ReportException {
+        Node a1 = getNode(1, "\"a1\"", "Artifact", "File");
+        Node a2 = getNode(2, "\"a2\"", "Artifact", "File");
+        Relationship a1DependsOnA2 = getRelationship(1, a1, "DEPENDS_ON", a2, "\"weight:3\"");
+        SubGraph subGraph = new SubGraph();
+        subGraph.getNodes().put(a1.getId(), a1);
+        subGraph.getNodes().put(a2.getId(), a2);
+        subGraph.getRelationships().put(a1DependsOnA2.getId(), a1DependsOnA2);
+        doReturn(subGraph).when(subGraphFactory).createSubGraph(result);
+
+        String componentDiagram = componentDiagramRenderer.renderDiagram(result);
+
+        assertThat(componentDiagram, containsString("component \"<U+0022>a1<U+0022>\" <<Artifact File>> as n1"));
+        assertThat(componentDiagram, containsString("component \"<U+0022>a2<U+0022>\" <<Artifact File>> as n2"));
+        assertThat(componentDiagram, containsString("n1 --> n2 : depends on (<U+0022>weight:3<U+0022>)"));
     }
 
     private SubGraph getSubGraph() {
         Node a1 = getNode(1, "a1", "Artifact", "File");
         Node a2 = getNode(2, "a2", "Artifact", "File");
         Node a3 = getNode(3, "a3", "Artifact", "File");
+        // a4 is not part of the created sub-graph
         Node a4 = getNode(4, "a4", "Artifact", "File");
         Relationship a1DependsOnA2 = getRelationship(1, a1, "DEPENDS_ON", a2, "weight:3");
         Relationship a1DependsOnA4 = getRelationship(2, a1, "DEPENDS_ON", a4);

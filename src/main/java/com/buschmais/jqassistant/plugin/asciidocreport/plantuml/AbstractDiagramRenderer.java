@@ -10,6 +10,8 @@ import com.buschmais.jqassistant.core.report.api.graph.model.SubGraph;
 import com.buschmais.jqassistant.core.report.api.model.Result;
 import com.buschmais.jqassistant.core.rule.api.model.ExecutableRule;
 
+import org.apache.commons.lang3.StringUtils;
+
 import static java.util.Arrays.fill;
 
 public abstract class AbstractDiagramRenderer {
@@ -41,7 +43,7 @@ public abstract class AbstractDiagramRenderer {
      * @throws ReportException
      *             If the renderer fails.
      */
-    public String renderDiagram(Result<? extends ExecutableRule> result) throws ReportException {
+    public final String renderDiagram(Result<? extends ExecutableRule> result) throws ReportException {
         StringBuilder plantumlBuilder = new StringBuilder();
         plantumlBuilder.append("@startuml").append('\n');
         plantumlBuilder.append("skinparam componentStyle uml2").append('\n');
@@ -60,7 +62,7 @@ public abstract class AbstractDiagramRenderer {
      *            The level.
      * @return The indent.
      */
-    protected String indent(int level) {
+    protected final String indent(int level) {
         char[] indent = new char[level * 2];
         fill(indent, ' ');
         return new String(indent);
@@ -73,7 +75,7 @@ public abstract class AbstractDiagramRenderer {
      *            The {@link Node}.
      * @return The id.
      */
-    protected String getNodeId(Node node) {
+    protected final String getNodeId(Node node) {
         String id = "n" + node.getId();
         return id.replaceAll("-", "_");
     }
@@ -92,7 +94,7 @@ public abstract class AbstractDiagramRenderer {
      *            The {@link Node}s of the SubGraph and its children.
      * @return A {@link Map} of {@link Relationship}s idendified by their ids.
      */
-    protected Map<Long, Relationship> getRelationships(SubGraph graph, Map<Long, Node> nodes) {
+    protected final Map<Long, Relationship> getRelationships(SubGraph graph, Map<Long, Node> nodes) {
         Map<Long, Relationship> relationships = new LinkedHashMap<>();
         for (Map.Entry<Long, Relationship> entry : graph.getRelationships().entrySet()) {
             Relationship relationship = entry.getValue();
@@ -104,6 +106,18 @@ public abstract class AbstractDiagramRenderer {
             relationships.putAll(getRelationships(subgraph, nodes));
         }
         return relationships;
+    }
+
+    /**
+     * Returns an escaped label.
+     *
+     * @param label
+     *     The label
+     * @return The escaped label.
+     */
+    protected final String escape(String label) {
+        // handle double quotes
+        return StringUtils.replace(label, "\"", "<U+0022>");
     }
 
 }
