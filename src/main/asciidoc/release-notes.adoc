@@ -1,6 +1,10 @@
 
 = AsciiDoc Report Plugin
 
+== 1.12.2
+
+* Fixed a problem where Asciidoc reports provided by plugins could not be rendered if the plugins were loaded from `.jqassistant.yml` configurations
+
 == 1.12.1
 
 * Added sorting of rules included by `jQA:Rules` (alphabetically by rule id)

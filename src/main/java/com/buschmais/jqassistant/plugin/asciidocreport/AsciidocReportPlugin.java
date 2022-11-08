@@ -100,7 +100,7 @@ public class AsciidocReportPlugin implements ReportPlugin {
                 JavaExtensionRegistry extensionRegistry = asciidoctor.javaExtensionRegistry();
                 IncludeProcessor includeProcessor = new IncludeProcessor(documentParser, document, conceptResults, constraintResults);
                 extensionRegistry.includeProcessor(includeProcessor);
-                extensionRegistry.includeProcessor(new PluginIncludeProcessor(ruleSource.getRelativePath()));
+                extensionRegistry.includeProcessor(new PluginIncludeProcessor(reportContext.getClassLoader(), ruleSource.getRelativePath()));
                 extensionRegistry.inlineMacro(new InlineMacroProcessor(documentParser));
                 extensionRegistry.treeprocessor(new TreePreprocessor(documentParser, conceptResults, constraintResults,
                         new File(reportDirectory, outputFileName).getParentFile(), reportContext));

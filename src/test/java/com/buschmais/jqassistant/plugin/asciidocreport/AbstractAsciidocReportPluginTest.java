@@ -72,7 +72,7 @@ abstract class AbstractAsciidocReportPluginTest {
     protected abstract List<String> getAsciidocFiles();
 
     protected final ReportContext configureReportContext(Map<String, Object> properties) throws ReportException {
-        ReportContext reportContext = new ReportContextImpl(null, outputDirectory);
+        ReportContext reportContext = new ReportContextImpl(AbstractAsciidocReportPluginTest.class.getClassLoader(), null, outputDirectory);
         for (ReportPlugin reportPlugin : reportPlugins.values()) {
             reportPlugin.configure(reportContext, properties);
         }
