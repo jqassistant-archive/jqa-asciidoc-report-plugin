@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.buschmais.jqassistant.core.rule.api.filter.RuleFilter;
 import com.buschmais.jqassistant.plugin.asciidocreport.RuleResult;
 
 import org.asciidoctor.ast.StructuralNode;
@@ -43,7 +42,7 @@ class SummaryFilterTest {
         constraintResults.put("importedConstraint", importedConstraintResult);
         ruleBlocks.put("concept", mock(StructuralNode.class));
         ruleBlocks.put("constraint", mock(StructuralNode.class));
-        summaryFilter = new SummaryFilter(conceptResults, constraintResults, ruleBlocks, RuleFilter.getInstance());
+        summaryFilter = new SummaryFilter(conceptResults, constraintResults, ruleBlocks);
     }
 
     @Test

@@ -3,9 +3,11 @@ package com.buschmais.jqassistant.plugin.asciidocreport;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import com.buschmais.jqassistant.core.report.api.model.Result;
 import com.buschmais.jqassistant.core.rule.api.model.Concept;
+import com.buschmais.jqassistant.core.rule.api.model.Constraint;
 import com.buschmais.jqassistant.core.rule.api.model.ExecutableRule;
 import com.buschmais.jqassistant.core.rule.api.model.Severity;
 
@@ -34,83 +36,77 @@ class RulePostProcessorTest {
 
     @Test
     void listingConceptWithTitle() {
-        // Given
-        Map<String, RuleResult> conceptResults = createRuleResults(Concept.builder().id("listingConceptWithTitle").severity(Severity.MINOR).build());
-
-        // When
-        String result = RulePostProcessor.HtmlRulePostProcessor.process(conceptResults, emptyMap(), html);
-
-        // Then
-        org.jsoup.nodes.Document doc = Jsoup.parse(result, "UTF-8");
-        Element ruleBlock = doc.getElementById("listingConceptWithTitle");
-        verifyStatus(ruleBlock);
-        Elements ruleToggle = ruleBlock.getElementsByClass("jqassistant-rule-toggle");
-        assertThat(ruleToggle).isNotNull();
+        Concept concept = Concept.builder()
+            .id("listingConceptWithTitle")
+            .severity(Severity.MINOR)
+            .build();
+        verify(concept, createRuleResults(concept), emptyMap(), ruleToggle -> assertThat(ruleToggle).isNotNull());
     }
 
     @Test
     void listingConceptWithoutTitle() {
         // Given
-        Map<String, RuleResult> conceptResults = createRuleResults(Concept.builder().id("listingConceptWithoutTitle").severity(Severity.MINOR).build());
-
-        // When
-        String result = RulePostProcessor.HtmlRulePostProcessor.process(conceptResults, emptyMap(), html);
-
-        // Then
-        org.jsoup.nodes.Document doc = Jsoup.parse(result, "UTF-8");
-        Element ruleBlock = doc.getElementById("listingConceptWithoutTitle");
-        verifyStatus(ruleBlock);
-        Elements ruleToggle = ruleBlock.getElementsByClass("jqassistant-rule-toggle");
-        assertThat(ruleToggle).isNotNull();
+        Concept concept = Concept.builder()
+            .id("listingConceptWithoutTitle")
+            .severity(Severity.MINOR)
+            .build();
+        verify(concept, createRuleResults(concept), emptyMap(), ruleToggle -> assertThat(ruleToggle).isNotNull());
     }
 
     @Test
     void nonListingConceptWithoutTitle() {
-        // Given
-        Map<String, RuleResult> conceptResults = createRuleResults(Concept.builder().id("nonListingConceptWithTitle").severity(Severity.MINOR).build());
-
-        // When
-        String result = RulePostProcessor.HtmlRulePostProcessor.process(conceptResults, emptyMap(), html);
-
-        // Then
-        org.jsoup.nodes.Document doc = Jsoup.parse(result, "UTF-8");
-        Element ruleBlock = doc.getElementById("nonListingConceptWithTitle");
-        verifyStatus(ruleBlock);
-        Elements ruleToggle = ruleBlock.getElementsByClass("jqassistant-rule-toggle");
-        assertThat(ruleToggle).isEmpty();
+        Concept concept = Concept.builder()
+            .id("nonListingConceptWithTitle")
+            .severity(Severity.MINOR)
+            .build();
+        verify(concept, createRuleResults(concept), emptyMap(), ruleToggle -> assertThat(ruleToggle).isEmpty());
     }
 
     @Test
     void listingConstraintWithTitle() {
-        // Given
-        Map<String, RuleResult> constraintResults = createRuleResults(Concept.builder().id("listingConstraintWithTitle").severity(Severity.MINOR).build());
+        Constraint constraint = Constraint.builder()
+            .id("listingConstraintWithTitle")
+            .severity(Severity.MINOR)
+            .build();
+        verify(constraint, emptyMap(), createRuleResults(constraint), ruleToggle -> assertThat(ruleToggle).isNotNull());
+    }
+
+    private void verify(ExecutableRule<?> rule, Map<String, RuleResult> conceptResults, Map<String, RuleResult> constraintResults,
+        Consumer<Elements> ruleToggleConsumer) {
 
         // When
-        String result = RulePostProcessor.HtmlRulePostProcessor.process(emptyMap(), constraintResults, html);
+        String result = RulePostProcessor.HtmlRulePostProcessor.process(conceptResults, constraintResults, html);
 
         // Then
         org.jsoup.nodes.Document doc = Jsoup.parse(result, "UTF-8");
-        Element ruleBlock = doc.getElementById("listingConstraintWithTitle");
-        verifyStatus(ruleBlock);
+        Element ruleBlock = doc.getElementById(rule.getId());
+        verifyStatus(ruleBlock, rule.getId());
         Elements ruleToggle = ruleBlock.getElementsByClass("jqassistant-rule-toggle");
-        assertThat(ruleToggle).isNotNull();
+        ruleToggleConsumer.accept(ruleToggle);
     }
 
     private Map<String, RuleResult> createRuleResults(ExecutableRule<?>... rules) {
         Map<String, RuleResult> ruleResults = new HashMap<>();
         for (ExecutableRule<?> rule : rules) {
-            ruleResults.put(rule.getId(), RuleResult.builder().rule(rule).effectiveSeverity(Severity.MINOR).status(Result.Status.SUCCESS).build());
+            ruleResults.put(rule.getId(), RuleResult.builder()
+                .rule(rule)
+                .effectiveSeverity(Severity.MINOR)
+                .status(Result.Status.SUCCESS)
+                .build());
         }
         return ruleResults;
     }
 
-    private void verifyStatus(Element ruleBlock) {
-        Element status = ruleBlock.getElementsByClass("jqassistant-rule-status").first();
+    private void verifyStatus(Element ruleBlock, String expectedId) {
+        Element status = ruleBlock.getElementsByClass("jqassistant-rule-status")
+            .first();
         assertThat(status).isNotNull();
         assertThat(status.hasClass("jqassistant-status-success")).isTrue();
         assertThat(status.hasClass("fa")).isTrue();
         assertThat(status.hasClass("fa-check")).isTrue();
-        assertThat(status.attr("title")).contains("SUCCESS").contains("MINOR");
+        assertThat(status.attr("title")).contains("Id: " + expectedId)
+            .contains("Status: SUCCESS")
+            .contains("Severity: MINOR");
     }
 
 }

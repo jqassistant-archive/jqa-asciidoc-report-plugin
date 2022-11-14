@@ -2,7 +2,6 @@ package com.buschmais.jqassistant.plugin.asciidocreport;
 
 import java.util.*;
 
-import com.buschmais.jqassistant.core.rule.api.filter.RuleFilter;
 import com.buschmais.jqassistant.core.rule.api.model.ExecutableRule;
 import com.buschmais.jqassistant.core.shared.asciidoc.DocumentParser;
 import com.buschmais.jqassistant.plugin.asciidocreport.include.*;
@@ -26,11 +25,10 @@ public class IncludeProcessor extends org.asciidoctor.extension.IncludeProcessor
         ruleBlocks.putAll(result.getConcepts());
         ruleBlocks.putAll(result.getConstraints());
         Set<ExecutableRule<?>> includedRules = new HashSet<>();
-        RuleFilter ruleFilter = RuleFilter.getInstance();
-        SummaryFilter summaryFilter = new SummaryFilter(conceptResults, constraintResults, ruleBlocks, ruleFilter);
+        SummaryFilter summaryFilter = new SummaryFilter(conceptResults, constraintResults, ruleBlocks);
         strategies = Arrays
                 .<IncludeStrategy> asList(new SummaryIncludeStrategy(conceptResults, constraintResults, summaryFilter),
-                        new RulesIncludeStrategy(conceptResults, constraintResults, ruleFilter, ruleBlocks, includedRules),
+                        new RulesIncludeStrategy(conceptResults, constraintResults, ruleBlocks, includedRules),
                         new ImportedRulesIncludeStrategy(conceptResults, constraintResults, ruleBlocks, includedRules))
                 .stream().collect(toMap(strategy -> strategy.getName(), strategy -> strategy));
     }

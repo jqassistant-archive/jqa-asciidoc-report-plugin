@@ -79,11 +79,16 @@ public class RulePostProcessor extends Postprocessor {
                 case SUCCESS:
                     status.addClass("fa").addClass("fa-check");
                     break;
+                case WARNING:
+                    status.addClass("fa").addClass("fa-exclamation");
+                    break;
                 case FAILURE:
                     status.addClass("fa").addClass("fa-ban");
                     break;
                 }
-                String hover = "Status: " + ruleResult.getStatus() + ", Severity: " + ruleResult.getEffectiveSeverity().getInfo(rule.getSeverity());
+                String hover = "Id: " + ruleResult.getRule()
+                    .getId() + ", Status: " + ruleResult.getStatus() + ", Severity: " + ruleResult.getEffectiveSeverity()
+                    .getInfo(rule.getSeverity());
                 status.attr("title", hover);
             } else {
                 status.addClass("fa").addClass("fa-question");
@@ -112,8 +117,9 @@ public class RulePostProcessor extends Postprocessor {
                 styles.append("}\n");
             }
             styles.append("." + StatusHelper.getStatusClass(SUCCESS) + "{color: green}");
+            styles.append("." + StatusHelper.getStatusClass(WARNING) + "{color: orange}");
             styles.append("." + StatusHelper.getStatusClass(FAILURE) + "{color: crimson}");
-            styles.append("." + StatusHelper.getStatusClass(SKIPPED) + "{color: yellow}");
+            styles.append("." + StatusHelper.getStatusClass(SKIPPED) + "{color: gray}");
             styles.append("</style>\n");
             doc.head().append(styles.toString());
         }

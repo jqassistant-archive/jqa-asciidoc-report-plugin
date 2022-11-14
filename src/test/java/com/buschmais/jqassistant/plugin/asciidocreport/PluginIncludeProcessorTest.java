@@ -26,7 +26,8 @@ class PluginIncludeProcessorTest {
     @Mock
     private PreprocessorReader preprocessorReader;
 
-    private final PluginIncludeProcessor classpathIncludeProcessor = new PluginIncludeProcessor("test/index.adoc");
+    private final PluginIncludeProcessor classpathIncludeProcessor = new PluginIncludeProcessor(PluginIncludeProcessorTest.class.getClassLoader(),
+        "test/index.adoc");
 
     @Test
     void relativeInclude() {

@@ -23,6 +23,7 @@ import org.asciidoctor.extension.JavaExtensionRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static com.buschmais.jqassistant.core.report.api.model.Result.Status.SKIPPED;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Default
@@ -99,7 +100,7 @@ public class AsciidocReportPlugin implements ReportPlugin {
                 JavaExtensionRegistry extensionRegistry = asciidoctor.javaExtensionRegistry();
                 IncludeProcessor includeProcessor = new IncludeProcessor(documentParser, document, conceptResults, constraintResults);
                 extensionRegistry.includeProcessor(includeProcessor);
-                extensionRegistry.includeProcessor(new PluginIncludeProcessor(ruleSource.getRelativePath()));
+                extensionRegistry.includeProcessor(new PluginIncludeProcessor(reportContext.getClassLoader(), ruleSource.getRelativePath()));
                 extensionRegistry.inlineMacro(new InlineMacroProcessor(documentParser));
                 extensionRegistry.treeprocessor(new TreePreprocessor(documentParser, conceptResults, constraintResults,
                         new File(reportDirectory, outputFileName).getParentFile(), reportContext));
@@ -169,6 +170,13 @@ public class AsciidocReportPlugin implements ReportPlugin {
         RuleResult.RuleResultBuilder ruleResultBuilder = RuleResult.builder();
         List<String> columnNames = result.getColumnNames();
         ruleResultBuilder.rule(result.getRule()).effectiveSeverity(result.getSeverity()).status(result.getStatus()).columnNames(columnNames);
+        if (!SKIPPED.equals(result.getStatus())) {
+            addResultRows(result, ruleResultBuilder);
+        }
+        return ruleResultBuilder.build();
+    }
+
+    private void addResultRows(Result<? extends ExecutableRule> result, RuleResult.RuleResultBuilder ruleResultBuilder) {
         for (Map<String, Object> row : result.getRows()) {
             Map<String, List<String>> resultRow = new LinkedHashMap<>();
             for (Map.Entry<String, Object> rowEntry : row.entrySet()) {
@@ -185,6 +193,5 @@ public class AsciidocReportPlugin implements ReportPlugin {
             }
             ruleResultBuilder.row(resultRow);
         }
-        return ruleResultBuilder.build();
     }
 }

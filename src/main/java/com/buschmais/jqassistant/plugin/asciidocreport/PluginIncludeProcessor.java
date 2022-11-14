@@ -14,7 +14,6 @@ import org.asciidoctor.ast.Document;
 import org.asciidoctor.extension.IncludeProcessor;
 import org.asciidoctor.extension.PreprocessorReader;
 
-import static java.lang.Thread.currentThread;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Optional.ofNullable;
 
@@ -25,9 +24,12 @@ import static java.util.Optional.ofNullable;
 @Slf4j
 public class PluginIncludeProcessor extends IncludeProcessor {
 
+    private final ClassLoader classLoader;
+
     private final String rootPath;
 
-    public PluginIncludeProcessor(String path) {
+    public PluginIncludeProcessor(ClassLoader classLoader, String path) {
+        this.classLoader = classLoader;
         StringBuilder builder = new StringBuilder("/");
         int lastFileSeparatorIndex = path.lastIndexOf('/');
         if (lastFileSeparatorIndex >= 0) {
@@ -68,7 +70,7 @@ public class PluginIncludeProcessor extends IncludeProcessor {
         }
         resource.append(target);
         log.debug("Mapped include target '{}' to class path resource '{}'.", target, resource);
-        return ofNullable(currentThread().getContextClassLoader().getResource(resource.toString()));
+        return ofNullable(classLoader.getResource(resource.toString()));
     }
 
 }

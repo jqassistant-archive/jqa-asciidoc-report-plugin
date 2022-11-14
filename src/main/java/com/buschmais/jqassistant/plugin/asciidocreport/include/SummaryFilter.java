@@ -32,20 +32,19 @@ public class SummaryFilter {
     private final Map<String, RuleResult> constraintResults;
     private final Map<String, StructuralNode> ruleBlocks;
 
-    private final RuleFilter ruleFilter;
-
-    public SummaryFilter(Map<String, RuleResult> conceptResults, Map<String, RuleResult> constraintResults, Map<String, StructuralNode> ruleBlocks,
-            RuleFilter ruleFilter) {
+    public SummaryFilter(Map<String, RuleResult> conceptResults, Map<String, RuleResult> constraintResults, Map<String, StructuralNode> ruleBlocks) {
         this.conceptResults = conceptResults;
         this.constraintResults = constraintResults;
         this.ruleBlocks = ruleBlocks;
-        this.ruleFilter = ruleFilter;
     }
 
     public Result apply(Map<String, Object> attributes) {
         if (attributes.isEmpty()) {
             // No filters provided, render everything
-            return Result.builder().constraints(constraintResults.values()).concepts(conceptResults.values()).build();
+            return Result.builder()
+                .constraints(constraintResults.values())
+                .concepts(conceptResults.values())
+                .build();
         } else {
             // Apply filters, render only selected rules
             List<RuleResult> constraints = include(attributes, "constraints", "importedConstraints", constraintResults);
@@ -53,7 +52,10 @@ public class SummaryFilter {
             if (concepts.isEmpty() && constraints.isEmpty()) {
                 log.warn("No constraints/concepts found matching the given filters {}.", attributes);
             }
-            return Result.builder().constraints(constraints).concepts(concepts).build();
+            return Result.builder()
+                .constraints(constraints)
+                .concepts(concepts)
+                .build();
         }
     }
 
@@ -66,12 +68,24 @@ public class SummaryFilter {
     private List<RuleResult> filterRuleResults(Map<String, RuleResult> results, String rulesFilter, String importedRulesFilter) {
         Set<String> ruleResults = new HashSet<>();
         // collect rules from documents
-        Set<String> rules = results.keySet().stream().filter(rule -> ruleBlocks.keySet().contains(rule)).collect(Collectors.toSet());
-        ruleResults.addAll(ruleFilter.match(rules, rulesFilter));
+        Set<String> rules = results.keySet()
+            .stream()
+            .filter(rule -> ruleBlocks.keySet()
+                .contains(rule))
+            .collect(Collectors.toSet());
+        ruleResults.addAll(RuleFilter.match(rules, rulesFilter));
         // collect imported rules
-        Set<String> importedRules = results.keySet().stream().filter(rule -> !ruleBlocks.keySet().contains(rule)).collect(Collectors.toSet());
-        ruleResults.addAll(ruleFilter.match(importedRules, importedRulesFilter));
-        return results.entrySet().stream().filter(entry -> ruleResults.contains(entry.getKey())).map(entry -> entry.getValue()).collect(toList());
+        Set<String> importedRules = results.keySet()
+            .stream()
+            .filter(rule -> !ruleBlocks.keySet()
+                .contains(rule))
+            .collect(Collectors.toSet());
+        ruleResults.addAll(RuleFilter.match(importedRules, importedRulesFilter));
+        return results.entrySet()
+            .stream()
+            .filter(entry -> ruleResults.contains(entry.getKey()))
+            .map(entry -> entry.getValue())
+            .collect(toList());
     }
 
 }

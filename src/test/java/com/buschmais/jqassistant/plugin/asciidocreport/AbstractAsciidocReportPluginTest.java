@@ -72,14 +72,14 @@ abstract class AbstractAsciidocReportPluginTest {
     protected abstract List<String> getAsciidocFiles();
 
     protected final ReportContext configureReportContext(Map<String, Object> properties) throws ReportException {
-        ReportContext reportContext = new ReportContextImpl(null, outputDirectory);
+        ReportContext reportContext = new ReportContextImpl(AbstractAsciidocReportPluginTest.class.getClassLoader(), null, outputDirectory);
         for (ReportPlugin reportPlugin : reportPlugins.values()) {
             reportPlugin.configure(reportContext, properties);
         }
         return reportContext;
     }
 
-    protected final void verifyRule(Document document, String id, String expectedDescription, Status expectedStatus, String expectedSeverity) {
+    protected final void verifyRule(Document document, String id, String expectedDescription, Status expectedStatus, String expectedTitle) {
         Element rule = document.getElementById(id);
         Element title = rule.getElementsByClass("title").first();
         assertThat(title).isNotNull();
@@ -93,12 +93,16 @@ abstract class AbstractAsciidocReportPluginTest {
             assertThat(status.hasClass("fa-check")).isEqualTo(true);
             assertThat(status.hasClass("jqassistant-status-success")).isEqualTo(true);
             break;
+        case WARNING:
+            assertThat(status.hasClass("fa-exclamation")).isEqualTo(true);
+            assertThat(status.hasClass("jqassistant-status-warning")).isEqualTo(true);
+            break;
         case FAILURE:
             assertThat(status.hasClass("fa-ban")).isEqualTo(true);
             assertThat(status.hasClass("jqassistant-status-failure")).isEqualTo(true);
             break;
         }
-        assertThat(status.attr("title")).isEqualTo(expectedSeverity);
+        assertThat(status.attr("title")).isEqualTo("Id: " + id + ", " + expectedTitle);
 
         Element ruleToggle = rule.getElementsByClass("jqassistant-rule-toggle").first();
         assertThat(ruleToggle).isNotNull();

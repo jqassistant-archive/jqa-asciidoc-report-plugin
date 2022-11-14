@@ -15,7 +15,7 @@ MATCH (n) RETURN n as Value
 ----
 
 [[test:Constraint]]
-[source,cypher,role=concept,requiresConcepts="test:ImportedConcept"]
+[source,cypher,role=constraint]
 .Constraint Description
 ----
 MATCH (n) RETURN n as Value
