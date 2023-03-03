@@ -1,5 +1,7 @@
 = jQAssistant AsciiDoc Report Plugin
 
+NOTE:: With jQAssistant 2.0.0, this plugin has been removed from the core-distribution. It is now available at https://github.com/jqassistant-plugin/jqassistant-asciidoc-report-plugin[jqassistant-asciidoc-report-plugin]
+
 This is the https://asciidoctor.org/[AsciiDoc^] report plugin for https://jqassistant.org[jQAssistant^].
 
 After an analysis https://asciidoctor.org[Asciidoctor] it renders the input documents that provided rules to HTML documents.
